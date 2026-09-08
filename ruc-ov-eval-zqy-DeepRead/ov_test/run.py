@@ -15,12 +15,6 @@ sys.path.append(REPO_ROOT)
 WORKSPACE_ROOT = os.path.dirname(REPO_ROOT)# 工作区根目录（Data和Output所在位置）
 PROJECT_ROOT = WORKSPACE_ROOT
 
-# 设置 OpenViking 配置文件路径（必须在 import openviking 之前）
-ov_config_path = os.path.join(SCRIPT_DIR, "ov.conf")
-if os.path.exists(ov_config_path):
-    os.environ["OPENVIKING_CONFIG_FILE"] = ov_config_path
-    print(f"[Init] Auto-detected OpenViking config: {ov_config_path}")
-
 # 导入模块
 try:
     from src.pipeline import BenchmarkPipeline
@@ -94,8 +88,7 @@ def resolve_auto_output_dir(config):
 
 def main():
     parser = ArgumentParser(description="Run RAG Benchmark (Smart Path Handling)")
-    # default_config_path = os.path.join(SCRIPT_DIR, "config/config.yaml")
-    default_config_path = os.path.join(SCRIPT_DIR, "config_deepread/config.yaml")
+    default_config_path = os.path.join(SCRIPT_DIR, "config_deepread/financebench.yaml")
     
     parser.add_argument("--config", default=default_config_path, 
                         help=f"Path to config file. Default: {default_config_path}")
@@ -185,43 +178,10 @@ def main():
                 llm_cfg=config.get('llm', {}),
                 store_cfg=store_cfg
             )
-        elif store_type == 'KohakuRAG':
-            from src.core.kohaku_store import KohakuStoreWrapper
-            vector_store = KohakuStoreWrapper.from_config(
-                store_path=config['paths']['vector_store'],
-                doc_output_dir=config['paths']['doc_output_dir'],
-                llm_cfg=config.get('llm', {}),
-                store_cfg=store_cfg
-            )
-        elif store_type == 'pageindex':
-            from src.core.pageindex_store import PageIndexStoreWrapper
-            pageindex_conf = store_cfg.get('pageindex_config_path')
-            if pageindex_conf:
-                pageindex_conf = resolve_path(pageindex_conf, PROJECT_ROOT)
-            vector_store = PageIndexStoreWrapper(
-                store_path=config['paths']['vector_store'],
-                doc_output_dir=config['paths'].get('doc_output_dir', ''),
-                config_path=pageindex_conf
-            )
-        elif store_type == 'hipporag':
-            from src.core.hipporag_store import HippoRAGStoreWrapper
-            hipporag_conf = store_cfg.get('hipporag_config', {})
-            vector_store = HippoRAGStoreWrapper(
-                store_path=config['paths']['vector_store'],
-                hipporag_config=hipporag_conf
-            )
-        elif store_type == 'sql_agent':
-            from src.core.sql_agent_store import SQLAgentStoreWrapper
-            sql_agent_conf = store_cfg.get('sql_agent_config', {})
-            sql_agent_conf['dataset_name'] = config.get('dataset_name', '')
-            sql_agent_conf['raw_data_path'] = config['paths'].get('raw_data', '')
-            vector_store = SQLAgentStoreWrapper(
-                store_path=config['paths']['vector_store'],
-                sql_agent_config=sql_agent_conf
-            )
         else:
-            from src.core.vector_store import VikingStoreWrapper
-            vector_store = VikingStoreWrapper(store_path=config['paths']['vector_store'])
+            raise ValueError(
+                f"不支持的 store.type: {store_type!r}。此裁剪版本仅保留 DeepRead 后端。"
+            )
         
         # 3. LLM Client
         api_key = os.environ.get(

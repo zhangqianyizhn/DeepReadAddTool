@@ -1,0 +1,2 @@
+openviking
+openviking_cli

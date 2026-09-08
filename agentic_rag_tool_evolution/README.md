@@ -31,7 +31,7 @@
 
 只填写下面这个文件中的一行：
 
-`D:\桌面\DeepRead\agentic_rag_self_learning\.env`
+`agentic_rag_self_learning/.env`（首次运行前 `cp agentic_rag_self_learning/.env.example agentic_rag_self_learning/.env`）
 
 ```dotenv
 VOLCENGINE_API_KEY=在这里粘贴新套餐的Key
@@ -47,21 +47,38 @@ JUDGE_MODEL=deepseek-v4-flash
 EMBEDDING_MODEL_NAME=doubao-embedding-vision
 ```
 
+## 从零复现（macOS / Linux）
+
+如果没有现成的 baseline 轨迹 artifact，先重建（需要原始数据集放在工作区根
+`Data/FinanceBench/`，含 `data/financebench_open_source.jsonl` 和 `markdown/` 或 `pdfs/`）：
+
+```bash
+cd ruc-ov-eval-zqy-DeepRead && uv sync   # 唯一 Python 环境
+cd ..
+./ruc-ov-eval-zqy-DeepRead/run_full141_matched_baseline.sh          # 建索引+141题baseline+评分（数小时）
+./ruc-ov-eval-zqy-DeepRead/run_full141_matched_baseline.sh --dry-run # 只校验数据与环境
+```
+
+该脚本产出 `ExperimentArtifacts/FinanceBenchFull141/Output/deepread_matched_baseline_141_0001/`
+（答案、逐题 Judge 评分、原始工具轨迹），并复用/重建
+`agentic_rag_self_learning/data/generated/full141/DeepRead/` 下的 82 文档索引。
+中断后重新运行同一命令即可断点续跑。
+
 ## 运行
 
-在 PowerShell 中执行：
+在 macOS / Linux 的终端中执行（Windows 时期的 `.ps1` 入口已被这些 `.sh` 替代）：
 
-```powershell
-cd "D:\桌面\DeepRead\agentic_rag_tool_evolution"
-.\run_blind_reconstruction.ps1
+```bash
+cd agentic_rag_tool_evolution
+./run_blind_reconstruction.sh
 ```
 
 默认会选取训练集中的 16 个低分案例和 4 个成功案例作为对照。运行结束后查看终端显示的 `BLIND_RECONSTRUCTION_REPORT.md`。候选代码只会保存在本目录的 `runs` 中，不会自动接入仓库。
 
 只检查输入是否齐全、不调用 API：
 
-```powershell
-.\run_blind_reconstruction.ps1 -DryRun
+```bash
+./run_blind_reconstruction.sh --dry-run
 ```
 
 ## 如何解释结果
@@ -77,22 +94,22 @@ cd "D:\桌面\DeepRead\agentic_rag_tool_evolution"
 
 盲重建候选生成后执行：
 
-```powershell
-cd "D:\桌面\DeepRead\agentic_rag_tool_evolution"
-.\run_dev_ab.ps1
+```bash
+cd agentic_rag_tool_evolution
+./run_dev_ab.sh
 ```
 
 该命令会依次运行同模型 Baseline、AI生成工具方案及固定 Judge。旧的
 `search_document_titles` 在两组中均关闭；候选组只增加盲重建生成的工具和它自己生成的使用策略。
-运行支持断点续跑，期间会阻止 Windows 自动睡眠，结束或中断后自动恢复正常睡眠设置。
+运行支持断点续跑；macOS 下入口脚本会用 `caffeinate` 阻止自动睡眠，结束后自动恢复。
 
 ## Round 2：Agent读取Dev反馈后自主修复
 
 首次dev A/B完成后执行：
 
-```powershell
-cd "D:\桌面\DeepRead\agentic_rag_tool_evolution"
-.\run_autonomous_repair_round2.ps1
+```bash
+cd agentic_rag_tool_evolution
+./run_autonomous_repair_round2.sh
 ```
 
 该命令把原候选、dev成对评分和候选轨迹交回Repair Agent。程序不会把人工发现的具体代码错误写进提示词，
@@ -102,9 +119,9 @@ cd "D:\桌面\DeepRead\agentic_rag_tool_evolution"
 
 仅在dev达到预设条件后运行一次：
 
-```powershell
-cd "D:\桌面\DeepRead\agentic_rag_tool_evolution"
-.\run_frozen_test61.ps1
+```bash
+cd agentic_rag_tool_evolution
+./run_frozen_test61.sh
 ```
 
 程序会冻结候选代码、策略、模型配置和test划分的SHA-256，然后依次运行61题Baseline、61题冻结候选和两组Judge。

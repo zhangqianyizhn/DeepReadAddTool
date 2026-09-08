@@ -179,6 +179,11 @@ agentic_rag_self_learning/data/generated/full141/DeepRead/store_index/
 
 索引建议在目标机器重新构建，因为旧索引和配置中可能包含本机绝对路径。
 
+> 2026-09 更新：本包已初始化为 git 仓库并裁剪掉 OpenViking/KohakuRAG/hipporag/pageindex 等无关后端；
+> 两个 generated 索引目录和 baseline artifact 现在可由
+> `./ruc-ov-eval-zqy-DeepRead/run_full141_matched_baseline.sh` 从 `Data/FinanceBench/` 一键重建
+> （详见 `agentic_rag_tool_evolution/README.md` 的"从零复现"一节），只需提供原始数据集。
+
 ## 9. 安全说明
 
 本包生成后会检查：

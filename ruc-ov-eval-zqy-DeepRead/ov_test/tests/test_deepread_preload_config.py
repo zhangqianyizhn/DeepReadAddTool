@@ -24,7 +24,7 @@ _module("requests")
 _module("tiktoken", get_encoding=MagicMock(return_value=MagicMock()))
 _module("tqdm", tqdm=lambda iterable=None, **_: iterable)
 _module("volcenginesdkarkruntime", Ark=MagicMock())
-_module("volcenginesdkarkruntime._exceptions", ArkRateLimitError=RuntimeError)
+_module("volcenginesdkarkruntime._exceptions", ArkRateLimitError=RuntimeError, ArkBadRequestError=RuntimeError)
 
 from src.core.deepread_store import DeepReadWrapper
 

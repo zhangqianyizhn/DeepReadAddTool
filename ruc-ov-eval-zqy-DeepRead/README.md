@@ -1,5 +1,11 @@
 # RUC-OV-Eval: OpenViking 性能评估系统
 
+> **2026-09 裁剪说明**：本仓库已被裁剪为仅保留 **DeepRead + FinanceBench** 链路（供
+> `agentic_rag_tool_evolution` 复现使用）。OpenViking/KohakuRAG/hipporag/pageindex/sql_agent 后端、
+> 对应 store 模块、适配器、配置与 uv workspace 均已删除；`store.type` 只接受 `DeepRead`。
+> 下文架构说明中涉及已删除后端的内容仅具历史参考价值。环境安装直接 `uv sync` 即可
+> （不再包含 torch/transformers 等重型依赖）。运行入口见根目录 `CLAUDE.md`。
+
 本项目是用于评估 **OpenViking** 系统在检索增强生成（RAG）场景下性能表现的自动化基准测试框架。
 
 经过重构，测试核心代码已迁移至 `ov_test` 目录，采用“适配器（Adapter）+ 流水线（Pipeline）”架构，解耦了数据处理、向量库操作和大型语言模型（LLM）的调用。

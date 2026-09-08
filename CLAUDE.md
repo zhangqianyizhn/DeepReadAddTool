@@ -4,28 +4,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this workspace is
 
-A research workspace (not a git repo) for "Agentic RAG self-learning and autonomous tool evolution" experiments on FinanceBench. Most docs and reports are written in Chinese. It is a *code + representative-artifacts package*: the raw FinanceBench PDFs, processed docs (~500MB), and vector/BM25 indexes are NOT included and must be provided separately (see "Required external data").
+A research workspace (git repo since 2026-09-09) for "Agentic RAG self-learning and autonomous tool evolution" experiments on FinanceBench. Most docs and reports are written in Chinese. Large/generated data is gitignored: the raw FinanceBench dataset (`Data/FinanceBench/`), indexes, and `ExperimentArtifacts/` must be produced locally (see "Baseline rebuild").
 
 Four sibling project directories are **mutually dependent via relative paths** — do not move or rename them:
 
-- `ruc-ov-eval-zqy-DeepRead/` — the underlying RAG/DeepRead runtime and benchmark harness (uv workspace, Python ≥3.13).
+- `ruc-ov-eval-zqy-DeepRead/` — the underlying RAG/DeepRead runtime and benchmark harness (uv project, Python ≥3.11). **Pruned to the DeepRead+FinanceBench path only**: OpenViking/KohakuRAG/hipporag/pageindex backends, their store modules, adapters and configs were deleted; `store.type` other than `DeepRead` now hard-fails in `ov_test/run.py`.
 - `agentic_rag_self_learning/` — original Teacher–Student prompt-optimization experiment; its `scripts/run_pilot.py` is the **shared base harness** (LLM calls, JSON retry, Judge, config generation) imported as `import run_pilot as legacy` by both later experiments.
-- `agentic_rag_self_learning_v2/` — strict Train/Dev/Test (60/20/61) self-learning loop, rounds 1–4 (`scripts/content2.py round1`, `round2.py`, `round3.py`, `round4.py`).
+- `agentic_rag_self_learning_v2/` — strict Train/Dev/Test (60/20/61) self-learning loop, rounds 1–4 (`scripts/content2.py round1`, `round2.py`, `round3.py`, `round4.py`). Its `data/splits/` are committed and required by tool_evolution.
 - `agentic_rag_tool_evolution/` — agent autonomously diagnoses failures from train trajectories and writes executable Python candidate tools (`blind_reconstruction.py` → `dev_ab.py` → `repair_round2.py` → `frozen_test61.py`).
-- `reference_artifacts/` — frozen FinanceBench outputs proving the closed loop ran end to end; read-only evidence, not source.
+- `reference_artifacts/` — frozen FinanceBench outputs from the original run; read-only evidence, not source.
 
 ## Commands
 
 ### Environment setup
 
 ```bash
-cd ruc-ov-eval-zqy-DeepRead && uv sync                 # base runtime (uv workspace incl. OpenViking, KohakuRAG)
-cd agentic_rag_self_learning
-python -m venv .venv && pip install -r requirements-pilot.txt
-cp .env.example .env                                    # fill in VOLCENGINE_API_KEY + model names
+cd ruc-ov-eval-zqy-DeepRead && uv sync   # the single shared venv for everything
+cp agentic_rag_self_learning/.env.example agentic_rag_self_learning/.env   # fill in VOLCENGINE_API_KEY + model names
 ```
 
 All experiment scripts load keys from `agentic_rag_self_learning/.env` (VOLCENGINE_API_KEY, STUDENT/TEACHER/JUDGE_MODEL + BASE_URL, EMBEDDING_MODEL_NAME). Never commit or print real `.env` contents. Note: some checked-in `ov_test/config*/` YAMLs contain a literal `llm.api_key` — prefer `.env` when editing configs.
+
+### Baseline rebuild (required once before the tool-evolution chain)
+
+`blind_reconstruction.py` hardcodes `ExperimentArtifacts/FinanceBenchFull141/Output/deepread_matched_baseline_141_0001/` (judged results + `deepread_run.log` trajectories). If it doesn't exist, rebuild from the raw dataset:
+
+```bash
+./ruc-ov-eval-zqy-DeepRead/run_full141_matched_baseline.sh            # ingest index + 141q baseline + judge (hours)
+./ruc-ov-eval-zqy-DeepRead/run_full141_matched_baseline.sh --dry-run  # validate data/env only
+```
+
+This wraps `agentic_rag_tool_evolution/scripts/rebuild_baseline141.py`: validates `Data/FinanceBench` (141q/82docs), builds the 82-doc index into `agentic_rag_self_learning/data/generated/full141/DeepRead/` when missing, runs `ov_test/run.py --step all` with a **stable** output dir (`auto_increment_output: false`, so reruns resume in place), and verifies the three artifacts.
 
 ### Benchmark harness (single source of truth for running DeepRead)
 
@@ -35,26 +44,29 @@ uv run python ov_test/run.py --config ov_test/config_deepread/financebench.yaml 
 # --step all|gen|eval|del ; --skip-ingest reuses an existing index
 ```
 
-Experiment scripts never call the model directly — they generate a temp `config.yaml` and launch `ov_test/run.py` as a subprocess.
+Experiment scripts never call the model directly — they generate a temp `config.yaml` and launch `ov_test/run.py` as a subprocess with env injection (`LLM_MODEL=$STUDENT_MODEL` etc.).
 
-### Experiment entry points
-
-Each experiment dir has PowerShell wrappers (`run_round1.ps1` … `run_round4.ps1`, `run_blind_reconstruction.ps1`, `run_dev_ab.ps1`, `run_autonomous_repair_round2.ps1`, `run_frozen_test61.ps1`). **They hardcode Windows paths** (`.venv\Scripts\python.exe`, `kernel32` sleep guard) and won't work on macOS/Linux — invoke the underlying Python directly instead, e.g.:
+### Experiment entry points (tool-evolution chain)
 
 ```bash
-cd agentic_rag_self_learning_v2 && python scripts/content2.py round1   # or round2.py / round3.py / round4.py
-cd agentic_rag_tool_evolution && python scripts/blind_reconstruction.py # then dev_ab.py, repair_round2.py, frozen_test61.py
+cd agentic_rag_tool_evolution
+./run_blind_reconstruction.sh        # [--dry-run] Analyzer + Tool Architect on train-60
+./run_dev_ab.sh                      # dev-20 strict A/B + Judge
+./run_autonomous_repair_round2.sh    # Repair Agent on dev feedback, re-run repaired arm
+./run_frozen_test61.sh               # SHA-256 freeze + one-shot test-61 A/B
 ```
 
-Most support `-DryRun` (validate inputs, no API calls) and checkpointed resume.
+The `.sh` wrappers share `scripts/_entry_common.sh`: they use the uv venv python, force UTF-8, and wrap with `caffeinate -i` on macOS. All stages checkpoint and resume on rerun. The old Windows `.ps1` entries were removed (still in git history); v2/pilot `.ps1` scripts were NOT ported — run their Python directly, e.g. `python agentic_rag_self_learning_v2/scripts/content2.py round1`.
 
 ### Tests
 
 ```bash
 cd ruc-ov-eval-zqy-DeepRead
-uv run python -m unittest discover DeepRead/tests        # unittest-style; also runnable via pytest
-uv run python -m unittest ov_test/tests/test_pipeline_skip_ingestion.py   # single test file
+PYTHONPATH=".:ov_test" uv run python -m unittest \
+  DeepRead.tests.test_search_session DeepRead.tests.test_document_title_search DeepRead.tests.test_source_header
 ```
+
+`DeepRead/agent/llm.py` imports `src.core.token_tracer_util` from ov_test, so tests need BOTH repo root and `ov_test/` on `PYTHONPATH` — plain `unittest discover` fails to import.
 
 ## Architecture
 
@@ -74,12 +86,13 @@ AI-generated candidate tools are **not** added to the tool schema. They run thro
 - "Blind" rule in tool_evolution: scripts must not read test data, the existing `search_document_titles` implementation, prior A/B reports, or human failure analyses.
 - `Data/FinanceBench`, the 82-doc index, and old 141-question outputs are read-only; indexes are never rebuilt by experiment scripts (they may embed machine-specific absolute paths — rebuild on a new machine).
 
-### Required external data (not in this package) for end-to-end reruns
+### Required external data (gitignored, must exist locally) for end-to-end reruns
 
 ```text
 Data/FinanceBench/                                                          (workspace root)
-agentic_rag_self_learning/data/generated/full141/DeepRead/processed_docs/
-agentic_rag_self_learning/data/generated/full141/DeepRead/store_index/
+agentic_rag_self_learning/data/generated/full141/DeepRead/processed_docs/   (rebuilt by rebuild_baseline141.py)
+agentic_rag_self_learning/data/generated/full141/DeepRead/store_index/      (rebuilt by rebuild_baseline141.py)
+ExperimentArtifacts/FinanceBenchFull141/Output/deepread_matched_baseline_141_0001/  (rebuilt likewise)
 ```
 
 ## Key files to read first
