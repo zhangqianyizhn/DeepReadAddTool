@@ -1,0 +1,133 @@
+version: 1
+status: review_only
+
+project:
+  name: financebench_agentic_rag_prompt_self_learning
+  existing_repo: ../ruc-ov-eval-zqy-DeepRead
+  existing_harness_entry: ../ruc-ov-eval-zqy-DeepRead/ov_test/run.py
+  base_deepread_config: ../ruc-ov-eval-zqy-DeepRead/ov_test/config_deepread_global/financebench_stateful.yaml
+
+dataset:
+  name: FinanceBench
+  source_jsonl: ../Data/FinanceBench/data/financebench_open_source.jsonl
+  expected_questions: 141
+  expected_documents: 82
+  stable_question_key: financebench_id
+  document_group_key: doc_name
+
+split:
+  seed: 20260810
+  method: grouped_stratified
+  group_by: doc_name
+  stratify_by:
+    - question_type
+  target_sizes:
+    train: 85
+    dev: 28
+    test: 28
+  rules:
+    - all_questions_from_same_document_stay_in_one_split
+    - teacher_can_only_see_train_gold_and_failures
+    - dev_is_only_for_prompt_selection
+    - test_is_evaluated_once_after_prompt_freeze
+
+pilot:
+  enabled: true
+  size: 20
+  source_split: train
+  selection: balanced_by_question_type_and_reasoning
+  purpose: validate_end_to_end_loop_not_claim_final_accuracy
+
+models:
+  student:
+    model_env: STUDENT_MODEL
+    api_key_env: STUDENT_API_KEY
+    base_url_env: STUDENT_BASE_URL
+    temperature: 0
+  teacher:
+    model_env: TEACHER_MODEL
+    api_key_env: TEACHER_API_KEY
+    base_url_env: TEACHER_BASE_URL
+    temperature: 0.2
+  judge:
+    model_env: JUDGE_MODEL
+    api_key_env: JUDGE_API_KEY
+    base_url_env: JUDGE_BASE_URL
+    temperature: 0
+    must_remain_fixed_across_all_candidates: true
+  embedding:
+    model_env: EMBEDDING_MODEL_NAME
+    api_key_env: EMBEDDING_API_KEY
+    base_url_env: EMBEDDING_BASE_URL
+
+student_rag:
+  store_type: DeepRead
+  reuse_existing_index: true
+  source_header_enabled: true
+  enable_session_pagination: true
+  preload_directory_structure: false
+  retrieval_topk: 1
+  agent_topk_max: 10
+  pagination_candidate_limit: 50
+  max_rounds: 50
+  enable_vector: true
+  enable_hybrid: false
+  enable_semantic: false
+  prompt_injection_field: store.agent_instructions
+
+self_learning:
+  method: opro_style_global_agent_prompt_optimization
+  optimize_model_weights: false
+  initial_rounds: 2
+  candidates_per_round: 3
+  max_teacher_cases_per_round: 36
+  teacher_batch_size: 12
+  failure_selection:
+    accuracy_at_most: 2
+    or_recall_below: 0.5
+    balance_by:
+      - question_type
+      - failure_stage
+  candidate_prompt:
+    max_tokens: 800
+    generic_rules_only: true
+    forbid_company_names: true
+    forbid_case_numbers_and_answers: true
+    forbid_doc_ids: true
+    must_not_change_tools_or_retrieval_config: true
+
+candidate_evaluation:
+  split: dev
+  paired_by: financebench_id
+  primary_metric: average_accuracy_normalized
+  secondary_metrics:
+    - evidence_recall
+    - paired_wins_minus_losses
+    - average_input_tokens
+    - average_latency_seconds
+    - average_agent_rounds
+  regression_guardrails:
+    max_cases_dropping_two_or_more_raw_accuracy_points: 2
+    reject_if_accuracy_decreases: true
+  early_stop:
+    no_primary_improvement_rounds: 2
+
+final_evaluation:
+  freeze_prompt_before_test: true
+  official_split: test
+  run_test_once: true
+  optional_descriptive_rerun_on_all_141_after_test: true
+  label_full_rerun_as_non_held_out_descriptive: true
+
+artifacts:
+  root: runs
+  save:
+    - split_manifest
+    - exact_student_config
+    - prompt_versions_and_hashes
+    - teacher_inputs_and_outputs
+    - generated_answers
+    - tool_traces
+    - evaluation_results
+    - token_and_latency_report
+    - paired_comparison

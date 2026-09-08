@@ -1,0 +1,18 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.python-version.local
+
+# OS
+.DS_Store
+
+# Large / generated experiment data (rebuilt locally, never synced)
+Data/
+ExperimentArtifacts/
+runs/
+agentic_rag_self_learning/data/generated/
+*.log

@@ -1,0 +1,99 @@
+{
+  "evidence_summary": "Across 16 failure cases and 4 successful controls, the dominant pattern is not a lack of reasoning ability but a retrieval/navigation bottleneck. Agents repeatedly issue full-corpus BM25/vector searches with top_k=1, get a wrong-company or wrong-period snippet, then loop on slightly modified queries and either conclude the data is unavailable or read the wrong document. The correct documents exist in the corpus (e.g., AMAZON_2019_10K, AMD_2022_10K, BESTBUY_2023_10K, BESTBUY_2024Q2_10Q, Pfizer_2023Q2_10Q, VERIZON_2022_10K) but are never enumerated or selected. Successful controls (3M margin/segment, Activision ratios) show that once the correct doc/node is found, the agent can compute and synthesize accurately. Secondary failure modes are within-document terminology mismatch, incomplete table-row extraction, formula/unit errors, and premature 'not found' conclusions.",
+  "failure_clusters": [
+    {
+      "name": "Wrong-document selection / corpus navigation failure",
+      "count_estimate": "~10 of 16 failures",
+      "causal_chain": "Agent issues full-corpus BM25/vector query -> top result is a different company or wrong fiscal year because query terms match common phrases -> agent repeats with slightly modified queries, still wrong -> agent concludes data unavailable or reads wrong doc -> final answer is a false negative or uses irrelevant evidence.",
+      "trajectory_evidence": "08286 (Amazon query returns Walmart/3M/Coca-Cola; never finds AMAZON_2019_10K), 00917 (AMD query returns AES/AMD 2015 10-K; misses AMD_2022_10K), 01077 (Best Buy query returns 2017 10-K; misses BESTBUY_2023_10K), 00288 (cash query returns Amcor/JPM/Adobe; misses BESTBUY_2024Q2_10Q), 00283 (Pfizer query returns 2021 10-K; misses Pfizer_2023Q2_10Q), 00606 (Ulta query returns private-label text; misses earnings release), 02419 (Pfizer query returns 3M; eventually finds 10-Q but wrong section), 00216 (Verizon query returns defense/JPM; eventually finds 2022 10-K late).",
+      "repairability": "High. A document inventory/metadata search would directly prevent this failure mode."
+    },
+    {
+      "name": "Within-document retrieval failure due to terminology mismatch or missing table rows",
+      "count_estimate": "~7 of 16 failures",
+      "causal_chain": "Correct document is identified -> agent searches for exact question terms -> document uses synonyms or a different statement type (e.g., 'separating Upjohn' vs 'spin off', 'Adjusted EBIT' vs 'EBITDA', 'payroll, bonus, and benefit costs' vs 'wages', 'TBVPS' vs 'liquidation value') -> search returns empty or wrong node -> agent misses the evidence.",
+      "trajectory_evidence": "01928 (EBITDA search in AMCOR 10-K empty; misses earnings release), 00283 (reads 2021 10-K historical spin-off; misses 2023Q2 expected costs), 02419 (searches 'spin off' in Pfizer 10-Q, gets Monsanto history; misses Upjohn separation), 00606 (searches 'wages expense' in Ulta 10-K, gets amortization table), 02119 (searches 'liquidation preference', misses TBVPS $66.56), 00299 (reads segment highlights but misses Corporate row in segment table), 00460 (reads Best Buy row but misses total stores row).",
+      "repairability": "Medium. Synonym-expanded search and table row lookup would help."
+    },
+    {
+      "name": "Numerical/formula/unit reasoning errors",
+      "count_estimate": "~6 of 16 failures",
+      "causal_chain": "Agent extracts line items -> applies incorrect formula or wrong interpretation (quick ratio includes prepaids; liquidation value uses book value not TBVPS; 'top line' treated as absolute revenue not growth; dividends not rounded to $0.40B) -> final numeric answer is wrong or contradicts gold.",
+      "trajectory_evidence": "00222 (quick ratio 1.77 vs gold 1.57; used current assets - inventory instead of cash+ST investments+AR+receivables), 00216 (quick ratio 0.98 vs gold 0.54; included prepaids and partial liabilities), 02119 (computed $82.20 book value vs gold $66.56 TBVPS), 01902 (picked Computing & Mobile Phones by revenue vs gold Entertainment by 9% growth), 05718 ($0.389B vs gold $0.40B rounding), 00499 (concluded capital-intensive despite same CAPEX/revenue ratio as gold's 'No').",
+      "repairability": "Medium. A ratio calculator with standard definitions and answer-format rounding would help, but some cases are interpretation issues."
+    },
+    {
+      "name": "Premature stopping / false-negative conclusion",
+      "count_estimate": "~8 of 16 failures",
+      "causal_chain": "After several failed searches, agent concludes 'no document contains X' or 'insufficient data' without exhaustively checking candidate documents; or reaches max rounds with no final answer.",
+      "trajectory_evidence": "08286 ('no document containing Amazon's FY2019 income statement'), 00917 ('no document containing AMD FY22'), 01077 ('no information about Best Buy acquisitions'), 00288 ('insufficient data'), 00283 ('no information indicating future payments'), 02419 ('not spinning off any large segments'), 01928/00606 (max rounds, no final answer).",
+      "repairability": "High. Document inventory plus a coverage check would prevent false negatives."
+    },
+    {
+      "name": "Question intent / answer synthesis misinterpretation",
+      "count_estimate": "~4 of 16 failures",
+      "causal_chain": "Question wording is ambiguous or domain-specific ('performed the best by top line' = growth; 'lowest net revenue' includes negative; 'future payment' = expected separation costs; 'spin off' = separating Upjohn) -> agent answers literal interpretation -> contradicts gold.",
+      "trajectory_evidence": "01902 (absolute revenue vs growth), 00299 (missed negative Corporate revenue), 00283 (historical vs expected future costs), 02419 (completed spin-off vs in-progress separation).",
+      "repairability": "Low/Medium. Requires better question understanding; partially addressable by query expansion and evidence composition."
+    }
+  ],
+  "candidate_capabilities": [
+    {
+      "name": "document_inventory_search",
+      "problem_solved": "Agent cannot identify which corpus document corresponds to a company/fiscal period; full-corpus BM25 returns wrong-company snippets and agent never enumerates available filings.",
+      "inputs": "company (optional), fiscal_period (optional), filing_type (optional, e.g., 10-K, 10-Q, earnings), top_k",
+      "outputs": "list of {doc_id, source_name, company, filing_type, fiscal_period} matching filters",
+      "preconditions": "Corpus documents have a source header node (e.g., 'Source Document: AMAZON_2019_10K') or equivalent metadata; tool can scan get_doc_structure outputs.",
+      "expected_effect": "Agent can select the correct document before searching, eliminating wrong-company loops and false 'not found' answers; also provides candidate set for coverage checks.",
+      "risks": "Metadata may be incomplete or inconsistent; agent may still need within-document search; extra tool call overhead."
+    },
+    {
+      "name": "financial_statement_locator",
+      "problem_solved": "Within a correct document, agent cannot find the exact statement/table (income statement, balance sheet, cash flow, segment results) because BM25/regex miss table nodes.",
+      "inputs": "doc_id, statement_type (income_statement|balance_sheet|cash_flow|segment_results|mdna), optional fiscal_period",
+      "outputs": "node_id(s) and paragraph ranges containing the requested statement/table",
+      "preconditions": "Document structure has recognizable section headings; tool can map statement types to heading patterns.",
+      "expected_effect": "Reduces within-document search failures; ensures agent reads the right table.",
+      "risks": "Heading variations; may return multiple candidates; requires table parsing."
+    },
+    {
+      "name": "table_row_lookup",
+      "problem_solved": "Agent misses specific rows in tables (e.g., 'Total stores', 'Corporate', 'Dividends paid', 'TBVPS') because read_section returns truncated previews or agent reads wrong rows.",
+      "inputs": "doc_id, node_id, row_label (string or regex), optional column_label",
+      "outputs": "matching row(s) with cell values and column headers",
+      "preconditions": "Node contains an HTML table; row labels are present.",
+      "expected_effect": "Ensures exact row extraction for store counts, segment revenues, cash flow line items, and key metrics.",
+      "risks": "Row label ambiguity; table parsing errors; may need disambiguation."
+    },
+    {
+      "name": "ratio_calculator",
+      "problem_solved": "Manual ratio calculations use wrong formulas or line items (quick ratio, fixed asset turnover, capex %, liquidation value per share).",
+      "inputs": "metric_name, fiscal_year, doc_id, optional formula_override",
+      "outputs": "computed value with formula and source line items",
+      "preconditions": "Metric definitions known; financial statements available in doc.",
+      "expected_effect": "Avoids arithmetic/formula errors; provides auditable calculation.",
+      "risks": "Gold definitions may differ from standard; need override; may not handle non-standard metrics."
+    },
+    {
+      "name": "synonym_expanded_search",
+      "problem_solved": "BM25/vector searches fail on terminology mismatch ('spin off' vs 'separating Upjohn', 'EBITDA' vs 'Adjusted EBIT', 'wages' vs 'payroll', 'liquidation value' vs 'TBVPS').",
+      "inputs": "query, scope, doc_id, top_k",
+      "outputs": "search results from original and expanded queries",
+      "preconditions": "Domain synonym lexicon (finance/accounting terms).",
+      "expected_effect": "Improves recall within correct document.",
+      "risks": "May increase false positives; needs ranking."
+    },
+    {
+      "name": "negative_result_verification",
+      "problem_solved": "Agent prematurely concludes data unavailable after a few searches.",
+      "inputs": "question, candidate_docs (from document_inventory_search), search_terms",
+      "outputs": "verified absence or list of unexplored docs/sections",
+      "preconditions": "Document inventory exists.",
+      "expected_effect": "Prevents false 'not found' answers.",
+      "risks": "May increase rounds; still depends on search."
+    }
+  ],
+  "selected_capability": "document_inventory_search",
+  "selection_reason": "The most frequent and fundamental failure is wrong-document selection. Many trajectories show repeated full-corpus searches returning wrong company/period snippets and false 'not found' conclusions, even though the correct document exists. A document inventory/metadata search directly addresses this bottleneck, is executable with existing source-header metadata, and is a prerequisite for other fixes such as coverage checks and statement locators. It would have prevented or shortened failures in roughly 10 of 16 cases.",
+  "falsification_test": "If, after adding document_inventory_search, agents still fail on cases where the gold source exists in the corpus—e.g., they still return 'no document found' for Amazon FY2019, AMD FY2022, Best Buy FY2023, or still select the wrong company's filing—then the diagnosis that document selection is the primary bottleneck is wrong. More specifically, if a held-out set of the same failure cases shows no reduction in wrong-document selection errors or false-negative conclusions, the capability should be reconsidered."
+}

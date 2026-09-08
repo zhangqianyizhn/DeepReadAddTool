@@ -1,0 +1,23 @@
+{
+  "protocol": "held_out_test61_ab_v1",
+  "source_repair_dir": "D:\\桌面\\DeepRead\\agentic_rag_tool_evolution\\runs\\blind_20260821_181044\\repair_round2",
+  "source_candidate_tool_sha256": "74dcab8e11db78721db730b74e53e7261ebf5e3e458e7ce4220d9d7c6b7edb03",
+  "source_candidate_json_sha256": "865486c4e3188d91a63dc89523b38c2224b2c05ba1c49a68819662cafefe2faf",
+  "test_split_sha256": "fe434029ccbc3f2fc90a99c197e9dbb7237cc017f309477e269df3c7cfb20f07",
+  "test_count": 61,
+  "student_model": "deepseek-v4-flash",
+  "student_base_url": "https://ark.cn-beijing.volces.com/api/plan/v3",
+  "judge_model": "deepseek-v4-flash",
+  "judge_base_url": "https://ark.cn-beijing.volces.com/api/plan/v3",
+  "old_title_tool_enabled": false,
+  "baseline_generated_tool_enabled": false,
+  "candidate_generated_tool_enabled": true,
+  "max_rounds": 50,
+  "retrieval_topk": 1,
+  "agent_topk_max": 1,
+  "session_pagination": false,
+  "test_feedback_may_repair_candidate": false,
+  "frozen_at": "2026-08-22T00:35:33",
+  "frozen_candidate_tool_sha256": "74dcab8e11db78721db730b74e53e7261ebf5e3e458e7ce4220d9d7c6b7edb03",
+  "frozen_candidate_json_sha256": "865486c4e3188d91a63dc89523b38c2224b2c05ba1c49a68819662cafefe2faf"
+}
