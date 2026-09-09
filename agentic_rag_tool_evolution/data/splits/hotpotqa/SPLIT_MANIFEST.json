@@ -1,0 +1,18 @@
+{
+  "dataset": "hotpotqa",
+  "seed": 20260909,
+  "ratio": "40/20/40",
+  "question_counts": {
+    "train": 40,
+    "dev": 20,
+    "test": 40
+  },
+  "doc_count": 991,
+  "doc_disjoint": false,
+  "doc_disjoint_note": "HotpotQA 多跳问题共享 Wikipedia 文章，划分为题目级随机，跨 split 存在文章重叠。",
+  "files": {
+    "harness_dev.json": "dfe944cfccefc9d1a2dc571fbe2da3daa57974e078a830aa68af876be104ffb2",
+    "harness_test.json": "846e2b76245e9b64755fd66eda619ff37688a8c11cd3564df1bd37d147f82f2f",
+    "harness_train.json": "572711bbc7e3eee41fdbbcc61f8ce6c13060e00e085b937e6e1eeb8f2ebbc218"
+  }
+}

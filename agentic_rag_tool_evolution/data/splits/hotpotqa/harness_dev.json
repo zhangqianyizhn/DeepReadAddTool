@@ -1,0 +1,1790 @@
+[
+  {
+    "id": "5abd259d55429924427fcf1a",
+    "question": "Are both Dictyosperma, and Huernia described as a genus?",
+    "answer": "yes",
+    "type": "comparison",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Dictyosperma",
+        "Huernia"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Dictyosperma",
+        "Huernia"
+      ],
+      "sentences": [
+        [
+          "Dictyosperma is a monotypic genus of flowering plant in the palm family found in the Mascarene Islands in the Indian Ocean (Mauritius, Réunion and Rodrigues).",
+          " The sole species, Dictyosperma album, is widely cultivated in the tropics but has been farmed to near extinction in its native habitat.",
+          " It is commonly called princess palm or hurricane palm, the latter owing to its ability to withstand strong winds by easily shedding leaves.",
+          " It is closely related to, and resembles, palms in the \"Archontophoenix\" genus.",
+          " The genus is named from two Greek words meaning \"net\" and \"seed\" and the epithet is Latin for \"white\", the common color of the crownshaft at the top of the trunk."
+        ],
+        [
+          "The genus Huernia (family Apocynaceae, subfamily Asclepiadoideae) consists of stem succulents from Eastern and Southern Africa, first described as a genus in 1810.",
+          " The flowers are five-lobed, usually somewhat more funnel- or bell-shaped than in the closely related genus \"Stapelia\", and often striped vividly in contrasting colours or tones, some glossy, others matt and wrinkled depending on the species concerned.",
+          " To pollinate, the flowers attract flies by emitting a scent similar to that of carrion.",
+          " The genus is considered close to the genera \"Stapelia\" and \"Hoodia\".",
+          " The name is in honour of Justin Heurnius (1587–1652) a Dutch missionary who is reputed to have been the first collector of South African Cape plants.",
+          " His name was actually mis-spelt by the collector."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5ae5aba0554299546bf82f17",
+    "question": "Which of Tara Strong major voice role in animated series is an American animated television series based on the DC Comics fictional superhero team, the \"Teen Titans\"?",
+    "answer": "Teen Titans Go!",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Tara Strong",
+        "Teen Titans Go! (TV series)"
+      ],
+      "sent_id": [
+        1,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "List of Teen Titans Go! episodes",
+        "Teen Titans (season 4)",
+        "Tara Strong",
+        "Roy Harper (comics)",
+        "Teen Titans Go! (TV series)",
+        "Teen Titans (season 1)",
+        "Teen Titans: Trouble in Tokyo",
+        "Teen Titans",
+        "Tara Strong filmography",
+        "List of Teen Titans episodes"
+      ],
+      "sentences": [
+        [
+          "\"Teen Titans Go!",
+          "\" is an American animated television series based on the DC Comics fictional superhero team, the \"Teen Titans\".",
+          " The series was announced following the popularity of DC Nation's New Teen Titans shorts, both of which are based on the 2003 \"Teen Titans\" TV series.",
+          " \"Teen Titans Go!\"",
+          " is a more comedic take on the DC Comics franchise, dealing with situations that happen every day.",
+          " Sporting a new animation style, \"Teen Titans Go!\"",
+          " serves as a comedic spin-off with no continuity to the previous series, and only certain elements are retained.",
+          " Many DC characters make cameo appearances and are referenced in the background.",
+          " The original principal voice cast returns to reprise their respective roles."
+        ],
+        [
+          "The fourth season of the animated television series \"Teen Titans\", based on the DC comics series of the same time by Bob Haney and Bruno Premiani, originally aired on Cartoon Network in the United States.",
+          " Developed by television writer David Slack, the series was produced by DC Entertainment and Warner Bros.",
+          " Animation.",
+          " It stars Scott Menville, Hynden Walch, Khary Payton, Tara Strong, and Greg Cipes as the main characters."
+        ],
+        [
+          "Tara Strong (born Tara Lyn Charendoff; February 12, 1973) is a Canadian–American actress who has done voice work for numerous animations and video games and performed in various live-action productions.",
+          " Many of her major voice roles include animated series such as \"Rugrats\", \"The Powerpuff Girls\", \"The Fairly OddParents\", \"Drawn Together\", \"Teen Titans\" and the spin-off series \"Teen Titans Go!",
+          "\", and \"\", as well as video games such as \"Mortal Kombat X\", \"Final Fantasy X-2\", and the \"\" series.",
+          " Her portrayals have garnered nominations in the Annie Awards and Daytime Emmys, and an award from the Academy of Interactive Arts & Sciences."
+        ],
+        [
+          "Roy Harper is a fictional superhero appearing in American comic books published by DC Comics.",
+          " Roy is one of DC's most longstanding characters, originating in 1940s comics as Speedy, the teen sidekick of the superhero Green Arrow.",
+          " Like his mentor Green Arrow, Roy is a world-class archer and athlete who uses his exceptional marksmanship to fight crime.",
+          " Along with other prominent DC Comics superhero sidekicks, he goes on to become a core member of the superhero group the Teen Titans.",
+          " As an adult, Roy casts off his Speedy identity to establish himself as the superhero Arsenal, and for a time adopts the name Red Arrow to symbolise his having become an equal of Green Arrow.",
+          " As well as continuing to serve as one of the Titans at various times, Roy has had leading roles in the superhero groups the Seven Soldiers of Victory, the Outsiders, the Justice League, and the Outlaws."
+        ],
+        [
+          "Teen Titans Go!",
+          " is an American animated television series based on the DC Comics fictional superhero team, the \"Teen Titans\".",
+          " The series was announced following the popularity of DC Nation's New Teen Titans shorts."
+        ],
+        [
+          "The first season of the animated television series Teen Titans, based on the DC comics series created by Bob Haney and Bruno Premiani, originally aired on Cartoon Network in the United States.",
+          " Developed by television writer David Slack, the series was produced by DC Entertainment and Warner Bros.",
+          " Animation.",
+          " It stars Scott Menville, Hynden Walch, Khary Payton, Tara Strong, and Greg Cipes as the voices of the main characters."
+        ],
+        [
+          "Teen Titans: Trouble in Tokyo is a 2006 television animated superhero film adaptation of the DC Comics superhero team Teen Titans.",
+          " It is set in the milieu of the animated series \"Teen Titans\" that ran from 2003–2006.",
+          " The film premiered on Cartoon Network on September 15, 2006 and on Kids' WB on September 16, 2006. \"",
+          "Teen Titans\" head writer David Slack returned for this movie."
+        ],
+        [
+          "The Teen Titans, also known as the New Teen Titans and the Titans, are a fictional superhero team appearing in American comic books published by DC Comics, often in an eponymous monthly series.",
+          " As the group's name suggests, its members are teenage superheroes, many of whom have acted as sidekicks to DC's premiere superheroes in the Justice League.",
+          " First appearing in 1964 in \"The Brave and the Bold\" #54, the team was founded by Kid Flash (Wally West), Robin (Dick Grayson), and Aqualad (Garth), with the team adopting the name Teen Titans in issue 60 following the addition of Wonder Girl (Donna Troy) to its ranks."
+        ],
+        [
+          "Tara Strong (born Tara Lyn Charendoff; February 12, 1973) is a Canadian–American actress who has done voice work for numerous animations and video games and performed in various live-action productions.",
+          " Many of her major voice roles include animated series such as \"Rugrats\", \"The Powerpuff Girls\", \"The Fairly OddParents\", \"Drawn Together\", \"Teen Titans\" and the spin-off series \"Teen Titans Go!",
+          "\", and \"\", as well as video games such as \"Mortal Kombat X\", \"Final Fantasy X-2\", and the \"\" series.",
+          " Her portrayals have garnered nominations in the Annie Awards and Daytime Emmys, and an award from the Academy of Interactive Arts & Sciences."
+        ],
+        [
+          "\"Teen Titans\" is an American animated television series based on the DC comics series of the same name by Bob Haney and Bruno Premiani.",
+          " Developed by David Slack for Cartoon Network, the series was produced by DC Entertainment and Warner Bros.",
+          " Animation with Sander Schwartz serving as executive producer and Glen Murakami, Bruce Timm, and Linda M. Steiner signing on as producers.",
+          " The series follows the adventures of a team of crime-fighting teenaged superheroes, consisting of the leader Robin (voiced by Scott Menville), foreign alien princess Starfire (voiced by Hynden Walch), the technological genius Cyborg (voiced by Khary Payton), the dark sorceress Raven (voiced by Tara Strong), and the green shapeshifter Beast Boy (voiced by Greg Cipes)."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a78bd9b554299078472774a",
+    "question": "What nationality were social anthropologists Alfred Gell and Edmund Leach?",
+    "answer": "British",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Alfred Gell",
+        "Edmund Leach"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Edmund Leach",
+        "Thomas Hylland Eriksen",
+        "Social Anthropology (journal)",
+        "Network Analysis and Ethnographic Problems",
+        "Aleksandar Bošković",
+        "Participant observation",
+        "Muted group theory",
+        "Association of Social Anthropologists",
+        "Alfred Gell",
+        "Coral Gardens and Their Magic"
+      ],
+      "sentences": [
+        [
+          "Sir Edmund Ronald Leach (7 November 1910 – 6 January 1989) was a British social anthropologist."
+        ],
+        [
+          "Thomas Hylland Eriksen (born February 6, 1962) is a Norwegian anthropologist.",
+          " He is currently a professor of social anthropology at the University of Oslo, as well as the 2015-2016 president of the European Association of Social Anthropologists.",
+          " He is a member of the Norwegian Academy of Science and Letters."
+        ],
+        [
+          "Social Anthropology/Anthropologie Sociale is a quarterly academic journal published since 2007 by Wiley-Blackwell on behalf of the European Association of Social Anthropologists.",
+          " It was established in 1992 and originally published by Cambridge University Press.",
+          " The current editors-in-chief are Sarah Green and Patrick Laviolette.",
+          " Articles are published in English or French."
+        ],
+        [
+          "Network Analysis and Ethnographic Problems: Process Models of a Turkish Nomad Clan is an anthropological and complexity science book by social anthropologists Douglas R. White, University of California, Irvine, and Ulla Johansen of the University of Cologne.",
+          " It is considered an important publication in anthropology and the political science of Central Asia."
+        ],
+        [
+          "Aleksandar Bošković is a social anthropologist from former Yugoslavia, who published twelve books and several hundred articles and book reviews on history and theory of anthropology, from a transactionalist and comparative perspective.",
+          " He is Professor in the Department of Ethnology and Anthropology (University of Belgrade Faculty of Philosophy), and Professor of Anthropology at the University of Donja Gorica in Montenegro.",
+          " Since 2 February 2017, Bošković also heads the Department of Anthropological Research (within the Center for Sociological and Anthropological Studies) at the Institute of Social Sciences in Belgrade, where he is Director of Research, and former (19 May 2009- 1 February 2017) Head of the Center for Political Studies and Public Opinion Research.",
+          " Aleksandar Bošković previously taught at the Universities of St Andrews (1994), Belgrade (then Yugoslavia, 1998), Brasília (Brazil, 1999-2001), University of the Witwatersrand (Johannesburg, South Africa, 2001-2003), and Rhodes University (Grahamstown, South Africa, 2003-2006).",
+          " Between 2000 and 2014, Aleksandar Bošković was teaching in the Post-graduate Program in Anthropology of the Faculty of Social Sciences (FDV), University of Ljubljana (Slovenia).",
+          " Just before the 2016 conference of the European Association of Social Anthropologists, held at the University of Milano-Bicocca, he was selected as the EASA Book Series Editor.",
+          " Together with Han Vermeulen, he is co-convenor of the recently established History of Anthropology Network of the EASA."
+        ],
+        [
+          "Participant observation is one type of data collection method typically used in qualitative research.",
+          " It is a widely used methodology in many disciplines, particularly cultural anthropology and (European) ethnology, less so in sociology, communication studies, human geography and social psychology.",
+          " Its aim is to gain a close and intimate familiarity with a given group of individuals (such as a religious, occupational, sub cultural group, or a particular community) and their practices through an intensive involvement with people in their cultural environment, usually over an extended period of time.",
+          " The method originated in the field research of social anthropologists, especially Bronisław Malinowski and his students in Britain, the students of Franz Boas in the United States, and in the later urban research of the Chicago School of sociology."
+        ],
+        [
+          "Muted group theory (MGT) is developed by social anthropologists Edwin Ardener and Shirley Ardener in 1975.",
+          " The theory describes the relationship between a dominant group and its subordinate group(s): As the dominant group contributes mostly to the formulation of the language system, including the norms and vocabulary, members from the subordinate group have to learn and use the dominant-made language to express themselves.",
+          " However, this translation process may result in loss and distortion of information as the people from subordinate groups cannot articulate their ideas clearly.",
+          " The dominant may also ignore the voice of the lower-power.",
+          " All these may eventually lead to the mutedness of the subordinate group.",
+          " Although this theory is initially developed to study the different situations faced by women and men, it can also be applied to any marginalized group that is muted by the inadequacies of their languages."
+        ],
+        [
+          "The Association of Social Anthropologists of the UK and Commonwealth, is a learned society in the United Kingdom dedicated to promoting the academic discipline of psychosocial studies.",
+          " It is a member of the Academy of Social Sciences."
+        ],
+        [
+          "Alfred Antony Francis Gell, {'1': \", '2': \", '3': \", '4': \"} ( ; June 12, 1945 – January 28, 1997) was a British social anthropologist whose most influential work concerned art, language, symbolism and ritual.",
+          " He was trained by Edmund Leach (MPhil, Cambridge University) and Raymond Firth (PhD, London School of Economics) and did his fieldwork in Melanesia and tribal India.",
+          " Gell taught at the London School of Economics, among other places.",
+          " He was also a Fellow of the British Academy.",
+          " He died of cancer in 1997, at the age of 51."
+        ],
+        [
+          "Coral Gardens and Their Magic, properly Coral Gardens and Their Magic: A Study of the Methods of Tilling the Soil and of Agricultural Rites in the Trobriand Islands, is the final book in anthropologist Bronisław Malinowski's ethnographic trilogy on the lives of the Trobriand Islanders.",
+          " It concentrates on the cultivation practices the Trobriand Islanders used to grow yams, taro, bananas and palms.",
+          " It describes the gardens in which the Trobrianders grew food as more than merely utilitarian spaces, even as works of art.",
+          " In 1988 Alfred Gell called the book \"still the best account of any primitive technological-cum-magical system, and unlikely ever to be superseded in this respect\".",
+          " The book has been described as Malinowski's \"magnum opus\"."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5ae0361155429925eb1afc2c",
+    "question": "Which  French ace pilot and adventurer fly L'Oiseau Blanc",
+    "answer": "Charles Eugène",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "L'Oiseau Blanc",
+        "Charles Nungesser"
+      ],
+      "sent_id": [
+        1,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "François Coli",
+        "Georges Madon",
+        "W. E. Johns",
+        "Charles Nungesser",
+        "Gervais Raoul Lufbery",
+        "L'Oiseau bleu (Metzinger)",
+        "Levasseur PL.8",
+        "Paul Sauvage (aviator)",
+        "Wooster and Davis",
+        "L'Oiseau Blanc"
+      ],
+      "sentences": [
+        [
+          "François Coli (June 5, 1881 – presumably on or after May 8, 1927) was a French pilot and navigator best known as the one-eyed flying partner of Charles Nungesser in their doomed attempt to fly the Atlantic Ocean on the aircraft known as \"L'Oiseau Blanc\"."
+        ],
+        [
+          "Georges Félix Madon (July 28, 1892 – November 11, 1924) was the fourth ranked French ace pilot of the First World War.",
+          " His lengthy career and wide variety of aviation experiences were remarkable."
+        ],
+        [
+          "William Earl Johns (5 February 189321 June 1968) was an English pilot and writer of adventure stories, usually written under the pen name Captain W. E. Johns.",
+          " He is best remembered as the creator of the ace pilot and adventurer Biggles."
+        ],
+        [
+          "Charles Eugène Jules Marie Nungesser, MC (15 March 1892 – presumably on or after 8 May 1927) was a French ace pilot and adventurer, best remembered as a rival of Charles Lindbergh.",
+          " Nungesser was a renowned ace in France, ranking third highest in the country with 43 air combat victories during World War I."
+        ],
+        [
+          "Gervais Raoul Victor Lufbery (March 14, 1885 – May 19, 1918) was a French and American fighter pilot and flying ace in World War I. Because he served in both the French Air Force, and later the United States Army Air Service in World War I, he is sometimes listed alternately as a French ace or as an American ace.",
+          " Officially, all but one of his 17 combat victories came while flying in French units."
+        ],
+        [
+          "L'Oiseau bleu (also known as The Blue Bird and Der Blaue Vogel) is a large oil painting created in 1912–1913 by the French artist and theorist Jean Metzinger (1883–1956); considered by Guillaume Apollinaire and André Salmon as a founder of Cubism, along with Georges Braque and Pablo Picasso.",
+          " \"L'Oiseau bleu\", one of Metzinger's most recognizable and frequently referenced works, was first exhibited in Paris at the Salon des Indépendants in the spring of 1913 (n. 2087), several months after the publication of the first (and only) Cubist manifesto, \"Du «Cubisme»\", written by Jean Metzinger and Albert Gleizes (1912).",
+          " It was subsequently exhibited at the 1913 in Berlin (titled \"Der blaue Vogel\", n. 287).",
+          " Apollinaire described \"L'Oiseau bleu\" as a 'very brilliant painting' and 'his most important work to date'.",
+          " \"L'Oiseau bleu\", acquired by the City of Paris in 1937, forms part of the permanent collection at the Musée d'Art Moderne de la Ville de Paris."
+        ],
+        [
+          "The Levasseur PL.8 was a single engine, two-seat long-distance record-breaking biplane aircraft modified from an existing Levasseur PL.4 carrier-based reconnaissance aircraft produced in France in the 1920s.",
+          " Levasseur built the aircraft in 1927, specifically for pilots Charles Nungesser and François Coli for a transatlantic attempt to win the Orteig Prize.",
+          " Only two examples of the type were built, with the first PL.8-01 named \"L'Oiseau Blanc\" (The White Bird), that gained fame as Nungesser and Coli's aircraft."
+        ],
+        [
+          "Sergent Paul Joannes Sauvage was a French World War I flying ace credited with eight confirmed and six unconfirmed aerial victories.",
+          " He was originally posted to fly a Nieuport for Escadrille 65, and scored his first victory with them on 16 July 1916.",
+          " He became the youngest French ace on 2 October, and held that distinction until his death by anti-aircraft fire on January 7, 1917."
+        ],
+        [
+          "Wooster and Davis-- Lieutenant Stanton Hall Wooster (April 1, 1895 Connecticut - April 26, 1927) and Lieutenant Commander Noel Guy Davis (December 25, 1891 Salt Lake City, Utah - April 26, 1927) were two United States Navy (USN) airmen who made an attempt to fly the Atlantic Ocean from New York-to-Paris in the spring of 1927.",
+          " The men were trying to win the $25,000 dollar Orteig Prize offered by New York hotelier Raymond Orteig for the first nonstop flight between New York and Paris.",
+          " Competitors for the prize were French World War One ace Rene Fonck and his crew of three, USN Commander Richard Evelyn Byrd, Clarence Chamberlain and a young airmail pilot named Charles Lindbergh.",
+          " On the Paris side of the Atlantic their competitors were another World War One French ace, Charles Nungesser, and his navigator Francois Coli."
+        ],
+        [
+          "L'Oiseau Blanc (commonly known in the English-speaking world as The White Bird ) was a French Levasseur PL.8 biplane that disappeared in 1927, during an attempt to make the first non-stop transatlantic flight between Paris and New York City to compete for the Orteig Prize.",
+          " The aircraft was flown by French World War I aviation heroes, Charles Nungesser and François Coli.",
+          " The aircraft took off from Paris on 8 May 1927 and was last seen over Ireland.",
+          " Less than two weeks later, Charles Lindbergh successfully made the New York–Paris journey and claimed the prize, flying the \"Spirit of St. Louis\"."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a8e068b5542995085b37384",
+    "question": "Are Ferocactus and Silene both types of plant?",
+    "answer": "yes",
+    "type": "comparison",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Ferocactus",
+        "Silene"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Silene latifolia",
+        "Silene tomentosa",
+        "Silene conoidea",
+        "Silene",
+        "Silene stenophylla",
+        "Silene menziesii",
+        "Silene suksdorfii",
+        "Ferocactus",
+        "Silene antirrhina",
+        "Sex determination in Silene"
+      ],
+      "sentences": [
+        [
+          "Silene latifolia (formerly \"Melandrium album\"), the white campion is a dioecious flowering plant in the family Caryophyllaceae, native to most of Europe, Western Asia and Northern Africa.",
+          " It is a herbaceous annual, occasionally biennial or a short-lived perennial plant, growing to between 40-80 centimetres tall.",
+          " It is also known in the USA as bladder campion but should not be confused with \"Silene vulgaris\", which is more generally called Bladder Campion."
+        ],
+        [
+          "Silene tomentosa, the Gibraltar campion, is a very rare flowering plant of the genus \"Silene\" and the family Caryophyllaceae.",
+          " It is a woody-based perennial about 40cm high, with bilobed flowers ranging from pink to pale violet and is endemic to Gibraltar."
+        ],
+        [
+          "Silene conoidea is a species of flowering plant in the pink family known by the common names weed silene and large sand catchfly.",
+          " It is native to Eurasia, and it is known in other parts of the world, such as western North America, as a weed.",
+          " It is an annual herb growing up to a meter in height with a hairy, partially glandular stem.",
+          " The lance-shaped leaves are up to 12 centimeters long near the base of the plant and smaller farther up.",
+          " The flower is enclosed in an inflated, hairy, glandular calyx of fused sepals which is ridged with many veins.",
+          " It is open at the top, revealing five bright pink petals."
+        ],
+        [
+          "Silene is a genus of flowering plants in the family Caryophyllaceae.",
+          " Containing approximately 700 species, it is the largest genus in the family.",
+          " Common names include campion (which is shared with the related genus \"Lychnis\") and catchfly.",
+          " Many \"Silene\" species are widely distributed, particularly in the northern hemisphere."
+        ],
+        [
+          "Silene stenophylla is a species of flowering plant in the family Caryophyllaceae.",
+          " Commonly called narrow-leafed campion, it is a species in the genus \"Silene\".",
+          " It grows in the Arctic tundra of far eastern Siberia and the mountains of Northern Japan.",
+          " Frozen samples, estimated via radiocarbon dating to be around 32,000 years old, were discovered in the same area as current living specimens, and in 2012 a team of scientists successfully regenerated a plant from the samples."
+        ],
+        [
+          "Silene menziesii is a species of flowering plant in the pink family known by the common names Menzies' campion and Menzies' catchfly.",
+          " It is native to western North America from Alaska through the western half of Canada to the southwestern United States.",
+          " It can be found in many types of habitat and it is quite common in much of its range.",
+          " It is variable in morphology and there are a number of varied subtaxa.",
+          " In general, it is a perennial herb growing from a caudex, appearing matlike, decumbent, or erect, with stems a few centimeters to over half a meter long.",
+          " It is usually hairy in texture, with upper parts bearing sticky glandular hairs.",
+          " The leaves are lance-shaped, oppositely arranged in pairs, and a few centimeters in length, upper leaves usually smaller than lower.",
+          " Flowers may occur in a cyme at the top of the stem, or in leaf axils, or both.",
+          " Each is encapsulated in a hairy, veined calyx of fused sepals.",
+          " The petals are white with two lobes at the tips.",
+          " The plant is dioecious with male and female plants producing different flowers.",
+          " The male and female flower types look the same externally; the stamens are reduced in female plants and the stigmas are reduced in the male."
+        ],
+        [
+          "Silene suksdorfii is a species of flowering plant in the pink family known by the common names Suksdorf's silene, Suksdorf's catchfly and Cascade alpine campion.",
+          " It is native to the Pacific Northwest of the United States, where it occurs from Washington and Idaho to northern California.",
+          " It is mainly an alpine species, growing in the talus of high mountain slopes.",
+          " It can also be found below the tree line in forested subalpine habitat.",
+          " It is a squat perennial herb producing several erect stems from a leafy, woody caudex.",
+          " It generally takes a clumpy form.",
+          " The stems grow up to 10 or 15 centimeters tall and are hairy in texture, with glandular, sticky areas on the upper parts.",
+          " The leaves occur in tufts around the caudex.",
+          " They are fleshy and coated in soft hairs.",
+          " Solitary flowers arise on erect peduncles.",
+          " Each is encapsulated in an inflated calyx of fused sepals, which is starkly purple-veined and has purplish glandular hairs.",
+          " The petals are white or purple-tinged and have two lobes at their tips and appendages at their bases."
+        ],
+        [
+          "Ferocactus is a genus of large barrel-shaped cacti, mostly with large spines and small flowers.",
+          " There are about 30 species included in the genus.",
+          " They are found in the southwestern United States and northwestern Mexico."
+        ],
+        [
+          "Silene antirrhina is a species of flowering plant in the pink family known by the common names sleepy silene and sleepy catchfly.",
+          " It is native to the Americas, where it is widespread throughout North America and parts of South America.",
+          " It is known in Europe as an introduced species."
+        ],
+        [
+          "\"Silene\" are a flowering plant that evolved a dioecious reproductive system.",
+          " This is made possible through heteromorphic sex chromosomes expressed as XY.",
+          " \"Silene\" recently evolved sex chromosomes 5-10 million years ago and are widely used by geneticists and biologists to study the mechanisms of sex determination since they are one of only 39 species across 14 families of angiosperm that possess sex-determining genes.",
+          " \"Silene\" are studied because of their ability to produce offspring with a plethora of reproductive systems.",
+          " The common inference drawn from such studies is that the sex of the offspring is determined by the Y chromosome."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a84c4135542994c784dda31",
+    "question": "Are Yingkou and Fuding the same level of city?",
+    "answer": "no",
+    "type": "comparison",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Yingkou",
+        "Fuding"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Fuding Railway Station",
+        "Yingkou",
+        "Fuding",
+        "Roman Catholic Diocese of Yingkou",
+        "Yingkou Lanqi Airport",
+        "Tongcheng Subdistrict, Fuding",
+        "Xiapu County",
+        "Taimushan Railway Station",
+        "Yingkou East Railway Station",
+        "Bayuquan Railway Station"
+      ],
+      "sentences": [
+        [
+          "Fuding Railway Station () is a railway station located in Fuding City, Ningde, Fujian Province, China, on the Wenzhou-Fuzhou Railway operated by the Nanchang Railway Bureau, China Railway Corporation."
+        ],
+        [
+          "Yingkou () is a prefecture-level city of Liaoning province, People's Republic of China.",
+          " It is a port city of the Bohai Sea, and is the location of the mouth of the Liao River."
+        ],
+        [
+          "   () is a county-level city in northeastern Ningde prefecture level city, on Fujian's border with Zhejiang province."
+        ],
+        [
+          "The Roman Catholic Diocese of Yingkou/Yingkow (Latin: \"Imcheuven(sis)\" , ) is a diocese located in the city of Yingkou in the Ecclesiastical province of Shenyang 瀋陽 in China."
+        ],
+        [
+          "Yingkou Lanqi Airport (IATA: YKH, ICAO: ZYYK) is an airport serving the city of Yingkou in Liaoning province of Northeast China.",
+          " It is located in Lanqi Village in Xishi District of Yingkou, about 17 km from the city center by road.",
+          " The airport opened on 3 February 2016, when the inaugural China Eastern Airlines flight landed from Shanghai Pudong International Airport.",
+          " The total investment for the project was estimated at CNY 8.94 billion."
+        ],
+        [
+          "Tongcheng () is a subdistrict of the city of Fuding, Fujian, People's Republic of China."
+        ],
+        [
+          "Xiapu (; Foochow Romanized: Hà-puō) is a county in the municipal region of Ningde, Fujian, People's Republic of China, located along a stretch of East China Sea coast, with many harbours and islands.",
+          " It is bordered by Fuding City and Zherong County to the north, Fu'an City and Ningde's urban area to the west, and—in Fuzhou City—Luoyuan County to the south."
+        ],
+        [
+          "Mount Taimu Railway Station () is a railway station located in Fuding City, Ningde, Fujian Province, China, on the Wenzhou-Fuzhou Railway operated by the Nanchang Railway Bureau, China Railway Corporation."
+        ],
+        [
+          "Yingkou East Railway Station (IATA: YDD) is a railway station of Beijing–Harbin High-Speed Railway, in particular of both the Panjin–Yingkou and Harbin–Dalian sub-sections.",
+          " It is located in Dashiqiao, in the Yingkou prefecture level city, in the Liaoning province of China."
+        ],
+        [
+          "Bayuquan Railway Station (IATA: JYQ) is a railway station of the Harbin–Dalian section of the Beijing–Harbin High-Speed Railway.",
+          " It is located in Bayuquan, in the Yingkou prefecture level city, in the Liaoning province of China."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a8e1027554299653c1aa15f",
+    "question": "Which year and which conference was the 14th season for this conference as part of the NCAA Division that the Colorado Buffaloes played in with a record of 2-6 in conference play?",
+    "answer": "2009 Big 12 Conference",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "2009 Colorado Buffaloes football team",
+        "2009 Colorado Buffaloes football team",
+        "2009 Big 12 Conference football season"
+      ],
+      "sent_id": [
+        0,
+        2,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "2016–17 Colorado Buffaloes men's basketball team",
+        "2015–16 Colorado Buffaloes men's basketball team",
+        "2009 Colorado Buffaloes football team",
+        "2015 Colorado Buffaloes football team",
+        "2012 Colorado Buffaloes football team",
+        "1989 Colorado Buffaloes football team",
+        "2011 Colorado Buffaloes football team",
+        "2014 Colorado Buffaloes football team",
+        "2009 Big 12 Conference football season",
+        "2014–15 Colorado Buffaloes men's basketball team"
+      ],
+      "sentences": [
+        [
+          "The 2016–17 Colorado Buffaloes men's basketball team represented the University of Colorado in the 2016–17 NCAA Division I men's basketball season.",
+          " They were led by head coach Tad Boyle in his seventh season at Colorado.",
+          " The Buffaloes played their home games at Coors Events Center in Boulder, Colorado as members of the Pac-12 Conference.",
+          " They finished the season 19–15, 8–10 in Pac-12 play to finish in seventh place.",
+          " They defeated Washington State in the first round of the Pac-12 Tournament to advance to the quarterfinals where they lost to Arizona.",
+          " They were invited to the National Invitation Tournament where the lost in the first round to UCF."
+        ],
+        [
+          "The 2015–16 Colorado Buffaloes men's basketball team represented the University of Colorado in the 2015–16 NCAA Division I men's basketball season.",
+          " This was Tad Boyle's sixth season as head coach at Colorado.",
+          " The Buffaloes played their home games at Coors Events Center in Boulder, Colorado and were members of the Pac-12 Conference.",
+          " They finished the season 22–12, 10–8 in Pac-12 play to finish in fifth place.",
+          " The defeated Washington State in the first round of the Pac-12 Tournament to advance to the quarterfinals where they lost to Arizona.",
+          " They received an at-large bid to the NCAA Tournament where they lost in the first round to Connecticut."
+        ],
+        [
+          "The 2009 Colorado Buffaloes football team represented the University of Colorado in the 2009 NCAA Division I FBS college football season.",
+          " The Buffaloes were led by fourth year head coach Dan Hawkins and played their home games at Folsom Field.",
+          " The Buffaloes finished the season with a record of 3–9 and 2–6 in Big 12 play."
+        ],
+        [
+          "The 2015 Colorado Buffaloes football team represented the University of Colorado at Boulder during the 2015 NCAA Division I FBS football season.",
+          " Led by third-year head coach Mike MacIntyre, the Buffaloes played their home games on-campus at Folsom Field in Boulder and were members of the South Division of the Pac-12 Conference.",
+          " They finished the season 4–9, 1–8 in Pac-12 play to finish in last place in the South Division."
+        ],
+        [
+          "The 2012 Colorado Buffaloes football team represented the University of Colorado Boulder during the 2012 NCAA Division I FBS football season.",
+          " Led by second-year head coach and alumnus Jon Embree, the Buffaloes played their home games on-campus at Folsom Field in Boulder and were members of the Pac-12 Conference.",
+          " On November 25, 2012, head coach Jon Embree was fired after compiling a 4–21 record including 1–11 in his final year, the worst year in the history of Colorado Buffaloes football."
+        ],
+        [
+          "The 1989 Colorado Buffaloes football team represented the University of Colorado at Boulder during the 1989 NCAA Division I-A football season.",
+          " Colorado finished with the most wins in school history, surpassing the 1971 team, and their first conference championship since 1976.",
+          " The Buffaloes played for the national title but lost to Notre Dame in the Orange Bowl.",
+          " The team dedicated the season to senior and former starting quarterback Sal Aunese, who was diagnosed with stomach cancer in February and died on September 23 due to complications from the disease."
+        ],
+        [
+          "The 2011 Colorado Buffaloes football team represented the University of Colorado at Boulder in the 2011 NCAA Division I FBS football season.",
+          " Led by first-year head coach and alumnus Jon Embree, the Buffaloes played their home games on-campus at Folsom Field in Boulder and were first-year members of the newly expanded Pac-12 Conference.",
+          " They finished with a record of 3–10, 2–7 in Pac-12 play, in a tie for last place in the South Division."
+        ],
+        [
+          "The 2014 Colorado Buffaloes football team represented the University of Colorado at Boulder during the 2014 NCAA Division I FBS football season.",
+          " Led by second-year head coach Mike MacIntyre, the Buffaloes played their home games on-campus at Folsom Field in Boulder and were members of the South Division of the Pac-12 Conference.",
+          " They finished the season 2–10, 0–9 in Pac-12 play to finish in last place in the South Division."
+        ],
+        [
+          "The 2009 Big 12 Conference football season was the 14th season for the Big 12, as part of the 2009 NCAA Division I FBS football season."
+        ],
+        [
+          "The 2014–15 Colorado Buffaloes men's basketball team represented the University of Colorado in the 2014–15 NCAA Division I men's basketball season.",
+          " This was Tad Boyle's fifth year as head coach at Colorado.",
+          " The Buffaloes played their home games at the Coors Events Center in Boulder, Colorado as members of the Pac-12 Conference.",
+          " They finished the season 16–18, 7–11 in Pac-12 play to finish in a three way tie for eighth place.",
+          " They advanced to the quarterfinals of the Pac-12 Tournament where they lost to Oregon.",
+          " They were invited to the College Basketball Invitational where they defeated Gardner–Webb in the first round before losing in the second round to Seattle."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5abd94525542992ac4f382d2",
+    "question": "2014 S/S is the debut album of a South Korean boy group that was formed by who?",
+    "answer": "YG Entertainment",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "2014 S/S",
+        "Winner (band)"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "List of awards and nominations received by Shinee",
+        "Cho Kyuhyun",
+        "2014 S/S",
+        "History (band)",
+        "Winner (band)",
+        "Madtown",
+        "List of songs written by Ravi",
+        "SF9 (band)",
+        "Seventeen discography",
+        "BTS discography"
+      ],
+      "sentences": [
+        [
+          "South Korean boy group Shinee have received several awards and nominations for their music work.",
+          " The group was formed by S.M. Entertainment in 2008 and released their first full-length album, \"The Shinee World\", on August 28, 2008, which won the Newcomer Album of the Year at the 23rd Golden Disk Awards.",
+          " The first single released from the album was \"Sanso Gateun Neo (Love Like Oxygen)\" and won first place on \"M Countdown\" on September 18, 2008 making it the group's first win on Korean music shows since debut.",
+          " Their second album \"Lucifer\" (2010) produced two singles, \"Lucifer\" and \"Hello\".",
+          " For their outstanding choreography the group was nominated for the Best Dance Performance Award at the Mnet Asian Music Awards in 2010. \"",
+          "Lucifer\" also won the Disk Bonsang Award at the 25th Golden Disk Awards as well as the Popularity Award.",
+          " On March 21, 2012 the group released their fourth EP \"Sherlock\" for which the group was awarded another Disk Bonsang Award at the 27th Golden Disc Awards and the Bonsang Award at the 22nd Seoul Music Award.",
+          " Also following the success of the lead single it was also nominated for Song of the Year at the 2012 Mnet Asian Music Awards."
+        ],
+        [
+          "Cho Kyu-hyun (born February 3, 1988), better known mononymously as Kyuhyun, is a South Korean singer and musical theatre actor.",
+          " He is best known as a member of South Korean boy group Super Junior, its sub-groups Super Junior-K.R.Y., Super Junior-M and a former member of the South Korean ballad group S.M. the Ballad.",
+          " He is one of the first four Korean artists to appear on Chinese postage stamps."
+        ],
+        [
+          "2014 S/S is the debut album of South Korean group WINNER.",
+          " It was released on August 12, 2014 by the group's record label, YG Entertainment.",
+          " The members were credited for writing the lyrics and composing the majority of the album's songs."
+        ],
+        [
+          "History (Korean: 히스토리 ) was a South Korean boy group formed by LOEN Entertainment in 2013.",
+          " They debuted on April 26, 2013 with \"Dreamer\", featuring the narration of their labelmate IU.",
+          " They were LOEN Entertainment's first boy group.",
+          " They officially disbanded on May 12, 2017."
+        ],
+        [
+          "Winner (Hangul: 위너), often stylized as WINNER, is a South Korean boy group formed in 2013 by YG Entertainment and debuted in 2014.",
+          " It currently consists of four members, Jinwoo, Seunghoon, Mino and Seungyoon.",
+          " Originally a five-piece group with Taehyun, who later departed from the group in November 2016."
+        ],
+        [
+          "Madtown (Hangul: 매드타운 ), often stylized as MADTOWN, is a South Korean boy group formed in 2014 by J. Tune Camp.",
+          " The group consists of Moos, Daewon, Lee Geon, Jota, Heo Jun, Buffy and H.O.",
+          " Their debut album, \"Mad Town\", was released on October 6, 2014.",
+          " Two of the members, Moos and Buffy, originally debuted as the hip hop duo \"Pro C\" in 2013.",
+          " Madtown's official fan-base name is Mad-people.",
+          " Starting December 22, 2016, MADTOWN's contract was sold to GNI Entertainment after J. Tune Camp closed."
+        ],
+        [
+          "Ravi is a South Korean rapper, songwriter and producer, signed under Jellyfish Entertainment.",
+          " He began his career as a rapper in 2012 in the South Korean boy group VIXX, and later formed VIXX's first sub-unit VIXX LR with band mate Leo in 2015.",
+          " Ravi's songwriting career began with his participation in co-writing VIXX's debut single \"Super Hero\".",
+          " As of November 2016 with the release of \"VIXX 2016 Conception Ker\", Ravi has contributed to the writing and composing of over 46 songs recorded by VIXX.",
+          " Ravi is widely known for his participation of composing and songwriting rap portions for the group as well as lyrics and music."
+        ],
+        [
+          "SF9 (Korean: 에스에프나인 ; shortened from Sensational Feeling 9) is a South Korean boy group formed by FNC Entertainment.",
+          " SF9 is the company's first dance boy group to ever debut.",
+          " SF9 debuted on October 5, 2016 with the release of their first single album \"Feeling Sensation\"."
+        ],
+        [
+          "This is the discography of South Korean boy group Seventeen.",
+          " Seventeen (Hangul: 세븐틴), also stylized as SEVENTEEN or SVT, is a South Korean boy group formed by Pledis Entertainment in 2015.",
+          " They have released one album and four EPs."
+        ],
+        [
+          "The following is the discography of South Korean boy group BTS.",
+          " The group debuted in South Korea on June 2013 with single album, \"2 Cool 4 Skool\", at number 5 on South Korean Week 31 Gaon Weekly Chart.",
+          " They made a comeback on September 2013 with an extended play, \"O!RUL8,2?",
+          "\", which peaked at number 4 on Week 38 Gaon Weekly Chart.",
+          " BTS then released their second extended play, \"Skool Luv Affair\", in February 2014, where it charted at number 1 on Week 18 Gaon Weekly Chart.",
+          " This also marked the first time their album charted on international charts, Billboard World Albums and Japan's Oricon Chart, specifically.",
+          " A repackaged version of the album, \"Skool Luv Affair Special Addition\" which was released in May 2014, also peaked at number 1 on Week 21 Gaon Weekly Chart."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5adccd795542990d50227d2c",
+    "question": "In which city is the ambassador of the Rabat-Salé-Kénitra administrative region to China based?",
+    "answer": "Beijing",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Moroccan Ambassador to China",
+        "Rabat",
+        "Rabat"
+      ],
+      "sent_id": [
+        0,
+        0,
+        1
+      ]
+    },
+    "context": {
+      "title": [
+        "Visa policy of Hong Kong",
+        "Rabat",
+        "Sinuiju Special Administrative Region",
+        "Caraga",
+        "2014 NPCSC Decision on Hong Kong",
+        "Ilocos Region",
+        "Wolong Special Administrative Region",
+        "Moroccan Ambassador to China",
+        "Liaison Office (Hong Kong)",
+        "Hong Kong Basic Law"
+      ],
+      "sentences": [
+        [
+          "The visa policy of Hong Kong deals with the requirements in which a foreign national wishing to enter the Hong Kong Special Administrative Region must meet to obtain an entry permit or visa, which depending on the traveller's nationality, may be required to travel to, enter, and remain in the Hong Kong Special Administrative Region.",
+          " Visitors from over 145 countries are permitted visa-free entry for periods ranging from 7 to 180 days, to the Hong Kong Special Administrative Region for tourism or certain business-related activities.",
+          " All visitors must hold a passport valid for more than 1 month."
+        ],
+        [
+          "Rabat (Berber: , Arabic: الرِّبَاط‎ ‎ , Moroccan Arabic: رّباط‎ ‎ ) is the capital city of Morocco and its second largest city with an urban population of approximately 580,000 (2014) and a metropolitan population of over 1.2 million.",
+          " It is also the capital city of the Rabat-Salé-Kénitra administrative region."
+        ],
+        [
+          "Sinŭiju Special Administrative Region is a special administrative region (SAR) of North Korea proclaimed in 2002 (but has not been put into \"de facto\" operation as of 2014), on the border with China.",
+          " It was established in September 2002 in an area including parts of Sinŭiju and the surrounding area, in an attempt to introduce market economics, and is directly governed as in the case of \"Directly Governed Cities\".",
+          " The special administrative region was modelled after China's Special Administrative Regions (SARs), Hong Kong and Macau, and, like them, has a \"Basic Law\" (기본법; Kibonpŏp)."
+        ],
+        [
+          "Caraga, officially known as the Caraga Administrative Region or simply Caraga Region and designated as Region XIII, is an administrative region in the Philippines occupying the northeastern section of the island of Mindanao.",
+          " The Caraga Region was created through \"Republic Act No. 7901\" on February 23, 1995.",
+          " The region comprises five provinces: Agusan del Norte, Agusan del Sur, Surigao del Norte, Surigao del Sur and Dinagat Islands; six cities: Bayugan, Bislig, Butuan, Cabadbaran, Surigao and Tandag; 67 municipalities and 1,311 barangays. Butuan is the regional administrative center."
+        ],
+        [
+          "The Decision of the Standing Committee of the National People's Congress on Issues Relating to the Selection of the Chief Executive of the Hong Kong Special Administrative Region by Universal Suffrage and on the Method for Forming the Legislative Council of the Hong Kong Special Administrative Region in the Year 2016 (), commonly known as 31 August Decision (), is a decision made by the Standing Committee of the National People's Congress (NPCSC), the national legislative body of the People's Republic of China (PRC) on 31 August 2014 which set limits for the 2017 Chief Executive election and 2016 Legislative Council election in the Hong Kong Special Administrative Region (HKSAR)."
+        ],
+        [
+          "The Ilocos Region (Ilocano: \"Rehion/Deppaar ti Ilocos\" ; Pangasinan: \"Sagor na Baybay na Luzon\" ; Filipino: \"Rehiyon ng Ilocos\" ) is an administrative region of the Philippines, designated as Region I, occupying the northwestern section of Luzon.",
+          " It is bordered by the Cordillera Administrative Region to the east, the Cagayan Valley to the northeast and southeast, and the Central Luzon to the south.",
+          " To the west lies the South China Sea."
+        ],
+        [
+          "The Wolong Special Administrative Region () is an area in Sichuan, China.",
+          " It is located in the southwest of Wenchuan County, Ngawa Tibetan and Qiang Autonomous Prefecture of Sichuan.",
+          " It was formerly known as Wolong Special Administrative Region of Wenchuan County, Sichuan Province and was founded in March 1983 with approval of the State Council.",
+          " It was given its current name and placed under Sichuan provincial government with administrative supervision by the provincial department of forestry.",
+          " Its area supersedes Sichuan Wolong National Nature Reserve and its administrative office is the same as the Administrative Bureau of the State Forestry Administration for the reserve.",
+          " It currently has a population of 5343."
+        ],
+        [
+          "The Moroccan ambassador in Beijing is the official representative of the Government in Rabat to the Government of the People's Republic of China."
+        ],
+        [
+          "The Liaison Office of the Central People's Government in the Hong Kong Special Administrative Region (; abbr.",
+          " LOCPG or 中聯辦) is an organ of the Central People's Government of the People's Republic of China (PRC) in the Hong Kong Special Administrative Region (HKSAR).",
+          " It replaced the New China News Agency (NCNA) as the representative of the PRC government in Hong Kong in 2000."
+        ],
+        [
+          "The Basic Law of the Hong Kong Special Administrative Region of the People's Republic of China is the constitutional document of the Hong Kong Special Administrative Region.",
+          " Being a national law of the People's Republic of China, the Basic Law was adopted on 4 April 1990 by the Seventh National People's Congress and signed by President Yang Shangkun."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a7d54165542995f4f402256",
+    "question": "A medieval fortress in Dirleton, East Lothian, Scotland borders on the south side of what coastal area?",
+    "answer": "Yellowcraig",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Yellowcraigs",
+        "Yellowcraigs",
+        "Yellowcraigs",
+        "Dirleton Castle"
+      ],
+      "sent_id": [
+        0,
+        1,
+        2,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Lothian and Borders",
+        "Scottish Borders",
+        "Dirleton Kirk",
+        "Dirleton",
+        "Haddington, East Lothian",
+        "Yellowcraigs",
+        "Dirleton Castle",
+        "Lord Haliburton of Dirleton",
+        "St. Mary's Priory (Lothian)",
+        "John Home Robertson"
+      ],
+      "sentences": [
+        [
+          "Lothian and Borders is an area in south-east Scotland consisting of the East Lothian, City of Edinburgh, Midlothian, West Lothian areas (collectively known as Lothian) along with the Scottish Borders."
+        ],
+        [
+          "The Scottish Borders (Scots: \"The Mairches\" , \"The Marches\") is one of 32 council areas of Scotland.",
+          " It borders the City of Edinburgh, Dumfries and Galloway, East Lothian, Midlothian, South Lanarkshire, West Lothian and, to the south and east, Northumberland in England.",
+          " The administrative centre of the area is Newtown St Boswells."
+        ],
+        [
+          "Dirleton Kirk is situated to the north of the village green in Dirleton, in East Lothian, Scotland.",
+          " Dirleton village lies on the south shore of the Firth of Forth 21 miles east of Edinburgh and two miles west of North Berwick on the A198 road.",
+          " The church is at grid reference [ NT512842] ."
+        ],
+        [
+          "Dirleton (Scottish Gaelic 'Duighreach') is a village and parish in East Lothian, Scotland approximately 20 mi east of Edinburgh on the A198.",
+          " It contains 7500 acre .",
+          " Dirleton lies between North Berwick (east), Gullane (west), Fenton Barns (south) and the Yellowcraigs nature reserve, Archerfield Estate and the Firth of Forth (north).",
+          " Gullane parish was joined to Dirleton parish in 1612 by an Act of Parliament because \"Golyn (as it was anciently spelt) is ane decaying toun, and Dirleton is ane thriven place.\""
+        ],
+        [
+          "The Royal Burgh of Haddington (Scots: \"Haidintoun\" ) is a town in East Lothian, Scotland.",
+          " It is the main administrative, cultural and geographical centre for East Lothian, which as a result of late-nineteenth century Scottish local government reforms, actually took the form of the county of Haddingtonshire for the period from 1889-1921.",
+          " It lies about 20 mi east of Edinburgh.",
+          " The name Haddington is Anglo-Saxon, dating from the sixth or seventh century AD when the area was incorporated into the kingdom of Bernicia.",
+          " The town, like the rest of the Lothian region, was ceded by King Edgar of England and became part of Scotland in the tenth century.",
+          " Haddington received burghal status, one of the earliest to do so, during the reign of David I (1124–1153), giving it trading rights which encouraged its growth into a market town."
+        ],
+        [
+          "Yellowcraig, less commonly known as Broad Sands Bay, is a coastal area of forest, beach and grassland in East Lothian, south-east Scotland.",
+          " Yellowcraig is partly within the Firth of Forth Site of Special Scientific Interest (SSSI).",
+          " It is bordered to the north by the Firth of Forth, to the south by the village of Dirleton and Dirleton Castle, to the east by the North Berwick West Links golf course, and to the west by the Archerfield Estate and Links golf courses."
+        ],
+        [
+          "Dirleton Castle is a medieval fortress in the village of Dirleton, East Lothian, Scotland.",
+          " It lies around 2 mi west of North Berwick, and around 19 mi east of Edinburgh.",
+          " The oldest parts of the castle date to the 13th century, and it was abandoned by the end of the 17th century."
+        ],
+        [
+          "Lord Haliburton of Dirleton (or \"Dirletoun\") was a Scottish Lordship of Parliament created \"circa.\"",
+          " 1450 for Sir Walter de Haliburton, Lord High Treasurer of Scotland.",
+          " The seat of Lord Haliburton was at Dirleton Castle in present-day East Lothian."
+        ],
+        [
+          "St. Mary's Priory, North Berwick, was a monastery of nuns in medieval East Lothian, Scotland.",
+          " Founded by Donnchad I, Earl of Fife (owner of much of northern East Lothian) around 1150, the priory lasted for more than four centuries, declining and disappearing after the Scottish Reformation.",
+          " It had been endowed by the Earls of Carrick as well as the Earls of Fife, but over time lost its dependence on these and came to be controlled by the more locally based Home (or Hume) family, who eventually acquired the priory's lands as a free barony."
+        ],
+        [
+          "John David Home Robertson (born 5 December 1948) is a Labour politician in Scotland.",
+          " He was a Member of Parliament (MP) for Berwick and East Lothian and East Lothian from 1978 to 2001 and a Member of the Scottish Parliament (MSP) for East Lothian from 1999 until 2007."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a85ea095542994775f606a8",
+    "question": "What science fantasy young adult series, told in first person, has a set of companion books narrating the stories of enslaved worlds and alien species?",
+    "answer": "Animorphs",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "The Hork-Bajir Chronicles",
+        "The Hork-Bajir Chronicles",
+        "The Hork-Bajir Chronicles",
+        "Animorphs",
+        "Animorphs"
+      ],
+      "sent_id": [
+        0,
+        1,
+        2,
+        0,
+        1
+      ]
+    },
+    "context": {
+      "title": [
+        "Andre Norton Award",
+        "Victoria Hanley",
+        "The Hork-Bajir Chronicles",
+        "Shadowshaper",
+        "Left Behind: The Kids",
+        "List of Square Enix companion books",
+        "The Divide trilogy",
+        "Science Fantasy (magazine)",
+        "Animorphs",
+        "Etiquette &amp; Espionage"
+      ],
+      "sentences": [
+        [
+          "The Andre Norton Award for Young Adult Science Fiction and Fantasy is an annual award presented by the Science Fiction and Fantasy Writers of America (SFWA) to the author of the best young adult or middle grade science fiction or fantasy book published in the United States in the preceding year.",
+          " It is named to honor prolific science fiction and fantasy author Andre Norton (1912–2005), and it was established by then SFWA president Catherine Asaro and the SFWA Young Adult Fiction committee and announced on February 20, 2005.",
+          " Any published young adult or middle grade science fiction or fantasy novel is eligible for the prize, including graphic novels.",
+          " There is no limit on word count.",
+          " The award is presented along with the Nebula Awards and follows the same rules for nominations and voting; as the awards are separate, works may be simultaneously nominated for both the Andre Norton award and a Nebula Award."
+        ],
+        [
+          "Victoria Hanley is an American young adult fantasy novelist.",
+          " Her first three books, \"The Seer And The Sword\", \"The Healer's Keep\" and \"The Light Of The Oracle\" are companion books to one another.",
+          " Her newest book (released March 2012) is the sequel of a series, called \"Indigo Magic\", published by Egmont USA.",
+          " She's also published two non-fiction books through Cotton Wood Press; called \"Seize the Story: A Handbook For Teens Who Like To Write\", and \"Wild Ink: A Grownups Guide To Writing Fiction For Teens\"."
+        ],
+        [
+          "The Hork-Bajir Chronicles is the second companion book to the \"Animorphs\" series, written by K. A. Applegate.",
+          " With respect to continuity within the series, it takes place before book #23, \"The Pretender\", although the events told in the story occur between the time of \"The Ellimist Chronicles\" and \"The Andalite Chronicles\".",
+          " The book is introduced by Tobias, who flies to the valley of the free Hork-Bajir, where Jara Hamee tells him the story of how the Yeerks enslaved the Hork-Bajir, and how Aldrea, an Andalite, and her companion, Dak Hamee, a Hork-Bajir, tried to save their world from the invasion.",
+          " Jara Hamee's story is narrated from the points of view of Aldrea, Dak Hamee, and Esplin 9466, alternating in similar fashion to the \"Megamorphs\" books."
+        ],
+        [
+          "Shadowshaper is a 2015 American urban fantasy young adult novel written by Daniel José Older.",
+          " It follows Sierra Santiago, an Afro-Boricua teenager living in Brooklyn.",
+          " She is the granddaughter of a \"shadowshaper\", or a person who infuses art with ancestral spirits.",
+          " As forces of gentrification invade their community and a mysterious being who appropriates their magic begins to hunt the aging shadowshapers, Sierra must learn about her artistic and spiritual heritage to foil the killer."
+        ],
+        [
+          "\"Left Behind: The Kids (stylized as LEFT BEHIND >THE KIDS<)\" is a series written by Jerry B. Jenkins, Tim LaHaye, and Chris Fabry.",
+          " The series consists of 40 short novels aimed primarily at the young adult market based on the adult series Left Behind also written by Jerry B. Jenkins.",
+          " It follows a core group of teenagers as they experience the rapture and tribulation, based on scriptures found in the Bible, and background plots introduced in the adult novels.",
+          " Like the adult series, the books were published by Tyndale House Publishing, and released over the 7 year period of 1997-2004.",
+          " The series has sold over 11 million copies worldwide."
+        ],
+        [
+          "Dozens of Square Enix companion books have been produced since 1998, when video game developer Square began to produce books that focused on artwork, developer interviews, and background information on the fictional worlds and characters in its games rather than on gameplay details.",
+          " The first series of these books was the \"Perfect Works\" series, written and published by Square subsidiary DigiCube.",
+          " They produced three books between 1998 and 1999 before the line was stopped in favor of the \"Ultimania\" (アルティマニア , Arutimania ) series, a portmanteau of ultimate and mania.",
+          " This series of books is written by Studio BentStuff, which had previously written game guides for Square for \"Final Fantasy VII\".",
+          " They were published by DigiCube until the company was dissolved in 2003.",
+          " Square merged with video game publisher Enix on April 1, 2003 to form Square Enix, which resumed publication of the companion books."
+        ],
+        [
+          "The Divide trilogy is a fantasy young adult novel trilogy by Elizabeth Kay, which takes place in an alternate universe.",
+          " The three books are \"The Divide\" (2002), \"Back to The Divide\" (2005), and \"Jinx on The Divide\" (2006).",
+          " The first novel was originally published by the small press publisher Chicken House (now a division of Scholastic), with subsequent volumes published by Scholastic, which also reprinted the first novel.",
+          " The books have been translated into French, German, Spanish, Finnish, Chinese, Japanese, Portuguese, Italian, Romanian and Dutch.",
+          " Interior illustrations are by Ted Dewan."
+        ],
+        [
+          "Science Fantasy, which also appeared under the titles Impulse and SF Impulse, was a British fantasy and science fiction magazine, launched in 1950 by Nova Publications as a companion to Nova's \"New Worlds\".",
+          " Walter Gillings was editor for the first two issues, and was then replaced by John Carnell, the editor of \"New Worlds\", as a cost-saving measure.",
+          " Carnell edited both magazines until Nova went out of business in early 1964.",
+          " The titles were acquired by Roberts & Vinter, who hired Kyril Bonfiglioli to edit \"Science Fantasy\"; Bonfiglioli changed the title to \"Impulse\" in early 1966, but the new title led to confusion with the distributors and sales fell, though the magazine remained profitable.",
+          " The title was changed again to \"SF Impulse\" for the last few issues.",
+          " \"Science Fantasy\" ceased publication the following year, when Roberts & Vinter came under financial pressure after their printer went bankrupt."
+        ],
+        [
+          "Animorphs is a science fantasy series of young adult books written by Katherine Applegate and her husband Michael Grant, writing together under the name K. A. Applegate, and published by Scholastic.",
+          " It is told in first person, with all six main characters taking turns narrating the books through their own perspectives.",
+          " Horror, war, dehumanization, sanity, morality, innocence, leadership, freedom and growing up are the core themes of the series."
+        ],
+        [
+          "Etiquette & Espionage is a young adult steampunk novel by Gail Carriger.",
+          " It is her first young adult novel, and is set in the same universe as her bestselling Parasol Protectorate adult series."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5aba749055429901930fa7d8",
+    "question": "What occupation do Chris Menges and Aram Avakian share?",
+    "answer": "director",
+    "type": "comparison",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Aram Avakian",
+        "Chris Menges"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Linda Mvusi",
+        "Second Best (film)",
+        "11 Harrowhouse",
+        "End of the Road (1970 film)",
+        "Chris Menges",
+        "A World Apart (film)",
+        "Cops and Robbers (1973 film)",
+        "Aram Avakian",
+        "Made in Britain",
+        "CrissCross"
+      ],
+      "sentences": [
+        [
+          "Linda Mvusi (c. 1955 in Bloemfontein- ) is an actress and architect.",
+          " Mvusi took an award for best actress at the 1988 Cannes Film Festival for her role in the film \"A World Apart\" which was directed by Chris Menges.",
+          " Mvusi was the first South African to get a best Actress award at Cannes.",
+          " Mvusi also shared in an award for excellence for her architecture on the Apartheid Museum."
+        ],
+        [
+          "Second Best is a 1994 British film produced by Sarah Radclyffe and directed by Chris Menges.",
+          " It closely follows the 1991 novel of the same name by David Cook, who also wrote the screenplay."
+        ],
+        [
+          "11 Harrowhouse is a 1974 British film directed by Aram Avakian.",
+          " It was adapted by Charles Grodin based upon the novel by Gerald A. Browne with the screenplay by Jeffrey Bloom.",
+          " It stars Charles Grodin, Candice Bergen, James Mason, Trevor Howard and John Gielgud."
+        ],
+        [
+          "End of the Road is a 1970 film directed, co-written, and edited by Aram Avakian and adapted from a 1958 novel by John Barth, and stars Stacy Keach, James Earl Jones and Harris Yulin."
+        ],
+        [
+          "Chris Menges BSC, ASC (born 15 September 1940) is an English cinematographer and film director.",
+          " He is a member of both the American and British Societies of Cinematographers."
+        ],
+        [
+          "A World Apart is a 1988 anti-Apartheid drama, written by Shawn Slovo and directed by Chris Menges.",
+          " It is based on the lives of Slovo's parents, Ruth First and Joe Slovo.",
+          " The film was a co-production between companies from the UK and Zimbabwe, where the movie was filmed.",
+          " It features Hans Zimmer's first non-collaborative film score."
+        ],
+        [
+          "Cops and Robbers is a 1973 crime comedy film directed by Aram Avakian with an original screenplay by Donald E. Westlake which Westlake subsequently expanded into a novel.",
+          " The film stars Cliff Gorman as Tom and Joseph Bologna as Joe."
+        ],
+        [
+          "Aram A. Avakian (April 23, 1926 – January 17, 1987) was an Armenian-American film editor and director.",
+          " His work in the latter role includes \"Jazz on a Summer's Day\" (1960) and the indie film \"End of the Road\" (1970)."
+        ],
+        [
+          "Made in Britain is a 1982 British television play written by David Leland, and directed by Alan Clarke, about a 16-year-old racist skinhead named Trevor, and his constant confrontations with authority figures.",
+          " It was originally broadcast on ITV on 10 July 1983 as fourth in an untitled series of works by Leland (including \"Birth of a Nation\"), loosely based around the British educational system, which subsequently acquired the overall title of \"Tales Out of School\".",
+          " As with many Alan Clarke works, the director attempts to depict English working-class life realistically, without moralising or complex plots.",
+          " The play features strong language, violence, racism and an anti-establishment feeling.",
+          " Cinematographer Chris Menges's use of the Steadicam contributed to the fluid and gritty atmosphere of the play."
+        ],
+        [
+          "CrissCross is a 1992 American drama film directed by Chris Menges and written by Scott Sommer, based on his homonymous novel.",
+          " It stars Goldie Hawn, Arliss Howard, Keith Carradine, Steve Buscemi, and David Arnott."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5add61d65542995b365fab21",
+    "question": "What type of forum did a former Soviet statesman initiate?",
+    "answer": "Organizations could come together to address global issues",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "World Summit of Nobel Peace Laureates",
+        "Mikhail Gorbachev"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Nikolai Podgorny",
+        "Andrei Kirilenko (politician)",
+        "MS Excelsior Neptune",
+        "Mikhail Suslov",
+        "Ephraim Sklyansky",
+        "World Summit of Nobel Peace Laureates",
+        "Anastas Mikoyan",
+        "Mikhail Gorbachev",
+        "David Waksberg",
+        "Sergo Mikoyan"
+      ],
+      "sentences": [
+        [
+          "Nikolai Viktorovich Podgorny (Russian: Никола́й Ви́кторович Подго́рный ; ] , Ukrainian: Микола Вікторович Підгорний ; 18 February [O.S. 5 February] 1903 – 11 January 1983) was a Soviet statesman during the Cold War.",
+          " He served as First Secretary of the Central Committee of the Communist Party of Ukraine from 1957 to 1963 and as Chairman of the Presidium of the Supreme Soviet from 1965 to 1977.",
+          " He was replaced as Chairman of the Presidium of the Supreme Soviet in 1977 by General Secretary Leonid Brezhnev.",
+          " That same year he lost his seat in the Political Bureau (Politburo) and was forced to resign from active politics."
+        ],
+        [
+          "Andrei Pavlovich Kirilenko (Russian: Андре́й Па́влович Кириле́нко ; ] ; 8 September [O.S. 26 August] 1906 – 12 May 1990) was a Soviet statesman from the start to the end of the Cold War.",
+          " In 1906, Kirilenko was born at Alexeyevka in Belgorod Oblast to a Ukrainian working-class family.",
+          " He graduated in the 1920s from a local vocational school, and again in the mid-to-late 1930s from the Rybinsk Aviation Technology Institute.",
+          " He became a member of the All-Union Communist Party (bolsheviks) in 1930.",
+          " As many like him, Kirilenko climbed up the Soviet hierarchy through the \"industrial ladder\"; by the 1960s, he was Vice-Chairman of the Bureau of the Central Committee of the Russian Soviet Federative Socialist Republic (RSFSR).",
+          " After Nikita Khrushchev's forced resignation, Kirilenko became Leonid Brezhnev's \"chief lieutenant\" within the Central Committee."
+        ],
+        [
+          "MS \"Excelsior Neptune\" (originally, the \"Feliks Dzerzhinskiy\") was an ocean liner owned by the Soviet Union's Black Sea Shipping Company.",
+          " She was built in 1958 by VEB Mathias-Thesen Werft, Wismar, East Germany, as one of the Mikhail Kalinin series of ships.",
+          " It was named after Felix Dzerzhinsky, a Soviet statesman and founder of the Soviet secret police (Cheka)."
+        ],
+        [
+          "Mikhail Andreyevich Suslov (Russian: Михаи́л Андре́евич Су́слов ; 21 November [O.S. 8 November] 1902 25 January 1982) was a Soviet statesman during the Cold War.",
+          " He served as Second Secretary of the Communist Party of the Soviet Union from 1965, and as unofficial Chief Ideologue of the Party until his death in 1982.",
+          " Suslov was responsible for party democracy and the power separation within the Communist Party.",
+          " His hardline attitude toward change made him one of the foremost anti-reformist Soviet leaders."
+        ],
+        [
+          "Ephraim Markovich Sklyansky (Russian: Эфраим Маркович Склянский ) (August 12 [O.S. July 31] 1892 - August 27, 1925) was a Soviet statesman.",
+          " He joined the Bolsheviks during his years as a student in the medical faculty of Kiev University, from which he graduated in 1916; he was immediately drafted into the army, where he served as a doctor and became prominent in the clandestine military organizations of the Bolsheviks.",
+          " At the time of the October Revolution he was a member of the Military Revolutionary Committee of the Petrograd Soviet; on meeting him in November, Leon Trotsky was so impressed with his \"great creative \"élan\" combined with concentrated attention to detail\" that he appointed him his deputy on the Revolutionary Military Council, where he served with distinction during the Russian Civil War (1918-1920) and helped improve the fighting condition of the Red Army—Trotsky called him the Carnot of the Russian Revolution.",
+          " In 1924 his position as Trotsky's deputy was taken over by Grigory Zinoviev's ally Mikhail Frunze.",
+          " Instead, he was made chairman of the Mossukno state textile trust, and the following May he left on a tour of Germany, France, and the United States to acquire technical information.",
+          " On August 27, 1925 he died in a boating accident on Long Lake (New York) along with , the first head of Amtorg Trading Corporation.",
+          " The high-ranking Soviet defector Boris Bazhanov was convinced that Sklyansky had been drowned on Stalin's orders, and the alleged accident had been organized by and Genrikh Yagoda."
+        ],
+        [
+          "The World Summit of Nobel Peace Laureates was initiated by Mikhail Gorbachev in the 90s, as a forum in which the Nobel Peace Laureates and the Peace Laureate Organizations could come together to address global issues with a view to encourage and support peace and human well being in the world.",
+          " Its Permanent Secretariat is an independent, non-profit, ECOSOC non-governmental organization, based in Rome, operating on a permanent basis.",
+          " A permanent staff, mainly composed of volunteers, promotes the work of the Nobel Peace Prize Winners and organizes the World Summit of Nobel Peace Laureates on a yearly basis.",
+          " To date, the Permanent Secretariat has organized 16 Summits, the most recent having been held in February 2017 in the city of Bogota, Colombia.",
+          " This was the first time that the Summit took place in Latin America."
+        ],
+        [
+          "Anastas Ivanovich Mikoyan ; 25 November 1895 – 21 October 1978) was an Old Bolshevik and Soviet statesman during the mandates of Lenin, Stalin, Khrushchev, and Brezhnev.",
+          " He was the only Soviet politician who managed to remain at the highest levels of power within the Communist Party of the Soviet Union, as that power oscillated between the Central Committee and the Politburo, from the latter days of Lenin's rule, throughout the eras of Stalin and Khrushchev, until his peaceful retirement after the first months of Brezhnev's rule."
+        ],
+        [
+          "Mikhail Sergeyevich Gorbachev, ( ; Russian: Михаи́л Серге́евич Горбачёв ; ] ; born 2 March 1931) is a former Soviet statesman.",
+          " He was the eighth and last leader of the Soviet Union, having been General Secretary of the Communist Party of the Soviet Union from 1985 until 1991.",
+          " He was the country's head of state from 1988 until 1991 (titled as Chairman of the Presidium of the Supreme Soviet from 1988 to 1989, as Chairman of the from 1989 to 1990, and as Soviet Union]] from 1990 to 1991)."
+        ],
+        [
+          "David Jonathan Waksberg, born December 14, 1956 in New York City, was a leading activist in the Soviet Jewry Movement during the 1980s and early 1990s.",
+          " In the 1970s he became involved in the Student Struggle for Soviet Jewry.",
+          " In the early 1980s he moved to California and began working for the Bay Area Council for Soviet Jews, first as Assistant Director, and later as Executive Director.",
+          " He initiated public and political activities on behalf of Soviet Jewry, supervised research and monitoring of their welfare and coordinated financial, medical and legal aid to Refuseniks and Prisoners of Conscience trapped in the Soviet Union.",
+          " He organized numerous protest demonstrations and vigils to raise public awareness of the plight of Jews in the USSR.",
+          " In 1985 Waksberg became National Vice-President of BACSJ's umbrella organization, the Union of Councils for Soviet Jews.",
+          " Waksberg frequently visited Jewish communities the Soviet Union and the Former Soviet states and coordinated briefings of the American travelers interested in visiting those communities.",
+          " In 1990 Waksberg took on the role of Director of the Center for Jewish Renewal, newly established by UCSJ.",
+          " The mission of the CJR was to promote the renewal and development of Jewish life in the USSR and the emigration rights, human rights and resettlement needs of Jews in the Former Soviet Union.",
+          " The CJR established a network of human rights and emigration bureaus in major cities of the former Soviet Union.",
+          " In mid-1990s Waksberg was a member of Bay Area Council's Board of Directors and served as Director of Development and Communication of the UCSJ.",
+          " Since 2007 Waksberg serves as Executive Director of the Bureau of Jewish Education of San Francisco."
+        ],
+        [
+          "Sergo Anastasi Mikoyan (Armenian: Սերգո Անաստասի Միկոյան ; Russian: Сергo Анаста́сович Микоян ; June 5, 1929 – March 7, 2010) was one of the Soviet Union's leading historians who specialized on the foreign policies of the Soviet Union and the United States in Latin America.",
+          " He was the son of Anastas Mikoyan, an Old Bolshevik and high level Soviet statesman and adviser to Soviet leader Nikita Khrushchev."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a77724455429972597f153e",
+    "question": "What race track in the midwest hosts a 500 mile race eavery May?",
+    "answer": "Indianapolis Motor Speedway",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "1957 Indianapolis 500",
+        "Indianapolis Motor Speedway"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Subway 400",
+        "Carolina Dodge Dealers 400",
+        "Louis Schwitzer Award",
+        "Indianapolis Motor Speedway",
+        "Lean Horse Ultramarathon",
+        "Orange County Fair Speedway",
+        "Johnny Rutherford",
+        "1957 Indianapolis 500",
+        "1964 Armstrong 500",
+        "Allison Transmission"
+      ],
+      "sentences": [
+        [
+          "The Subway 400 was the second race of the NASCAR Winston Cup Series season until 2004, held a week after the Daytona 500.",
+          " This 400-mile (644 km) annual race was sponsored by Subway and was held at North Carolina Speedway (\"The Rock\") since 1966.",
+          " From 1966 to 1995, a 500-mile (805-km) race was held; the race was known as the Peach Blossom 500 (1966), the Carolina 500 (1967–1985), and the Goodwrench 500 (1986–1995).",
+          " In 1996, the race was shortened to its current distance of 400 miles; the 400 mile race was called the Goodwrench Service 400 (1996–1997), the GM Goodwrench Service Plus 400 (1998), the Dura Lube/Big K 400 (1999), the Dura Lube/Kmart 400 (2000), the Dura Lube 400 (2001), and the Subway 400 (2002–2004)."
+        ],
+        [
+          "The Carolina Dodge Dealers 400 was the annual spring NASCAR Sprint Cup race held at Darlington Raceway in Darlington, South Carolina, USA.",
+          " A 100 mi race was held in May at the track in 1952, however the event did not become a regular one on the NASCAR schedule until 1957, as a 300 mi race in the Convertible Division, known as the Rebel 300.",
+          " In 1966, the race was expanded to 400 mi , and in 1973 to 500 mi .",
+          " In 1994, the race was returned to 400 miles.",
+          " In 2005, as part of the settlement of the Ferko lawsuit and as part of a schedule realignment, Darlington was forced to contract to one race date, with the 500 mile race (the famous Southern 500) moving to Mother's Day weekend.",
+          " The 400 mile race was eliminated, although Dodge's sponsorship was transferred to the 500 miler."
+        ],
+        [
+          "The Louis Schwitzer Award is presented annually to an engineer, or a team of engineers, for excellence in the design, development and implementation of new, innovative motorsports technology concepts for use in the Indianapolis 500 Mile Race.",
+          " The focus of this award is on those concepts that improve the performance, safety, or energy efficiency of racing cars, related components and systems, or driver and race track support equipment."
+        ],
+        [
+          "The Indianapolis Motor Speedway is an automobile racing circuit located in Speedway, Indiana, (an enclave suburb of Indianapolis) in the United States.",
+          " It is the home of the Indianapolis 500 and the Brickyard 400, and formerly the home of the United States Grand Prix.",
+          " It is located on the corner of 16th Street and Georgetown Road, approximately 6 mi west of Downtown Indianapolis."
+        ],
+        [
+          "The Lean Horse Ultramarathon is run in August every year in the Black Hills of South Dakota.",
+          " It was first run in 2005.",
+          " It features a 100-mile race, a 50-mile race, and a 50-kilometer race.",
+          " Most of the course is on the George S. Mickelson Trail.",
+          " It was the 33rd sanctioned 100-mile race in the United States and is known as one of the easiest hundred mile races in the country."
+        ],
+        [
+          "Orange County Fair Speedway is a five-eighths mile dirt oval speedway in Middletown, Orange County, New York.",
+          " The facility holds weekly stock car races and demolition derbies during the summer months.",
+          " The track was built in 1857 for horse racing at the Orange County Fair and staged its first automobile race on August 16, 1919.",
+          " The fair began as an agricultural exhibit in 1843 and was permanently located in the Wallkill–Middletown area in 1857.",
+          " The speedway is located at 239 Wisner Avenue in Middletown on land which was known as The Ogden Tract in the mid-1850s.",
+          " It was originally a half-mile horse racing track known as the Harry Clay Oval, named after a race horse that was famous at that time.",
+          " Over the years, the track was widened and lengthened to a true 5/8-mile race track."
+        ],
+        [
+          "John Sherman \"Johnny\" Rutherford III (born March 12, 1938), also known as \"Lone Star JR\", is an American former automobile racing driver.",
+          " He is one of ten drivers to win the prestigious Indianapolis 500 mile race at least three times, winning in 1974, 1976, and 1980."
+        ],
+        [
+          "The 41st International 500-Mile Sweepstakes was held at the Indianapolis Motor Speedway on Thursday, May 30, 1957.",
+          " The event was part of the 1957 USAC National Championship Trail and it was race 3 of 8 in the 1957 World Championship of Drivers."
+        ],
+        [
+          "The 1964 Armstrong 500 was a production car race held on 4 October 1964 at the Mount Panorama Circuit just outside Bathurst in New South Wales, Australia.",
+          " The 500 mile race was open to Australian built production sedans of which 100 examples had been registered.",
+          " It was the fifth Armstrong 500 and the second to be held at Bathurst although it is commonly referred to as the fifth \"Bathurst 500\"."
+        ],
+        [
+          "Allison began in 1909 when James A. Allison, along with three business partners, helped found and build the Indianapolis Motor Speedway.",
+          " In 1911, Allison’s new track held the first Indianapolis 500 mile race.",
+          " In addition to funding several race teams, Jim Allison established his own racing team in 1915 and quickly gained a reputation for his work on race cars and automotive technology in general."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5aba5d2e55429901930fa799",
+    "question": "What was the name of a woman from the book titled \"Their Lives: The Women Targeted by the Clinton Machine \" and was also a former white house intern?",
+    "answer": "Monica Lewinsky",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Their Lives",
+        "Their Lives",
+        "Monica Lewinsky"
+      ],
+      "sent_id": [
+        0,
+        1,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Sheila Cavanagh",
+        "Gregory B. Craig",
+        "The White House Doctor",
+        "Once Upon a Secret",
+        "Their Lives",
+        "Eric Schultz",
+        "William H. Ginsburg",
+        "Mark D. Fabiani",
+        "Monica Lewinsky",
+        "Lewinsky scandal"
+      ],
+      "sentences": [
+        [
+          "Sheila Cavanagh is an associate professor of sociology and former chair of the Sexuality Studies Program at York University.",
+          " Cavanagh is currently chair of the Canadian Sexuality Studies Association and co-editor (along with Malena Gustavson) of the \"Somatechnics\" journal.",
+          " Her research is in the area of gender and sexuality with a concentration on queer, cultural, and psychoanalytic theories.",
+          " Cavanagh is editing a special issue on transgender and psychoanalysis in \"Transgender Studies Quarterly\" and completing her third book monograph titled \"Transgender and the Other Sexual Difference: Bracha L. Ettinger and Jacques Lacan\".",
+          " She co-edited a collection with Angela Failler and Rachel A. J. Hurst titled \"Skin, Culture and Psychoanalysis\" (2013) published by Palgrave Macmillan.",
+          " Her first sole-authored book titled \"Sexing the Teacher: School Sex Scandals and Queer Pedagogies\" (2007) was given honorable mention by the Canadian Women’s Studies Association.",
+          " Her second sole-authored book titled \"Queering Bathrooms: Gender, Sexuality, and the Hygienic Imagination\" (2010) is a GLBT Indie Book Award finalist and recipient of the CWSA/ACEF Outstanding Scholarship Prize Honourable Mention (2012).",
+          " Her performed ethnography titled Queer Bathroom Monologues (QBM) premiered at the Toronto Fringe Festival (2011) and was given the Audience Pick Award.",
+          " The play was professionally staged at Buddies in Bad Times Theatre, Toronto, in June 2014 for WorldPride and has toured at conferences, colleges and universities in Canada and the United States.",
+          " She has published in a wide range of international journals and given keynotes addresses at conferences in Sweden, Turkey and Canada.",
+          " Cavanagh teaches an undergraduate course titled Sociology of Gender and a range of graduate courses in sexuality studies, feminist theory and queer theory.",
+          " She is also interviewed in Rohan Spong's documentaries \"T is for Teacher\" (2009) and \"Queer Science\" (2008)."
+        ],
+        [
+          "Gregory Bestor \"Greg\" Craig (born March 4, 1945) is an American lawyer and former White House Counsel under President Barack Obama from 2009 to 2010.",
+          " A former attorney at the Washington, D.C. law firm of Williams & Connolly, Craig has represented numerous high-profile clients.",
+          " Prior to becoming White House Counsel, Craig served as assistant to the President and special counsel in the White House of President Bill Clinton, where he directed the team defending Clinton against impeachment.",
+          " Craig also served as a senior advisor to Senator Edward Kennedy and Secretary of State Madeleine Albright."
+        ],
+        [
+          "The White House Doctor: My Patients Were Presidents – A Memoir is a book authored by Connie Mariano, the first military woman in the history of the United States to be appointed as Physician to the President, the first female director of the medical unit of the White House, and the first Filipino-American to become a rear admiral in the US Navy.",
+          " With a foreword from Bill Clinton, the autobiographical book takes a look at the personal lives of three American Presidents (George H.W. Bush, Bill Clinton, and George W. Bush) and three American First Ladies (Barbara Bush, Hillary Clinton, and Laura Bush) she had taken care of while working as a White House physician.",
+          " It was described as a \"fascinating look into what goes on behind closed doors at 1600 Pennsylvania Avenue\"."
+        ],
+        [
+          "Once Upon a Secret: My Affair with President John F. Kennedy and Its Aftermath is a book by the former White House intern Mimi Alford in February 2012.",
+          " It contains the autobiographical account of the woman who had an affair with U.S. President John F. Kennedy towards the end of his life (from June 1962 to July 1963).",
+          " Despite its consuming influence over her life at the time, Alford managed to keep her involvement in the affair secret for nearly 50 years, until basic details were published in the 2003 Kennedy biography \"\" by Robert Dallek."
+        ],
+        [
+          "Their Lives: The Women Targeted by the Clinton Machine is a book by Candice E. Jackson.",
+          " Published by conservative publisher World Ahead Publishing on May 31, 2005, it recounts the stories of seven women who crossed paths with Bill Clinton: Monica Lewinsky, Paula Jones, Gennifer Flowers, Kathleen Willey, Elizabeth Gracen, Juanita Broaddrick, and Sally Perdue."
+        ],
+        [
+          "Eric Schultz is a senior advisor to former President Barack Obama and is the founder of Schultz Group.",
+          " Schultz is a former White House Principal Deputy Press Secretary and special assistant to President Obama.",
+          " Recognized by \"Politico\" as the strategist “White House officials turn to in a crisis to handle communications,” Schultz was originally hired at the White House in 2011 to respond to Congressional oversight investigations.",
+          " After White House Deputy Press Secretary Josh Earnest replaced Jay Carney to become White House Press Secretary, Schultz was appointed White House Deputy Press Secretary.",
+          " In this role, Schultz often diffuses \"tensions with humor.",
+          " But he can be relentless in pushing his message in both public and private conversations.”",
+          " Former White House Communications Director Jen Psaki compared Schultz to fictional crisis manager Olivia Pope, \"he's the person you want next to you in a foxhole when there's a crisis.\"",
+          " At the end of President Obama's second term, former White House Senior Advisor Valerie Jarrett said of Schultz, “We’ve all grown to rely on his wise counsel\" and that the President \"trusts his sound judgement.\""
+        ],
+        [
+          "William H. Ginsburg (March 25, 1943 – April 1, 2013) was an American lawyer, best known for representing former White House intern Monica Lewinsky in her controversy regarding sexual activities with President Bill Clinton in 1998."
+        ],
+        [
+          "Mark D. Fabiani (born 1957) is an American political strategist, crisis management expert, former Deputy Mayor of Los Angeles and chief of staff to Mayor Tom Bradley, and former White House lawyer and spokesman.",
+          " He is recognized for his work as special counsel to President Bill Clinton and legal spokesperson for the Clinton White House from 1994 through 1996, as well as for his work as head of communications for the Gore presidential campaign in 2000.",
+          " He also served in senior positions at the Department of Housing and Urban Development and at the Department of Justice."
+        ],
+        [
+          "Monica Samille Lewinsky (born July 23, 1973) is an American activist, television personality, fashion designer, and former White House intern."
+        ],
+        [
+          "The Lewinsky scandal was an American political sex scandal that involved 49-year-old President Bill Clinton and 22-year-old White House intern Monica Lewinsky.",
+          " The sexual relationship took place between 1995 and 1996 and came to light in 1998.",
+          " Clinton ended a televised speech with the statement that he did not have sexual relations with Lewinsky.",
+          " Further investigation led to charges of perjury and to the impeachment of President Clinton in 1998 by the U.S. House of Representatives.",
+          " He was subsequently acquitted on all impeachment charges of perjury and obstruction of justice in a 21-day Senate trial.",
+          " Clinton was held in civil contempt of court by Judge Susan Webber Wright for giving misleading testimony in the Paula Jones case regarding Lewinsky and was also fined $90,000 by Wright.",
+          " His license to practice law was suspended in Arkansas for five years; shortly thereafter, he was disbarred from presenting cases in front of the United States Supreme Court."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a80840f554299485f59863b",
+    "question": "What WB supernatrual drama series was Jawbreaker star Rose Mcgowan best known for being in?",
+    "answer": "Charmed",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Jawbreaker (film)",
+        "Jawbreaker (film)",
+        "Rose McGowan"
+      ],
+      "sent_id": [
+        0,
+        1,
+        1
+      ]
+    },
+    "context": {
+      "title": [
+        "Safe Harbor (TV series)",
+        "Power of Three (Charmed)",
+        "Kay Tagal Kang Hinintay",
+        "Rose McGowan",
+        "Kerr Smith",
+        "Jawbreaker (film)",
+        "Sarah Drew",
+        "Charmed (season 4)",
+        "List of Charmed characters",
+        "Charmed"
+      ],
+      "sentences": [
+        [
+          "Safe Harbor is an American television drama series that aired on The WB Television Network from September 20, 1999 to November 28, 1999.",
+          " The series was created and executive produced by Brenda Hampton, who at the time was best known for work on the fellow WB series \"7th Heaven\", the series was paired with \"7th Heaven\" on the network's Monday night lineup.",
+          " Despite \"7th Heaven\" being the No. 1 show on The WB during the 1999-2000 season, \"Safe Harbor\" was unable to hold a solid audience after \"7th Heaven\" and was canceled after ten episodes and one season with the show moving to Sunday nights where the last two episodes aired."
+        ],
+        [
+          "The Power of Three, on The WB series \"Charmed\", refers to any bond formed by three magical beings good or evil.",
+          " It is most commonly used to describe the bond between the Warren/Halliwell line, more specifically the Charmed Ones, which is said to be the most powerful magical force in history.",
+          " The \"Power of Three\" originally included the Halliwell sisters Prue (Shannen Doherty), Piper (Holly Marie Combs) and Phoebe (Alyssa Milano).",
+          " However, following Prue's death in the third season finale, their long-lost younger half sister Paige Matthews (Rose McGowan) takes her place within the \"Power of Three\" from season four onwards."
+        ],
+        [
+          "Kay Tagal Kang Hinintay (Tagalog: \"So Long Have I Waited For You\") is a Filipino soap opera, produced by ABS-CBN and Star Cinema.",
+          " It started July 8, 2002 and ended November 14, 2003.",
+          " The critically acclaimed and top-rating teleserye won the CMMA Best Drama Series and the PMPC Star Awards Best Primetime Drama Series.",
+          " It is the first local soap opera that became a finalist to the Best Drama Series category of the International Emmy Awards.",
+          " It was also part of the top five drama series of the Asian TV Awards."
+        ],
+        [
+          "Rose Arianna McGowan (born September 5, 1973) is an Italian-born American actress, film producer, director and singer.",
+          " She is best known to television audiences for having played Paige Matthews in The WB supernatural drama series \"Charmed\" from 2001 to 2006."
+        ],
+        [
+          "Kerr Van Cleve Smith (born March 9, 1972) is an American actor known for playing Jack McPhee on The WB drama series \"Dawson's Creek\", Kyle Brody in The WB supernatural drama \"Charmed\" and more recently Axel Palmer in \"My Bloody Valentine 3D\".",
+          " He is also known for portraying Carter Horton in \"Final Destination\" (2000)."
+        ],
+        [
+          "Jawbreaker is a 1999 American black comedy film written and directed by Darren Stein.",
+          " The film stars Rose McGowan, Rebecca Gayheart, and Julie Benz as girls in an exclusive clique in their high school.",
+          " Charlotte Ayanna has a non-speaking cameo role as the murdered leader of the group.",
+          " The film was inspired by the film \"Heathers\", and is often compared to it, particularly the plot involving a popular female clique, and the ostensibly accidental killing of one of its members."
+        ],
+        [
+          "Sarah Drew (born October 1, 1980) is an American actress.",
+          " She is known for playing Hannah Rogers in The WB family drama series \"Everwood\" (2004–2006) and Dr. April Kepner in the ABC medical drama series \"Grey's Anatomy\" (2009–present)."
+        ],
+        [
+          "The fourth season of \"Charmed\", an American supernatural drama television series, began airing on October 4, 2001 on The WB.",
+          " Airing on Thursdays at 9:00 pm, the season consisted of 22 episodes and concluded its airing on May 16, 2002.",
+          " This season also saw the introduction of Rose McGowan as Paige Matthews—half-sister to Prue, Piper and Phoebe—and a slight alteration of the opening credits, due to the third season departure of Shannen Doherty as Prue.",
+          " Paramount Home Entertainment released the complete fourth season in a six-disc boxed set on February 28, 2006."
+        ],
+        [
+          "\"Charmed\" is an American television series that was originally broadcast by The WB for eight seasons from October 7, 1998, until May 21, 2006.",
+          " The series narrative follows a trio of sisters, known as The Charmed Ones, the most powerful good witches of all time, who use their combine Power of Three to protect innocent lives from evil beings such as demons and warlocks.",
+          " Each sister possesses unique magical powers that grow and evolve, while they attempt to maintain normal lives in modern-day San Francisco.",
+          " The main characters of the first three seasons were Prue (Shannen Doherty), Piper (Holly Marie Combs) and Phoebe Halliwell (Alyssa Milano).",
+          " After Doherty departed from the series in 2001, resulting in her character's death, she was replaced by Rose McGowan as the long-lost younger half-sister Paige Matthews from the fourth season onwards.",
+          " The following list only contains characters that appeared in five or more episodes."
+        ],
+        [
+          "Charmed is an American television series created by Constance M. Burge and produced by Aaron Spelling and his production company Spelling Television, with Brad Kern serving as showrunner.",
+          " The series was originally broadcast by The WB for eight seasons from October 7, 1998, until May 21, 2006.",
+          " The series narrative follows a trio of sisters, known as The Charmed Ones, the most powerful good witches of all time, who use their combined \"Power of Three\" to protect innocent lives from evil beings such as demons and warlocks.",
+          " Each sister possesses unique magical powers that grow and evolve, while they attempt to maintain normal lives in modern-day San Francisco.",
+          " Keeping their supernatural identities separate and secret from their ordinary lives often becomes a challenge for them, with the exposure of magic having far-reaching consequences on their various relationships and resulting in a number of police and FBI investigations throughout the series.",
+          " The series initially focuses on the three Halliwell sisters, Prue (Shannen Doherty), Piper (Holly Marie Combs) and Phoebe (Alyssa Milano).",
+          " However, following Prue's death in the third-season finale, their long-lost half sister Paige Matthews (Rose McGowan) assumes her place within the \"Power of Three\" from season four onwards."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5abf63f15542997ec76fd3ea",
+    "question": "Alexander Kerensky was defeated and destroyed by the Bolsheviks in the course of a civil war that ended when ?",
+    "answer": "October 1922",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Socialist Revolutionary Party",
+        "Russian Civil War"
+      ],
+      "sent_id": [
+        5,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Socialist Revolutionary Party",
+        "Communism in Russia",
+        "Lavr Kornilov",
+        "Left-wing uprisings against the Bolsheviks",
+        "Louise Bryant",
+        "Battle of Romanovka",
+        "Kerensky–Krasnov uprising",
+        "Russian Civil War",
+        "Timofey Samsonov",
+        "Alexander Kerensky"
+      ],
+      "sentences": [
+        [
+          "The Socialist Revolutionary Party, or Party of Socialists-Revolutionaries (the SRs; Russian: Партия социалистов-революционеров (ПСР), эсеры , \"esery\") was a major political party in early 20th century Russia and a key player in the Russian Revolution.",
+          " Its general ideology was revolutionary socialism of democratic socialist and agrarian socialist forms.",
+          " After the February Revolution of 1917, it shared power with other liberal and democratic socialist forces within the Russian Provisional Government.",
+          " In November 1917, it won a plurality of the national vote in Russia's first-ever democratic elections (to the Russian Constituent Assembly), but the October Revolution had changed the political landscape and the Bolsheviks disbanded the Constituent Assembly in January 1918.",
+          " The SRs soon split into pro-Bolshevik and anti-Bolshevik factions.",
+          " The anti-Bolshevik faction of this party, known as the Right SRs, which remained loyal to the Provisional Government leader Alexander Kerensky was defeated and destroyed by the Bolsheviks in the course of the Russian Civil War and subsequent persecution."
+        ],
+        [
+          "Communism in Russia began after Tsar Nicholas II lost his power during the February Revolution.",
+          " The Provisional Government was established under Prince Lvov, however, the Bolsheviks refused to accept the government and revolted in October 1917, taking control of Russia.",
+          " Vladmir Lenin, their leader, rose to power and governed between 1917 and 1924.",
+          " The Bolsheviks formed the Russian Soviet Federative Socialist Republic, marking the beginning of the Russian Civil War between the revolutionary Reds and the counter-revolutionary Whites.",
+          " In 1922 the Communist Reds were victorious, and formed the Soviet Union.",
+          " Lenin died in 1924, starting a power struggle which ended with Joseph Stalin seizing power.",
+          " He was the leader of the Communist Party until 1953.",
+          " He encouraged political paranoia and conducted the Great Purge to remove opponents of his dominance."
+        ],
+        [
+          "Lavr Georgiyevich Kornilov (Russian: Лавр Гео́ргиевич Корни́лов , ] ; 18 August 1870 – 13 April 1918) was a military intelligence officer, explorer, and general in the Imperial Russian Army during World War I and the ensuing Russian Civil War.",
+          " He is today best remembered for the Kornilov Affair, an unsuccessful endeavor in August/September 1917 that purported to strengthen Alexander Kerensky's Provisional Government, but which led to Kerensky eventually having Kornilov arrested and charged with attempting a coup d'état, and ultimately undermined the rule of Kerensky; strengthening the claims and power of the soviets, and the Bolshevik party."
+        ],
+        [
+          "The left-wing uprisings against the Bolsheviks were a series of rebellions and uprisings against the Bolsheviks by rival left-wing parties that started soon after the October Revolution, continued through the Russian Civil War, and lasted into the first few years of Soviet rule.",
+          " They were led or supported by left-wing groups such as some factions of the Socialist Revolutionary Party, Left Socialist Revolutionaries, Mensheviks, and anarchists.",
+          " The uprisings started in 1918 and continued during and after the Civil War until around 1924.",
+          " The Bolsheviks increasingly abandoned attempts to invite these groups to join the government and instead suppressed them with force."
+        ],
+        [
+          "Louise Bryant (December 5, 1885 – January 6, 1936) was an American feminist, political activist, and journalist best known for her sympathetic coverage of Russia and the Bolsheviks during the Russian Revolution.",
+          " Bryant, who married writer John Reed, her second husband, in 1916, wrote about Russian leaders such as Katherine Breshkovsky, Maria Spiridonova, Alexander Kerensky, Vladimir Lenin, and Leon Trotsky.",
+          " Her news stories, distributed by Hearst during and after her trips to Petrograd and Moscow, appeared in newspapers across the United States and Canada in the years immediately following World War I.",
+          " A collection of articles from her first trip was published in book form as \"Six Red Months in Russia\" in 1918.",
+          " During the next year, she defended the revolution in testimony before the Overman Committee, a Senate subcommittee established to investigate Bolshevik influence in the United States.",
+          " Later in 1919, she undertook a nationwide speaking tour to encourage public support of the Bolsheviks and to denounce armed U.S. intervention in Russia."
+        ],
+        [
+          "The Battle of Romanovka was fought in June 1919 during the Russian Civil War.",
+          " Russian Bolsheviks of Yakov Triapitsyn launched a surprise attack on an American army camp at Romanovka, Siberia near Vladivostok.",
+          " As a result of the engagement, the attacks were repelled.",
+          " Romanovka and the Suchan Valley Campaign that followed were the final major engagements of the Russian Civil War involving the United States.",
+          " Battles would later break out again between the Americans and Bolsheviks, as well as the Cossacks, on much smaller scales.",
+          " Likewise, the Americans were invariably victorious."
+        ],
+        [
+          "Kerensky–Krasnov uprising was an attempt by Alexander Kerensky to regain power after the Bolsheviks overthrew his Provisional Government in Petrograd."
+        ],
+        [
+          "The Russian Civil War (Russian: Гражда́нская война́ в Росси́и , \"Grazhdanskaya voyna v Rossiyi\" ; November 1917 – October 1922) was a multi-party war in the former Russian Empire immediately after the Russian Revolutions of 1917, as many factions vied to determine Russia's political future.",
+          " The two largest combatant groups were the Red Army, fighting for the Bolshevik form of socialism led by Vladimir Lenin, and the loosely allied forces known as the White Army, which included diverse interests favoring monarchism, capitalism and alternative forms of socialism, each with democratic and antidemocratic variants.",
+          " In addition, rival militant socialists and nonideological Green armies fought against both the Bolsheviks and the Whites.",
+          " Eight foreign nations intervened against the Red Army, notably the Allied Forces and the pro-German armies.",
+          " The Red Army defeated the White Armed Forces of South Russia in Ukraine and the army led by Admiral Aleksandr Kolchak in Siberia in 1919.",
+          " The remains of the White forces commanded by Pyotr Nikolayevich Wrangel were beaten in Crimea and evacuated in late 1920.",
+          " Lesser battles of the war continued on the periphery for two more years, and minor skirmishes with the remnants of the White forces in the Far East continued well into 1923.",
+          " The war ended in 1923 in the sense that Red control of the newly formed Soviet Union was now assured, although armed national resistance in Central Asia was not completely crushed until 1934.",
+          " There were an estimated 7,000,000–12,000,000 casualties during the war, mostly civilians.",
+          " The Russian Civil War has been described by some as the greatest national catastrophe that Europe had yet seen."
+        ],
+        [
+          "Timofey Petrovich Samsonov (Russian: Тимофей Петрович Самсонов ) (9 May 1888 – 28 October 1955) was a Soviet politician and veteran of the Russian Civil War.",
+          " He was a member of the Central Committee elected by the 15th Congress of the All-Union Communist Party (Bolsheviks),the Central Committee elected by the 16th Congress of the All-Union Communist Party (Bolsheviks) and the Central Committee elected by the 17th Congress of the All-Union Communist Party (Bolsheviks).",
+          " He was Chief Administrator (1927–1935), head of the Accounting Department (1932–1934).",
+          " He died in Moscow."
+        ],
+        [
+          "Alexander Fyodorovich Kerensky (Russian: Алекса́ндр Фёдорович Ке́ренский , ] ; 4 May 1881 – 11 June 1970) was a Russian lawyer and key political figure in the Russian Revolution of 1917.",
+          " After the February Revolution of 1917 he joined the newly formed Russian Provisional Government, first as Minister of Justice, then as Minister of War, and after July 1917 as the government's second Minister-Chairman.",
+          " A leader of the moderate-socialist Trudoviks faction of the Socialist Revolutionary Party, he was also vice-chairman of the powerful Petrograd Soviet.",
+          " On 7 November, his government was overthrown by the Lenin-led Bolsheviks in the October Revolution.",
+          " He spent the remainder of his life in exile, in Paris and New York City, and worked for the Hoover Institution."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a7571135542992d0ec05f98",
+    "question": "Ralph Hefferline was a psychology professor at a university that is located in what city?",
+    "answer": "New York City",
+    "type": "bridge",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Ralph Hefferline",
+        "Columbia University"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Princeton Neuroscience Institute",
+        "Stanley Coren",
+        "Abraham Maslow",
+        "E. Mavis Hetherington",
+        "Kimberly Young",
+        "Mathematically Alive",
+        "Frank L. Schmidt",
+        "Ralph Hefferline",
+        "David C. Funder",
+        "Columbia University"
+      ],
+      "sentences": [
+        [
+          "The Princeton Neuroscience Institute (PNI) is a center for neuroscience research at Princeton University.",
+          " PNI was created in 2006 as a partnership of Princeton University's departments of Psychology and Molecular Biology.",
+          " This partnership was led by psychology professor Jonathan Cohen and molecular biology professor David Tank, who continue to serve as Co-Directors of the Institute.",
+          " In 2014, PNI moved into a dedicated research complex that houses both PNI and the Department of Psychology.",
+          " The building is 248,00 square feet, and was designed by Rafael Moneo to meet LEED Silver certification."
+        ],
+        [
+          "Stanley Coren (born 1942) is a psychology professor and neuropsychological researcher who has become best known to the general public for his best selling and award-winning books regarding the intelligence, mental abilities and history of dogs. Through television shows and media coverage that have been broadcast in Canada and the United States as well as overseas, he has become popular with dog owners, while continuing research and instruction in psychology at the University of British Columbia in Vancouver, British Columbia.",
+          " He also writes for \"Psychology Today\" in the award-winning regular feature series Canine Corner ."
+        ],
+        [
+          "Abraham Harold Maslow ( ; April 1, 1908 – June 8, 1970) was an American psychologist who was best known for creating Maslow's hierarchy of needs, a theory of psychological health predicated on fulfilling innate human needs in priority, culminating in self-actualization.",
+          " Maslow was a psychology professor at Alliant International University, Brandeis University, Brooklyn College, New School for Social Research, and Columbia University.",
+          " He stressed the importance of focusing on the positive qualities in people, as opposed to treating them as a \"bag of symptoms.\"",
+          " A \"Review of General Psychology\" survey, published in 2002, ranked Maslow as the tenth most cited psychologist of the 20th century."
+        ],
+        [
+          "E. Mavis Hetherington (born November 27, 1926) is a retired psychology professor at the University of Virginia.",
+          " She is a leading researcher on the impacts of divorce, family as units, and the development of children.",
+          " Throughout her career she has published more than 200 articles and edited 13 books.",
+          " While a professor at the University of Virginia she helped improve their psychology department, making them a nationally ranked program.",
+          " Hetherington also introduced a new method of analyzing observational research as well as help open the field of psychology to women by overcoming discrimination in her early career."
+        ],
+        [
+          "Kimberly Young is a psychologist and world expert on Internet addiction disorder and online behaviour.",
+          " She founded the Center for Internet Addiction in 1995 and was a psychology professor at the University of Pittsburgh at Bradford with a PhD in Clinical Psychology.",
+          " Young is currently a professor of management scientists at St. Bonaventure University.",
+          " She has published numerous journal articles and books chapters and served as an expert witness regarding her pioneer research including testimony for the Child Protection Online Act Congressional Committee.",
+          " Young is a member of the American Psychological Association, the Pennsylvania Psychological Association, and a founding member of the International Society of Mental Health Online."
+        ],
+        [
+          "Mathematically Alive: A Story of Fandom is an award-winning 2007 documentary film about fans of the New York Mets.",
+          " Directed, produced and edited by Katherine Foronjy and Joseph Coburn, the film follows a wide variety of fans over the course of the 2005 and 2006 baseball seasons, culminating in an exciting 7 game series against the St. Louis Cardinals in the NLCS.",
+          " \"Mathematically Alive\" shows the emotional attachment that fans develop for their team and how it can be the source of great joy or tremendous sadness.",
+          " In addition to the hundreds of fans interviewed for the film, Coburn and Foronjy also caught up with former Mets players Bud Harrelson, Ron Swoboda, Ed Charles, Tim Teuffel and legendary broadcaster Ralph Kiner.",
+          " The filmmakers also interviewed Dr. Daniel Wann, a sports psychology professor at Murray State University, who explains many of the psychological characteristics sports fans share.",
+          " Of particular focus in the film are a group of female Mets fans whose favorite player is former catcher Mike Piazza.",
+          " They wait for his arrival outside the Shea stadium parking lot on game days, and travelled around the country to see him play even when he was no longer a player on the Mets."
+        ],
+        [
+          "Frank L. Schmidt is a retired American psychology professor (University of Iowa) known for his work in personnel selection and employment testing.",
+          " Schmidt is a researcher in the area of industrial and organizational psychology with the most number of publications in the two major journals in the 1980s.",
+          " In the 1990s he was the 4th most published researcher in Journal of Applied Psychology (JAP) and Personnel Psychology (PP), the two principal publications in the field of industrial-organizational psychology.",
+          " He is also winner of the first Dunnette Prize, the most prestigious lifetime achievement award given by the Society for Industrial and Organizational Psychology \"to honor living individuals whose work has significantly expanded knowledge of the causal significance of individual differences through advanced research, development, and/or application\""
+        ],
+        [
+          "Ralph Franklin Hefferline (15 February 1910 in Muncie, Indiana – 16 March 1974) was a psychology professor at Columbia University."
+        ],
+        [
+          "David C. Funder (Ph.D., Stanford University, 1979) is a psychology professor who has written a number of important textbooks and research articles pertaining to the field of personality psychology.",
+          " Funder resides as the chair of the Psychology department at the University of California, Riverside.",
+          " He used to be a past editor of the \"Journal of Research and Personality\", as well as being a former secondary editor of the \"Journal of Personality and Social Psychology\".",
+          " Funder has been praised for his studies on personality judgment.",
+          " He had also published research over the attribution theory and the \"delay of gratification\"."
+        ],
+        [
+          "Columbia University (Columbia; officially Columbia University in the City of New York), established in 1754, is a private Ivy League research university in Upper Manhattan, New York City, often cited as one of the world's most prestigious universities."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5ab51dae5542991779162d82",
+    "question": "Are both Elko Regional Airport and Gerald R. Ford International Airport located in Michigan?",
+    "answer": "no",
+    "type": "comparison",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Elko Regional Airport",
+        "Gerald R. Ford International Airport"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Grantley Adams International Airport",
+        "Pensacola International Airport",
+        "Elko Regional Airport",
+        "Gerald R. Ford International Airport",
+        "Pre-Commissioning Unit",
+        "John Glenn Columbus International Airport",
+        "Raleigh Executive Jetport",
+        "Bishop International Airport",
+        "Gerald R. Ford Freeway",
+        "Gerald R. Ford Presidential Library"
+      ],
+      "sentences": [
+        [
+          "Grantley Adams International Airport (GAIA) (IATA: BGI, ICAO: TBPB) is the international airport of Barbados, located in Seawell, Christ Church.",
+          " It is the only designated port of entry for persons arriving and departing by air in Barbados and operates as a major gateway to the Eastern Caribbean.",
+          " The airport has direct service to destinations in the United States, Canada, Central America and Europe and serves as the second hub for LIAT.",
+          " In 2016, the airport was the 8th busiest airport in the Caribbean region; and the third busiest airport in the Lesser Antilles; after Queen Beatrix International Airport located in Aruba, and Pointe-à-Pitre International Airport located in the Republic of France within the island of Guadeloupe.",
+          " GAIA, also remains an important air-link for cruise ship passengers departing and arriving at the Port of Bridgetown, and a base of operations for the Regional Security System (RSS), and the Regional (Caribbean) Police Training Centre."
+        ],
+        [
+          "Pensacola International Airport (IATA: PNS, ICAO: KPNS, FAA LID: PNS) , formerly Pensacola Gulf Coast Regional Airport and Pensacola Regional Airport (Hagler Field), is a public use airport three nautical miles (6 km) northeast of the central business district of Pensacola, in Escambia County, Florida, United States.",
+          " It is owned by the City of Pensacola.",
+          " Despite the name, this airport does not offer direct international flights.",
+          " This airport is one of the five major airports in North Florida, others being: Northwest Florida Beaches International Airport, Destin-Fort Walton Beach Airport Tallahassee International Airport, and Jacksonville International Airport."
+        ],
+        [
+          "Elko Regional Airport (IATA: EKO, ICAO: KEKO, FAA LID: EKO) , formerly Elko Municipal Airport, is a mile west of downtown Elko, in Elko County, Nevada."
+        ],
+        [
+          "Gerald R. Ford International Airport (IATA: GRR, ICAO: KGRR, FAA LID: GRR) is a commercial airport in Cascade Township approximately 13 mi southeast of Grand Rapids, Michigan.",
+          " The facility is owned by the Kent County Board of Commissioners and managed by an independent authority.",
+          " The Federal Aviation Administration (FAA) National Plan of Integrated Airport Systems for 2017–2021 categorized it as a small hub primary commercial service facility."
+        ],
+        [
+          "A pre-commissioning unit (PRECOMMUNIT) or (PCU) is used by the United States Navy to describe vessels under construction prior to their official commissioning.",
+          " For example, prior to its commissioning, the aircraft carrier \"Gerald R. Ford\" (CVN-78) has been described by the Navy as \"pre-commissioning unit (PCU) \"Gerald R. Ford\" .\"",
+          " However, \"PCU\" is only a descriptive term and is not a prefix or a part of the ship's official name.",
+          " Until they are commissioned, U.S. Navy vessels are officially identified by their given name and hull number only with no prefix, such as \"Gerald R. Ford\" (CVN-78)."
+        ],
+        [
+          "John Glenn Columbus International Airport (IATA: CMH, ICAO: KCMH, FAA LID: CMH) , is an international airport located 6 mi east of downtown Columbus, Ohio.",
+          " Formerly known as Port Columbus International Airport, it is managed by the Columbus Regional Airport Authority, which also oversees operations at Rickenbacker International Airport and Bolton Field.",
+          " The airport code 'CMH' stands for \"Columbus Municipal Hangar,\" the original name for the airport."
+        ],
+        [
+          "Raleigh Exec: The Raleigh Executive Jetport @ Sanford-Lee County or Raleigh Exec Jetport at Sanford-Lee CountyFAA Airport Master Record for TTA (Form 5010 ) (ICAO: KTTA, FAA LID: TTA) is a public use airport located seven nautical miles (8 mi, 13 km) northeast of the central business district of Sanford, a city in Lee County, North Carolina, United States.",
+          " It is owned by the Sanford-Lee County Regional Airport Authority and was previously known as Sanford-Lee County Regional Airport.",
+          " This airport is included in the National Plan of Integrated Airport Systems for 2011–2015, which categorized it as a \"reliever airport\" for Raleigh-Durham International Airport."
+        ],
+        [
+          "Bishop International Airport (IATA: FNT, ICAO: KFNT, FAA LID: FNT) is a commercial and general aviation airport located in Flint, Michigan.",
+          " It is named after banker and General Motors board member Arthur Giles Bishop (April 12, 1851 – January 22, 1944), who donated 220 acres of his farmland for the airport in 1928.",
+          " The third busiest airport in Michigan, it surpassed competitor MBS International Airport in terms of airline operations in 2002.",
+          " In 2007, 1,071,238 passengers used Bishop International Airport; in 2011, 938,914 passengers used the airport.",
+          " It is included in the Federal Aviation Administration (FAA) National Plan of Integrated Airport Systems for 2017–2021, in which it is categorized as a small hub primary commercial service facility.",
+          " The airport is currently served by several passenger airlines: Allegiant Air, Southwest Airlines and Delta Air Lines operate mainline service out of the airport, as well as affiliates of Delta Connection, United Express and American Eagle.",
+          " Additionally, FedEx Express and a FedEx Feeder affiliate operate cargo services out of the airport.",
+          " Accompanying the airlines is fixed-base operator Av Flight that handles both general aviation and airline operations and the flight school American Wings Aviation.",
+          " Bishop International Airport is in southwestern Flint, and is surrounded by Flint Township to the north, east and west; and Mundy Township to the south."
+        ],
+        [
+          "The Gerald R. Ford Freeway refers to Interstate Highways named for former President Gerald R. Ford in Omaha (where he was born) and Michigan (where he grew up and was a Congressman):"
+        ],
+        [
+          "The Gerald R. Ford Presidential Library is a repository located on the north campus of the University of Michigan in Ann Arbor.",
+          " The library houses archival materials on the life, career, and presidency of Gerald Ford, the 38th President of the United States.",
+          " The Gerald R. Ford Presidential Library is a part of the National Archives and Records Administration's presidential library system."
+        ]
+      ]
+    }
+  },
+  {
+    "id": "5a8133725542995ce29dcbdb",
+    "question": "Which writer was from England, Henry Roth or Robert Erskine Childers?",
+    "answer": "Robert Erskine Childers DSC",
+    "type": "comparison",
+    "level": "hard",
+    "supporting_facts": {
+      "title": [
+        "Henry Roth",
+        "Robert Erskine Childers"
+      ],
+      "sent_id": [
+        0,
+        0
+      ]
+    },
+    "context": {
+      "title": [
+        "Asgard (yacht)",
+        "Henry Roth",
+        "R509 road (Ireland)",
+        "Molly Childers",
+        "Gretchen Osgood Warren",
+        "Robert Caesar Childers",
+        "Robert Erskine Childers",
+        "Irish Bulletin",
+        "Erskine Barton Childers",
+        "Robert Barton"
+      ],
+      "sentences": [
+        [
+          "Asgard is a 51 ft gaff rigged yacht.",
+          " She was owned by the English-born writer and Irish nationalist Erskine Childers and his wife Molly Childers.",
+          " She is most noted for her use in the Howth gun-running of 1914."
+        ],
+        [
+          "Henry Roth (February 8, 1906 – October 13, 1995) was an American novelist and short story writer."
+        ],
+        [
+          "The R509 road, following part of the Childers Road (named after Erskine Childers), is a regional road in Ireland, running through the southeastern side of Limerick City.",
+          " It forms what is somewhat akin to an inner ring road (albeit mostly two-lane only)."
+        ],
+        [
+          "Mary Alden Osgood Childers, MBE (14 December 1875 – 1 January 1964) was an American-born Irish writer and Irish nationalist.",
+          " She was the daughter of Dr Hamilton Osgood and Margaret Cushing Osgood of Beacon Hill, Boston, Massachusetts.",
+          " Her older sister was Gretchen Osgood Warren.",
+          " Molly married the writer and Irish nationalist, Robert Erskine Childers.",
+          " Their son, Erskine Hamilton Childers, became the fourth President of Ireland."
+        ],
+        [
+          "Gretchen Osgood Warren (19 March 1868 – September 1961), the wife of Fiske Warren, was an actress, singer and poet.",
+          " The daughter of Dr. Hamilton Osgood and Margaret Cushing Osgood of Beacon Hill, Boston, Massachusetts, her younger sister was Mary Alden Childers, the wife of writer and Irish nationalist Robert Erskine Childers.",
+          " Her nephew Erskine Hamilton Childers served as the fourth President of Ireland from 1973-74."
+        ],
+        [
+          "Robert Caesar Childers (1838 – 25 July 1876) was a British Orientalist scholar, compiler of the first Pāli-English dictionary.",
+          " Childers was the husband of Anna Barton of Ireland.",
+          " He was the father of Irish nationalist Robert Erskine Childers and grandfather to the fourth President of Ireland, Erskine Hamilton Childers."
+        ],
+        [
+          "Robert Erskine Childers DSC (25 June 1870 – 24 November 1922), universally known as Erskine Childers, was a British writer, whose works included the influential novel \"The Riddle of the Sands\", and a Fenian revolutionary who smuggled guns to Ireland in his sailing yacht \"Asgard\".",
+          " He was executed by the authorities of the nascent Irish Free State during the Irish Civil War.",
+          " He was the son of British Orientalist scholar Robert Caesar Childers; the cousin of Hugh Childers and Robert Barton; and the father of the fourth President of Ireland, Erskine Hamilton Childers."
+        ],
+        [
+          "The Irish Bulletin was the official gazette of the government of the Irish Republic.",
+          " It was produced by the Department of Propaganda during the Irish War of Independence.",
+          " and its offices were originally located at No. 6 Harcourt Street, Dublin.",
+          " The paper's first editor was Desmond FitzGerald, until his arrest and replacement by Robert Erskine Childers.",
+          " \"The Bulletin\" appeared in weekly editions from 11 November 1919 to 11 July 1921."
+        ],
+        [
+          "Erskine Barton Childers (11 March 1929 – 25 August 1996) was an Irish writer, BBC correspondent and United Nations senior civil servant.",
+          " He was the eldest son of Erskine Hamilton Childers (Ireland's fourth President) and Ruth Ellen Dow Childers.",
+          " His grandparents Mary Alden Childers and Robert Erskine Childers and the latter's double first cousin Robert Barton were all Irish nationalists involved heavily with the negotiation of Irish independence; which ultimately led to his grandfather's execution during the Irish Civil War.",
+          " His great aunt was Gretchen Osgood Warren."
+        ],
+        [
+          "Robert Childers Barton (4 March 1881 – 10 August 1975) was an Irish nationalist, politician and farmer who participated in the negotiations leading up to the signature of the Anglo-Irish Treaty.",
+          " His father was Charles William Barton and his mother was Agnes Childers.",
+          " His wife was Rachel Warren of Boston, daughter of Fiske Warren.",
+          " His double first cousin and close friend was Robert Erskine Childers."
+        ]
+      ]
+    }
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "dataset": "syllabusqa",
+  "seed": 20260909,
+  "ratio": "40/20/40",
+  "pool_size": 4358,
+  "sampled": 200,
+  "question_counts": {
+    "train": 79,
+    "dev": 42,
+    "test": 79
+  },
+  "doc_count": 63,
+  "doc_disjoint": true,
+  "doc_disjoint_note": "按 syllabus_name 整体分配，同一大纲不会跨 split。",
+  "excluded_question_type": "no answer",
+  "files": {
+    "harness_all.csv": "9632557283db38f4e8060405165911acfd20546aaf1022174651df214162dc66",
+    "harness_dev.csv": "ff5126b352cb2c92c123941dacd4b8086a2c4fc41db3cfeedc69f92e2d73cf50",
+    "harness_test.csv": "95025cfefc4ebf939df9cb982bf30e9cb25f434e7ae933f169fef764a6f88c74",
+    "harness_train.csv": "cac2a54608c8c0bca2ab6c98664dbbdc7fb65fc1d93011ffeb685323cefd081f"
+  }
+}

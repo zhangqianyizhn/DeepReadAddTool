@@ -11,8 +11,8 @@ __pycache__/
 .DS_Store
 
 # Large / generated experiment data (rebuilt locally, never synced)
-Data
-Data/
+# 注意锚定到根目录：macOS 的 core.ignorecase=true 会让 "Data/" 误伤任何名为 data 的目录
+/Data
 ExperimentArtifacts/
 runs/
 agentic_rag_self_learning/data/generated/
