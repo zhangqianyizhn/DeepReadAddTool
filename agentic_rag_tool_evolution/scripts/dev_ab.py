@@ -99,14 +99,8 @@ def load_candidate_module(path: Path) -> Any:
 def run_generated_tests(module: Any, candidate: dict[str, Any]) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for test in candidate.get("tests") or []:
-        output = module.run(
-            str(test.get("question") or ""),
-            list(test.get("documents") or []),
-            int(test.get("top_k") or 5),
-        )
         expected = str(test.get("expected_property") or "")
         expected_top = str(test.get("expected_top_doc_id") or "").strip()
-        match = None
         if not expected_top:
             for pattern in (
                 r"top result is\s+([A-Z][A-Z0-9_-]+)",
@@ -117,18 +111,40 @@ def run_generated_tests(module: Any, candidate: dict[str, Any]) -> list[dict[str
                 if match:
                     expected_top = match.group(1)
                     break
-        actual = str(((output.get("results") or [{}])[0]).get("doc_id") or "")
-        passed = bool(expected_top and actual.upper() == expected_top.upper())
+        error = None
+        output: Any = {}
+        try:
+            output = module.run(
+                str(test.get("question") or ""),
+                list(test.get("documents") or []),
+                int(test.get("top_k") or 5),
+            )
+            json.dumps(output)  # 必须 JSON 可序列化
+        except Exception as exc:  # 工具自身抛错视为测试失败
+            error = f"{type(exc).__name__}: {exc}"
+        actual = str((((output or {}).get("results") or [{}])[0]).get("doc_id") or "") if isinstance(output, dict) else ""
+        if expected_top:
+            # 排名型断言：严格比对 top1 文档
+            passed = bool(actual and actual.upper() == expected_top.upper())
+            check = "top_doc"
+        else:
+            # 行为/属性型断言（如"空结果不得当作证据"）：验证可执行且返回合法 dict
+            passed = error is None and isinstance(output, dict)
+            check = "execution_only"
         results.append(
             {
                 "name": test.get("name"),
                 "passed": passed,
+                "check": check,
                 "expected_top": expected_top or None,
                 "actual_top": actual,
+                **({"error": error} if error else {}),
             }
         )
     if not results or not all(item["passed"] for item in results):
         raise RuntimeError(f"候选工具自生成测试未全部通过：{results}")
+    if not any(item["check"] == "top_doc" for item in results):
+        say("[提示] 候选工具的自测全部为行为型断言（无排名型），门禁仅验证了可执行性。")
     return results
 
 

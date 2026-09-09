@@ -62,7 +62,7 @@ Return one JSON object with keys:
 - tool_spec: {name, purpose, inputs, outputs, algorithm, complexity, failure_modes}
 - code: complete Python source as a JSON string
 - usage_policy: {when_to_call, how_to_use_output, fallback, stopping_rule}
-- tests: array of generic {name, question, documents, top_k, expected_property}
+- tests: array of generic {name, question, documents, top_k, expected_property}; for tests that assert a ranking, also include expected_top_doc_id explicitly; behavioral assertions (e.g. "empty input yields empty results") are allowed without it
 - novelty_claim: a restrained statement; do not claim literature novelty
 """
 
