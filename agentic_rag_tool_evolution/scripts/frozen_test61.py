@@ -177,8 +177,11 @@ def write_test_report(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
+    parser.add_argument("--workers", type=int, default=None,
+                        help="答题线程数（默认：financebench=1 对齐历史，其余=4）")
     args = parser.parse_args()
     profile = profiles.get_profile(args.dataset)
+    workers = args.workers or profiles.DEFAULT_WORKERS[profile.name]
 
     blind_run = core.latest_blind_run(profile)
     repair_dir = blind_run / "repair_round2"
@@ -214,6 +217,7 @@ def main() -> int:
         [],
         env,
         profile,
+        workers,
     )
     candidate_output = core.run_arm(
         "frozen_generated_tool",
@@ -225,6 +229,7 @@ def main() -> int:
         core.generated_policy(frozen_candidate),
         env,
         profile,
+        workers,
     )
     baseline = core.judge(
         "test_baseline",

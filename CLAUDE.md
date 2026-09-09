@@ -58,8 +58,11 @@ One command for the full pipeline (all three datasets, or a subset) — see `SER
 ```bash
 ./run_all.sh                                  # prepare_splits → baseline → blind → dev A/B → repair → frozen test
 ./run_all.sh --datasets financebench          # subset
+./run_all.sh --workers 8                      # question-level thread parallelism (default: financebench=1 to match historic artifacts, others=4)
 ./run_all.sh --dry-run                        # preflight only, no API calls
 ```
+
+Dataset-level parallelism: run multiple terminals each with `--datasets <name>` — indexes, `runs/<dataset>/`, and `ExperimentArtifacts/` are fully isolated per dataset; the only shared constraint is model API QPS (429s are retried with backoff by `DeepRead/agent/llm.py`).
 
 Per-stage entries (all take `--dataset financebench|hotpotqa|syllabusqa`, default financebench):
 

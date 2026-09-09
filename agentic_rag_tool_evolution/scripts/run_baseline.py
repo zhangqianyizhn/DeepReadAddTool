@@ -105,7 +105,14 @@ def index_is_complete(profile: "profiles.DatasetProfile") -> bool:
     return len(list(profile.index_dir.glob("*_corpus.json"))) >= expected
 
 
-def make_config(profile: "profiles.DatasetProfile", path: Path, *, skip_ingestion: bool) -> None:
+def make_config(
+    profile: "profiles.DatasetProfile",
+    path: Path,
+    *,
+    skip_ingestion: bool,
+    workers: int,
+    ingest_workers: int,
+) -> None:
     config = {
         "project_name": f"{profile.display_name}MatchedBaseline",
         "dataset_name": profile.baseline_dataset_name,
@@ -134,8 +141,8 @@ def make_config(profile: "profiles.DatasetProfile", path: Path, *, skip_ingestio
             "embedding_model": "${EMBEDDING_MODEL_NAME}",
         },
         "execution": {
-            "max_workers": 1,
-            "ingest_workers": 1,
+            "max_workers": workers,
+            "ingest_workers": ingest_workers,
             "retrieval_topk": 1,
             "max_queries": profile.total_count,
             "skip_ingestion": skip_ingestion,
@@ -182,9 +189,14 @@ def verify_artifacts(profile: "profiles.DatasetProfile") -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
+    parser.add_argument("--workers", type=int, default=None,
+                        help="答题线程数（默认：financebench=1 对齐历史，其余=4）")
+    parser.add_argument("--ingest-workers", type=int, default=None, help="入库线程数（默认同 --workers）")
     parser.add_argument("--dry-run", action="store_true", help="只校验数据与环境，不调用 API")
     args = parser.parse_args()
     profile = profiles.get_profile(args.dataset)
+    workers = args.workers or profiles.DEFAULT_WORKERS[profile.name]
+    ingest_workers = args.ingest_workers or workers
 
     required = [HARNESS, OLD_EXPERIMENT / ".env"]
     missing = [str(path) for path in required if not path.exists()]
@@ -195,7 +207,8 @@ def main() -> int:
     have_index = index_is_complete(profile)
     say(
         f"[数据就绪] {profile.display_name} {profile.total_count} 题 / {profile.doc_count} 文档；"
-        f"索引{'已完整，将跳过入库' if have_index else '缺失，本轮将先入库建索引'}。"
+        f"索引{'已完整，将跳过入库' if have_index else '缺失，本轮将先入库建索引'}；"
+        f"答题线程={workers}，入库线程={ingest_workers}。"
     )
     if args.dry_run:
         say(f"[DryRun 完成] 输出目录将是 {profile.baseline_dir}；未调用 API。")
@@ -203,7 +216,7 @@ def main() -> int:
 
     env_values = legacy.load_experiment_env()
     config_path = profile.baseline_dir.parent / "rebuild_baseline_config.yaml"
-    make_config(profile, config_path, skip_ingestion=have_index)
+    make_config(profile, config_path, skip_ingestion=have_index, workers=workers, ingest_workers=ingest_workers)
 
     process_env = os.environ.copy()
     process_env.update(env_values)

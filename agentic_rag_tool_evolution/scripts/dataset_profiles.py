@@ -286,6 +286,10 @@ PROFILES: dict[str, DatasetProfile] = {
     "syllabusqa": SYLLABUSQA,
 }
 
+# 默认答题/入库线程数：financebench 保持 1 以与历史 reference artifacts 完全对齐；
+# 新数据集无历史对齐包袱，默认 4（火山方舟 429 由底层指数退避重试兜底）。
+DEFAULT_WORKERS = {"financebench": 1, "hotpotqa": 4, "syllabusqa": 4}
+
 # FinanceBench 的归一化行直接从 v2 splits 派生；其余两个由 prepare_splits 预生成 harness 文件。
 _LOADERS: dict[str, Callable[[str], list[dict[str, Any]]]] = {
     "financebench": _fb_rows,

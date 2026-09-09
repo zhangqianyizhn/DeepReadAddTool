@@ -95,15 +95,32 @@ prepare_splits（仅 HotpotQA/SyllabusQA：40%/20%/40% 划分，SyllabusQA 先�
 ./run_all.sh --datasets hotpotqa,syllabusqa
 ```
 
+**加速：答题线程并行**（temperature=0 且题目间无共享状态，A/B 两组同值，不影响结论有效性）：
+
+```bash
+./run_all.sh --workers 8            # 答题线程数（默认 financebench=1 对齐历史实验，其余=4）
+./run_all.sh --ingest-workers 8     # 入库线程数（默认同 --workers；HotpotQA 991 篇文档建议开）
+```
+
+**加速：数据集间并行**——无需特殊支持，直接开多个终端（或 tmux 窗口）各跑一条：
+
+```bash
+# 终端 1 / 2 / 3 各执行一条
+./run_all.sh --datasets financebench
+./run_all.sh --datasets hotpotqa
+./run_all.sh --datasets syllabusqa
+```
+
+三个数据集的索引、`runs/<dataset>/`、`ExperimentArtifacts/` 输出目录完全隔离，无文件冲突；
+唯一共享约束是模型 API 的 QPS——429 限流由底层 5 次指数退避重试兜底，若频繁限流就降低
+`--workers` 或减少并行数据集数。
+
 **断点续跑**：所有阶段都有断点（入库按文档跳过、答案/Judge 评分按文件复用、
 候选与冻结清单按 SHA-256 校验）。中断或失败后，直接重新运行 `./run_all.sh` 即可。
 
-**防休眠**：macOS 下脚本自动用 `caffeinate` 包裹；Linux 服务器建议配合
-`tmux`/`nohup` 使用：
-
-```bash
-nohup ./run_all.sh > run_all.log 2>&1 &
-```
+**防休眠/防断连**：macOS 下脚本自动用 `caffeinate` 包裹；Linux 服务器用 tmux/screen
+防 SSH 断连（`tmux new -s run` → 运行 → Ctrl+B D 脱离），本地工作站要防 suspend 可加
+`systemd-inhibit --what=sleep ./run_all.sh`。
 
 ## 7. 预计耗时与成本
 

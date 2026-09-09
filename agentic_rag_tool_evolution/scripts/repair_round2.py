@@ -356,7 +356,9 @@ def append_round2_report(
     report_path.write_text(base_text + "\n" + "\n".join(additions), encoding="utf-8")
 
 
-def evaluate_repair(blind_run: Path, repair_dir: Path, profile: "profiles.DatasetProfile") -> Path:
+def evaluate_repair(
+    blind_run: Path, repair_dir: Path, profile: "profiles.DatasetProfile", workers: int = 1
+) -> Path:
     original_dev = blind_run / "dev_ab"
     baseline_path = original_dev / "baseline_judged.json"
     baseline = core.load_json(baseline_path).get("results", [])
@@ -380,6 +382,7 @@ def evaluate_repair(blind_run: Path, repair_dir: Path, profile: "profiles.Datase
         core.generated_policy(repaired),
         env,
         profile,
+        workers,
     )
     judged = core.judge(
         "repaired_generated_tool",
@@ -411,9 +414,12 @@ def evaluate_repair(blind_run: Path, repair_dir: Path, profile: "profiles.Datase
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
+    parser.add_argument("--workers", type=int, default=None,
+                        help="答题线程数（默认：financebench=1 对齐历史，其余=4）")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     profile = profiles.get_profile(args.dataset)
+    workers = args.workers or profiles.DEFAULT_WORKERS[profile.name]
     blind_run = core.latest_blind_run(profile)
     required = [
         blind_run / "candidate.json",
@@ -435,7 +441,7 @@ def main() -> int:
     if args.dry_run:
         say(f"[DryRun完成] 反馈包已生成：{repair_dir / 'repair_feedback_packet.json'}；未调用API。")
         return 0
-    evaluate_repair(blind_run, repair_dir, profile)
+    evaluate_repair(blind_run, repair_dir, profile, workers)
     return 0
 
 

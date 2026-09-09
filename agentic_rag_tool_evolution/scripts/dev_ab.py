@@ -156,6 +156,7 @@ def make_config(
     candidate_enabled: bool,
     candidate_path: Path,
     instructions: list[str],
+    workers: int = 1,
 ) -> dict[str, Any]:
     return {
         "project_name": "AgenticRAGGeneratedToolDevAB",
@@ -187,7 +188,7 @@ def make_config(
             "embedding_model": "${EMBEDDING_MODEL_NAME}",
         },
         "execution": {
-            "max_workers": 1,
+            "max_workers": workers,
             "ingest_workers": 1,
             "retrieval_topk": 1,
             "max_queries": max_questions,
@@ -231,6 +232,7 @@ def run_arm(
     instructions: list[str],
     env_values: dict[str, str],
     profile: "profiles.DatasetProfile",
+    workers: int = 1,
 ) -> Path:
     stage = run_root / label
     stage.mkdir(parents=True, exist_ok=True)
@@ -247,6 +249,7 @@ def run_arm(
         candidate_enabled=candidate_enabled,
         candidate_path=candidate_path,
         instructions=instructions,
+        workers=workers,
     )
     config_path.write_text(yaml.safe_dump(config, allow_unicode=True, sort_keys=False), encoding="utf-8")
     process_env = os.environ.copy()
@@ -436,9 +439,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
     parser.add_argument("--max-questions", type=int, default=None)
+    parser.add_argument("--workers", type=int, default=None,
+                        help="答题线程数（默认：financebench=1 对齐历史，其余=4）")
     args = parser.parse_args()
 
     profile = profiles.get_profile(args.dataset)
+    workers = args.workers or profiles.DEFAULT_WORKERS[profile.name]
     max_questions = args.max_questions if args.max_questions is not None else profile.dev_count
     if not 1 <= max_questions <= profile.dev_count:
         raise ValueError(f"max-questions必须在1到{profile.dev_count}之间。")
@@ -473,7 +479,7 @@ def main() -> int:
     env_values = legacy.load_experiment_env()
     say(
         f"[严格A/B] {profile.display_name} {len(rows)}题；Student={env_values['STUDENT_MODEL']}；"
-        f"Judge={env_values['JUDGE_MODEL']}；旧标题工具=OFF。"
+        f"Judge={env_values['JUDGE_MODEL']}；旧标题工具=OFF；答题线程={workers}。"
     )
     baseline_output = run_arm(
         "baseline",
@@ -485,6 +491,7 @@ def main() -> int:
         [],
         env_values,
         profile,
+        workers,
     )
     candidate_output = run_arm(
         "generated_tool",
@@ -496,6 +503,7 @@ def main() -> int:
         generated_policy(candidate_json),
         env_values,
         profile,
+        workers,
     )
     baseline_judged = judge(
         "baseline",
