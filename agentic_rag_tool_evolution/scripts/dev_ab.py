@@ -20,14 +20,11 @@ WORKSPACE = ROOT.parent
 REPO = WORKSPACE / "ruc-ov-eval-zqy-DeepRead"
 HARNESS = REPO / "ov_test" / "run.py"
 OLD_EXPERIMENT = WORKSPACE / "agentic_rag_self_learning"
-V2 = WORKSPACE / "agentic_rag_self_learning_v2"
-DEV_FILE = V2 / "data" / "splits" / "dev.jsonl"
-FULL_INDEX = OLD_EXPERIMENT / "data" / "generated" / "full141" / "DeepRead" / "store_index"
-FULL_PROCESSED = OLD_EXPERIMENT / "data" / "generated" / "full141" / "DeepRead" / "processed_docs"
-RUNS = ROOT / "runs"
 
 sys.path.insert(0, str(OLD_EXPERIMENT / "scripts"))
+sys.path.insert(0, str(HERE.parent))
 import run_pilot as legacy  # noqa: E402
+import dataset_profiles as profiles  # noqa: E402
 
 
 def say(message: str) -> None:
@@ -50,16 +47,16 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def latest_blind_run() -> Path:
+def latest_blind_run(profile: "profiles.DatasetProfile") -> Path:
     candidates = [
         path
-        for path in RUNS.glob("blind_*")
+        for path in profile.runs_dir.glob("blind_*")
         if (path / "candidate_tool.py").exists()
         and (path / "candidate.json").exists()
         and (path / "analysis.json").exists()
     ]
     if not candidates:
-        raise RuntimeError("没有找到已完成的盲重建候选。")
+        raise RuntimeError(f"没有找到已完成的盲重建候选（{profile.runs_dir}）。")
     return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
@@ -151,6 +148,7 @@ def generated_policy(candidate: dict[str, Any]) -> list[str]:
 
 
 def make_config(
+    profile: "profiles.DatasetProfile",
     raw_data: Path,
     output_base: Path,
     max_questions: int,
@@ -161,10 +159,10 @@ def make_config(
 ) -> dict[str, Any]:
     return {
         "project_name": "AgenticRAGGeneratedToolDevAB",
-        "dataset_name": "FinanceBenchDev20",
+        "dataset_name": profile.dev_dataset_name,
         "adapter": {
-            "module": "src.adapters.finance_bench_adapter",
-            "class_name": "FinanceBenchAdapter",
+            "module": profile.adapter_module,
+            "class_name": profile.adapter_class,
         },
         "store": {
             "type": "DeepRead",
@@ -197,8 +195,8 @@ def make_config(
         },
         "paths": {
             "raw_data": str(raw_data),
-            "doc_output_dir": str(FULL_PROCESSED),
-            "vector_store": str(FULL_INDEX),
+            "doc_output_dir": str(profile.processed_dir),
+            "vector_store": str(profile.index_dir),
             "output_dir": str(output_base),
         },
         "llm": {
@@ -232,6 +230,7 @@ def run_arm(
     candidate_enabled: bool,
     instructions: list[str],
     env_values: dict[str, str],
+    profile: "profiles.DatasetProfile",
 ) -> Path:
     stage = run_root / label
     stage.mkdir(parents=True, exist_ok=True)
@@ -241,6 +240,7 @@ def run_arm(
         return completed
     config_path = stage / "config.yaml"
     config = make_config(
+        profile,
         rows_file,
         stage / "output",
         expected,
@@ -251,6 +251,7 @@ def run_arm(
     config_path.write_text(yaml.safe_dump(config, allow_unicode=True, sort_keys=False), encoding="utf-8")
     process_env = os.environ.copy()
     process_env.update(env_values)
+    process_env.update(profile.env_overrides)
     process_env["LLM_MODEL"] = env_values["STUDENT_MODEL"]
     process_env["LLM_API_KEY"] = env_values.get("STUDENT_API_KEY") or env_values["VOLCENGINE_API_KEY"]
     process_env["LLM_BASE_URL"] = env_values["STUDENT_BASE_URL"]
@@ -293,6 +294,7 @@ def judge(
     answers: dict[str, dict[str, Any]],
     path: Path,
     env_values: dict[str, str],
+    judge_system: str = "You are a strict FinanceBench answer evaluator.",
 ) -> list[dict[str, Any]]:
     saved: dict[str, dict[str, Any]] = {}
     if path.exists():
@@ -301,7 +303,7 @@ def judge(
             saved = {row["case_id"]: row for row in payload.get("results", [])}
     results: list[dict[str, Any]] = []
     for index, row in enumerate(rows, start=1):
-        case_id = row["financebench_id"]
+        case_id = row["case_id"]
         if case_id in saved:
             results.append(saved[case_id])
             continue
@@ -313,7 +315,7 @@ def judge(
             env_values.get("JUDGE_API_KEY") or env_values["VOLCENGINE_API_KEY"],
             env_values["JUDGE_MODEL"],
             [
-                {"role": "system", "content": "You are a strict FinanceBench answer evaluator."},
+                {"role": "system", "content": judge_system},
                 {"role": "user", "content": judge_prompt(row["question"], row["answer"], student_answer)},
             ],
             temperature=0,
@@ -381,17 +383,18 @@ def write_report(
     baseline: list[dict[str, Any]],
     candidate: list[dict[str, Any]],
     test_results: list[dict[str, Any]],
+    display_name: str = "FinanceBench",
 ) -> None:
     b = metrics(baseline)
     c = metrics(candidate)
     comparison = paired(baseline, candidate)
     lines = [
-        "# AI自主生成工具：Dev 20严格A/B",
+        f"# AI自主生成工具：{display_name} Dev {len(baseline)}严格A/B",
         "",
         "## 实验边界",
         "",
-        "- 候选工具仅由固定train 60题中的原始轨迹生成。",
-        "- 本轮只使用dev 20题；test 61题保持未触碰。",
+        "- 候选工具仅由固定train题中的原始轨迹生成。",
+        f"- 本轮只使用dev {len(baseline)}题；test题保持未触碰。",
         "- Baseline关闭旧标题工具；Candidate只新增AI生成工具及AI生成的使用策略。",
         "- Student、Judge、索引、轮数、top-k和其他检索工具完全相同。",
         f"- 盲重建来源：`{blind_run}`",
@@ -431,17 +434,25 @@ def write_report(
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--max-questions", type=int, default=20)
+    parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
+    parser.add_argument("--max-questions", type=int, default=None)
     args = parser.parse_args()
-    if not 1 <= args.max_questions <= 20:
-        raise ValueError("max-questions必须在1到20之间。")
 
-    required = [HARNESS, DEV_FILE, FULL_INDEX, FULL_PROCESSED, OLD_EXPERIMENT / ".env"]
+    profile = profiles.get_profile(args.dataset)
+    max_questions = args.max_questions if args.max_questions is not None else profile.dev_count
+    if not 1 <= max_questions <= profile.dev_count:
+        raise ValueError(f"max-questions必须在1到{profile.dev_count}之间。")
+
+    required = [HARNESS, profile.index_dir, profile.processed_dir, OLD_EXPERIMENT / ".env"]
+    if profile.name != "financebench" and not (profile.splits_dir / "SPLIT_MANIFEST.json").exists():
+        raise FileNotFoundError(
+            f"缺少划分：请先运行 scripts/prepare_splits.py --dataset {profile.name}"
+        )
     missing = [str(path) for path in required if not path.exists()]
     if missing:
         raise FileNotFoundError("缺少实验输入：\n" + "\n".join(missing))
 
-    blind_run = latest_blind_run()
+    blind_run = latest_blind_run(profile)
     candidate_path = blind_run / "candidate_tool.py"
     candidate_json = load_json(blind_run / "candidate.json")
     validate_candidate(candidate_path)
@@ -449,17 +460,19 @@ def main() -> int:
     generated_tests = run_generated_tests(module, candidate_json)
     say(f"[候选复核] 静态安全检查通过；自生成测试 {len(generated_tests)}/{len(generated_tests)} 通过。")
 
-    all_dev = load_jsonl(DEV_FILE)
-    rows = all_dev[: args.max_questions]
-    run_root = blind_run / ("dev_ab" if args.max_questions == 20 else f"dev_ab_smoke{args.max_questions}")
+    rows = profile.load_split_rows("dev")[:max_questions]
+    run_root = blind_run / ("dev_ab" if max_questions == profile.dev_count else f"dev_ab_smoke{max_questions}")
     run_root.mkdir(parents=True, exist_ok=True)
-    rows_file = run_root / "dev_input.jsonl"
-    if not rows_file.exists():
-        rows_file.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
+    if max_questions == profile.dev_count:
+        rows_file = profile.harness_file("dev")
+    else:
+        rows_file = run_root / f"dev_input{profile.harness_ext}"
+        if not rows_file.exists():
+            profile.write_harness_subset(rows, rows_file)
 
     env_values = legacy.load_experiment_env()
     say(
-        f"[严格A/B] {len(rows)}题；Student={env_values['STUDENT_MODEL']}；"
+        f"[严格A/B] {profile.display_name} {len(rows)}题；Student={env_values['STUDENT_MODEL']}；"
         f"Judge={env_values['JUDGE_MODEL']}；旧标题工具=OFF。"
     )
     baseline_output = run_arm(
@@ -471,6 +484,7 @@ def main() -> int:
         False,
         [],
         env_values,
+        profile,
     )
     candidate_output = run_arm(
         "generated_tool",
@@ -481,6 +495,7 @@ def main() -> int:
         True,
         generated_policy(candidate_json),
         env_values,
+        profile,
     )
     baseline_judged = judge(
         "baseline",
@@ -488,6 +503,7 @@ def main() -> int:
         answer_map(baseline_output),
         run_root / "baseline_judged.json",
         env_values,
+        profile.judge_system,
     )
     candidate_judged = judge(
         "generated_tool",
@@ -495,9 +511,10 @@ def main() -> int:
         answer_map(candidate_output),
         run_root / "generated_tool_judged.json",
         env_values,
+        profile.judge_system,
     )
     report = run_root / "DEV_AB_REPORT.md"
-    write_report(report, blind_run, baseline_judged, candidate_judged, generated_tests)
+    write_report(report, blind_run, baseline_judged, candidate_judged, generated_tests, profile.display_name)
     comparison = paired(baseline_judged, candidate_judged)
     say(
         f"[完成] dev A/B：{comparison['wins']}胜/{comparison['ties']}平/"

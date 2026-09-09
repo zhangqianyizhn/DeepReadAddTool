@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sys
@@ -14,10 +15,7 @@ WORKSPACE = ROOT.parent
 SCRIPT_DIR = HERE.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 import dev_ab as core  # noqa: E402
-
-
-TEST_FILE = WORKSPACE / "agentic_rag_self_learning_v2" / "data" / "splits" / "test.jsonl"
-EXPECTED_TEST_COUNT = 61
+import dataset_profiles as profiles  # noqa: E402
 
 
 def say(message: str) -> None:
@@ -32,19 +30,22 @@ def sha256_file(path: Path) -> str:
     return sha256_bytes(path.read_bytes())
 
 
-def freeze_candidate(repair_dir: Path, run_root: Path, env: dict[str, str]) -> tuple[Path, dict[str, Any]]:
+def freeze_candidate(
+    repair_dir: Path, run_root: Path, env: dict[str, str], profile: "profiles.DatasetProfile"
+) -> tuple[Path, dict[str, Any]]:
     source_tool = repair_dir / "candidate_tool.py"
     source_json = repair_dir / "candidate.json"
     frozen_tool = run_root / "frozen_candidate_tool.py"
     frozen_json = run_root / "frozen_candidate.json"
     manifest_path = run_root / "FROZEN_MANIFEST.json"
     expected = {
-        "protocol": "held_out_test61_ab_v1",
+        "protocol": f"held_out_test{profile.test_count}_ab_v1",
+        "dataset": profile.name,
         "source_repair_dir": str(repair_dir),
         "source_candidate_tool_sha256": sha256_file(source_tool),
         "source_candidate_json_sha256": sha256_file(source_json),
-        "test_split_sha256": sha256_file(TEST_FILE),
-        "test_count": EXPECTED_TEST_COUNT,
+        "test_split_sha256": sha256_file(profile.harness_file("test")),
+        "test_count": profile.test_count,
         "student_model": env["STUDENT_MODEL"],
         "student_base_url": env["STUDENT_BASE_URL"],
         "judge_model": env["JUDGE_MODEL"],
@@ -113,6 +114,7 @@ def write_test_report(
     candidate: list[dict[str, Any]],
     baseline_output: Path,
     candidate_output: Path,
+    profile: "profiles.DatasetProfile",
 ) -> None:
     before = core.metrics(baseline)
     after = core.metrics(candidate)
@@ -121,12 +123,12 @@ def write_test_report(
     latency_change = (after["average_latency_sec"] / before["average_latency_sec"] - 1) if before["average_latency_sec"] else 0
     score_change = after["accuracy"] - before["accuracy"]
     lines = [
-        "# AI自主生成并修复工具：冻结Test 61最终A/B",
+        f"# AI自主生成并修复工具：冻结Test {profile.test_count}最终A/B（{profile.display_name}）",
         "",
         "## 实验纪律",
         "",
         "- 工具与策略在查看test结果前冻结，并由SHA-256清单校验。",
-        "- test共61题；Repair Agent从未读取test反馈。",
+        f"- test共{profile.test_count}题；Repair Agent从未读取test反馈。",
         "- Baseline关闭旧标题工具；Candidate只开启冻结的AI生成工具与AI生成策略。",
         "- 两组Student、Judge、索引、轮数、top-k和其他检索工具完全一致。",
         "- 本结果只用于最终泛化评估，禁止再用test反馈修改候选。",
@@ -173,48 +175,56 @@ def write_test_report(
 
 
 def main() -> int:
-    blind_run = core.latest_blind_run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
+    args = parser.parse_args()
+    profile = profiles.get_profile(args.dataset)
+
+    blind_run = core.latest_blind_run(profile)
     repair_dir = blind_run / "repair_round2"
-    required = [repair_dir / "candidate_tool.py", repair_dir / "candidate.json", TEST_FILE]
+    test_harness_file = profile.harness_file("test")
+    required = [repair_dir / "candidate_tool.py", repair_dir / "candidate.json", test_harness_file]
     missing = [str(item) for item in required if not item.exists()]
     if missing:
         raise FileNotFoundError("冻结test缺少输入：\n" + "\n".join(missing))
-    test_rows = core.load_jsonl(TEST_FILE)
-    if len(test_rows) != EXPECTED_TEST_COUNT:
-        raise RuntimeError(f"test题数必须为61，实际为{len(test_rows)}。")
+    test_rows = profile.load_split_rows("test")
+    if len(test_rows) != profile.test_count:
+        raise RuntimeError(f"test题数必须为{profile.test_count}，实际为{len(test_rows)}。")
 
     env = core.legacy.load_experiment_env()
     run_root = repair_dir / "frozen_test61"
     run_root.mkdir(parents=True, exist_ok=True)
-    frozen_tool, manifest = freeze_candidate(repair_dir, run_root, env)
+    frozen_tool, manifest = freeze_candidate(repair_dir, run_root, env, profile)
     frozen_candidate = core.load_json(run_root / "frozen_candidate.json")
     core.validate_candidate(frozen_tool)
     tests = core.run_generated_tests(core.load_candidate_module(frozen_tool), frozen_candidate)
     say(f"[冻结候选复核] 自生成测试 {len(tests)}/{len(tests)} 通过。")
     say(
-        f"[最终Test] 61题严格A/B；Student={env['STUDENT_MODEL']}；"
+        f"[最终Test] {profile.display_name} {profile.test_count}题严格A/B；Student={env['STUDENT_MODEL']}；"
         f"Judge={env['JUDGE_MODEL']}；test结果禁止回流修复。"
     )
 
     baseline_output = core.run_arm(
         "baseline",
         run_root,
-        TEST_FILE,
-        EXPECTED_TEST_COUNT,
+        test_harness_file,
+        profile.test_count,
         frozen_tool,
         False,
         [],
         env,
+        profile,
     )
     candidate_output = core.run_arm(
         "frozen_generated_tool",
         run_root,
-        TEST_FILE,
-        EXPECTED_TEST_COUNT,
+        test_harness_file,
+        profile.test_count,
         frozen_tool,
         True,
         core.generated_policy(frozen_candidate),
         env,
+        profile,
     )
     baseline = core.judge(
         "test_baseline",
@@ -222,6 +232,7 @@ def main() -> int:
         core.answer_map(baseline_output),
         run_root / "baseline_judged.json",
         env,
+        profile.judge_system,
     )
     candidate = core.judge(
         "test_frozen_generated_tool",
@@ -229,9 +240,10 @@ def main() -> int:
         core.answer_map(candidate_output),
         run_root / "frozen_generated_tool_judged.json",
         env,
+        profile.judge_system,
     )
     report = run_root / "FROZEN_TEST61_REPORT.md"
-    write_test_report(report, manifest, baseline, candidate, baseline_output, candidate_output)
+    write_test_report(report, manifest, baseline, candidate, baseline_output, candidate_output, profile)
     paired = core.paired(baseline, candidate)
     before = core.metrics(baseline)
     after = core.metrics(candidate)

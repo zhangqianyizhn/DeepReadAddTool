@@ -16,4 +16,5 @@ Data/
 ExperimentArtifacts/
 runs/
 agentic_rag_self_learning/data/generated/
+agentic_rag_tool_evolution/data/index/
 *.log

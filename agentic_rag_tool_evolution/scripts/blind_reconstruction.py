@@ -20,17 +20,10 @@ from openai import OpenAI
 HERE = Path(__file__).resolve()
 ROOT = HERE.parents[1]
 WORKSPACE = ROOT.parent
+sys.path.insert(0, str(HERE.parent))
+import dataset_profiles as profiles  # noqa: E402
+
 ENV_FILE = WORKSPACE / "agentic_rag_self_learning" / ".env"
-TRAIN_FILE = WORKSPACE / "agentic_rag_self_learning_v2" / "data" / "splits" / "train.jsonl"
-BASELINE_DIR = (
-    WORKSPACE
-    / "ExperimentArtifacts"
-    / "FinanceBenchFull141"
-    / "Output"
-    / "deepread_matched_baseline_141_0001"
-)
-ANSWERS_FILE = BASELINE_DIR / "qa_eval_detailed_results.json"
-LOG_FILE = BASELINE_DIR / "deepread_run.log"
 
 
 ANALYZER_SYSTEM = """You are the analysis agent in a blind RAG capability-discovery experiment.
@@ -130,9 +123,9 @@ def compact_tool_result(event: dict[str, Any]) -> dict[str, Any]:
     return compact
 
 
-def load_trajectories(wanted_ids: set[str]) -> dict[str, list[dict[str, Any]]]:
+def load_trajectories(log_file: Path, wanted_ids: set[str]) -> dict[str, list[dict[str, Any]]]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    with LOG_FILE.open("r", encoding="utf-8", errors="replace") as handle:
+    with log_file.open("r", encoding="utf-8", errors="replace") as handle:
         for line in handle:
             try:
                 event = json.loads(line)
@@ -181,10 +174,14 @@ def normalized_score(row: dict[str, Any]) -> float:
         return 0.0
 
 
-def build_blind_packet(failure_limit: int, success_limit: int) -> tuple[dict[str, Any], dict[str, Any]]:
-    train_rows = read_jsonl(TRAIN_FILE)
+def build_blind_packet(
+    profile: "profiles.DatasetProfile", failure_limit: int, success_limit: int
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    answers_file = profile.baseline_dir / "qa_eval_detailed_results.json"
+    log_file = profile.baseline_dir / "deepread_run.log"
+    train_rows = profile.load_split_rows("train")
     train_by_question = {row["question"]: row for row in train_rows}
-    all_results = read_json(ANSWERS_FILE).get("results", [])
+    all_results = read_json(answers_file).get("results", [])
     train_results = [row for row in all_results if row.get("question") in train_by_question]
     if len(train_results) != len(train_rows):
         raise RuntimeError(
@@ -195,24 +192,20 @@ def build_blind_packet(failure_limit: int, success_limit: int) -> tuple[dict[str
     successes = sorted((row for row in train_results if normalized_score(row) >= 4), key=normalized_score, reverse=True)
     selected = failures[:failure_limit] + successes[:success_limit]
     wanted = {query_id(row["question"]) for row in selected}
-    trajectories = load_trajectories(wanted)
+    trajectories = load_trajectories(log_file, wanted)
 
     cases: list[dict[str, Any]] = []
     for row in selected:
         source = train_by_question[row["question"]]
-        evidence = source.get("evidence") or []
-        gold_sources = sorted(
-            {str(item.get("doc_name")) for item in evidence if isinstance(item, dict) and item.get("doc_name")}
-        )
         qid = query_id(row["question"])
         cases.append(
             {
-                "case_id": source.get("financebench_id"),
+                "case_id": source.get("case_id"),
                 "question_type": source.get("question_type"),
                 "question": source.get("question"),
                 "gold_answer": clip(source.get("answer") or row.get("gold_answers"), 1400),
-                "gold_evidence_sources": gold_sources,
-                "gold_evidence_excerpt": [clip(item.get("evidence_text", ""), 650) for item in evidence[:2]],
+                "gold_evidence_sources": source.get("evidence_sources") or [],
+                "gold_evidence_excerpt": [clip(text, 650) for text in (source.get("evidence_excerpts") or [])[:2]],
                 "baseline_answer": clip((row.get("llm") or {}).get("final_answer", ""), 1600),
                 "judge_score_0_to_4": normalized_score(row),
                 "judge_reason": clip((row.get("llm_evaluation") or {}).get("reasoning", ""), 650),
@@ -222,7 +215,7 @@ def build_blind_packet(failure_limit: int, success_limit: int) -> tuple[dict[str
 
     packet = {
         "experiment": "blind_capability_discovery",
-        "dataset": "FinanceBench",
+        "dataset": profile.display_name,
         "split": "train_only",
         "case_selection": {
             "failure_threshold": "judge score <= 2",
@@ -241,13 +234,14 @@ def build_blind_packet(failure_limit: int, success_limit: int) -> tuple[dict[str
         "cases": cases,
     }
     manifest = {
+        "dataset": profile.name,
         "train_rows": len(train_rows),
         "matched_baseline_rows": len(train_results),
         "available_failures": len(failures),
         "available_successes": len(successes),
         "selected_cases": len(cases),
         "question_type_counts": dict(Counter(case["question_type"] for case in cases)),
-        "source_files": [str(TRAIN_FILE), str(ANSWERS_FILE), str(LOG_FILE)],
+        "source_files": [str(profile.harness_file("train")), str(answers_file), str(log_file)],
         "explicitly_excluded": [
             "test split",
             "existing title-routing source code",
@@ -392,19 +386,25 @@ def render_report(run_dir: Path, manifest: dict[str, Any], analysis: dict[str, A
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
     parser.add_argument("--failure-cases", type=int, default=16)
     parser.add_argument("--success-cases", type=int, default=4)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    required = [ENV_FILE, TRAIN_FILE, ANSWERS_FILE, LOG_FILE]
+    profile = profiles.get_profile(args.dataset)
+    answers_file = profile.baseline_dir / "qa_eval_detailed_results.json"
+    log_file = profile.baseline_dir / "deepread_run.log"
+    required = [ENV_FILE, answers_file, log_file]
     missing = [str(path) for path in required if not path.exists()]
+    if profile.name != "financebench" and not profile.harness_file("train").exists():
+        missing.append(f"{profile.splits_dir}（先运行 prepare_splits.py --dataset {profile.name}）")
     if missing:
         raise FileNotFoundError("缺少实验输入：\n" + "\n".join(missing))
 
-    packet, manifest = build_blind_packet(args.failure_cases, args.success_cases)
+    packet, manifest = build_blind_packet(profile, args.failure_cases, args.success_cases)
     say(
-        f"[数据就绪] train={manifest['train_rows']}，选中={manifest['selected_cases']}，"
+        f"[数据就绪] {profile.display_name} train={manifest['train_rows']}，选中={manifest['selected_cases']}，"
         f"失败池={manifest['available_failures']}，成功池={manifest['available_successes']}"
     )
     say("[盲测约束] 不读取现成标题工具、人工归因、历史标题路由报告或 test 集。")
@@ -422,7 +422,7 @@ def main() -> int:
         raise RuntimeError("缺少 ARK_BASE_URL/TEACHER_BASE_URL。")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = ROOT / "runs" / f"blind_{timestamp}"
+    run_dir = profile.runs_dir / f"blind_{timestamp}"
     run_dir.mkdir(parents=True, exist_ok=False)
     (run_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     (run_dir / "blind_packet.json").write_text(json.dumps(packet, ensure_ascii=False, indent=2), encoding="utf-8")

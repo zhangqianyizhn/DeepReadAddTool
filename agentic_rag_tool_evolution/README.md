@@ -1,5 +1,11 @@
 # Agent 自动工具演化：盲重建实验
 
+> **2026-09 更新**：本实验链已参数化支持三个数据集（`--dataset financebench|hotpotqa|syllabusqa`，
+> 默认 financebench，与原命令完全兼容）。新增数据集的划分由 `scripts/prepare_splits.py` 生成
+> （HotpotQA 100 题 40/20/40；SyllabusQA 抽样 200 题后按大纲 doc-disjoint 分 80/40/80），
+> baseline 由 `scripts/run_baseline.py --dataset <name>` 构建。一键全流程见仓库根目录
+> `SERVER_GUIDE.md` 与 `run_all.sh`。
+
 这个目录用于回答一个非常具体的问题：
 
 > 在看不到现成 `search_document_titles`、人工错误分析和历史 A/B 结论的情况下，Agent 只根据训练集上的 baseline 失败轨迹，能否独立诊断缺失能力，并写出一个可执行的候选工具？

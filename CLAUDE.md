@@ -34,7 +34,7 @@ All experiment scripts load keys from `agentic_rag_self_learning/.env` (VOLCENGI
 ./ruc-ov-eval-zqy-DeepRead/run_full141_matched_baseline.sh --dry-run  # validate data/env only
 ```
 
-This wraps `agentic_rag_tool_evolution/scripts/rebuild_baseline141.py`: validates `Data/FinanceBench` (141q/82docs), builds the 82-doc index into `agentic_rag_self_learning/data/generated/full141/DeepRead/` when missing, runs `ov_test/run.py --step all` with a **stable** output dir (`auto_increment_output: false`, so reruns resume in place), and verifies the three artifacts.
+This wraps `agentic_rag_tool_evolution/scripts/run_baseline.py --dataset financebench` (the shim `rebuild_baseline141.py` keeps the old command shape). For the other datasets: `run_baseline.py --dataset hotpotqa|syllabusqa` — validates raw data, builds the index into `agentic_rag_tool_evolution/data/index/<dataset>/` when missing, runs `ov_test/run.py --step all` with a **stable** output dir (`auto_increment_output: false`, so reruns resume in place), and verifies the three artifacts. Baselines cover each dataset's full experiment set; `blind_reconstruction` feeds only train-split cases to the Analyzer.
 
 ### Benchmark harness (single source of truth for running DeepRead)
 
@@ -53,15 +53,35 @@ Experiment scripts never call the model directly — they generate a temp `confi
 
 ### Experiment entry points (tool-evolution chain)
 
+One command for the full pipeline (all three datasets, or a subset) — see `SERVER_GUIDE.md`:
+
+```bash
+./run_all.sh                                  # prepare_splits → baseline → blind → dev A/B → repair → frozen test
+./run_all.sh --datasets financebench          # subset
+./run_all.sh --dry-run                        # preflight only, no API calls
+```
+
+Per-stage entries (all take `--dataset financebench|hotpotqa|syllabusqa`, default financebench):
+
 ```bash
 cd agentic_rag_tool_evolution
-./run_blind_reconstruction.sh        # [--dry-run] Analyzer + Tool Architect on train-60
-./run_dev_ab.sh                      # dev-20 strict A/B + Judge
+./run_blind_reconstruction.sh        # [--dry-run] Analyzer + Tool Architect on train
+./run_dev_ab.sh                      # dev strict A/B + Judge
 ./run_autonomous_repair_round2.sh    # Repair Agent on dev feedback, re-run repaired arm
-./run_frozen_test61.sh               # SHA-256 freeze + one-shot test-61 A/B
+./run_frozen_test61.sh               # SHA-256 freeze + one-shot test A/B (filename is historic; test size comes from the dataset profile)
 ```
 
 The `.sh` wrappers share `scripts/_entry_common.sh`: they use the uv venv python, force UTF-8, and wrap with `caffeinate -i` on macOS. All stages checkpoint and resume on rerun. The old Windows `.ps1` entries were removed (still in git history); v2/pilot `.ps1` scripts were NOT ported — run their Python directly, e.g. `python agentic_rag_self_learning_v2/scripts/content2.py round1`.
+
+### Multi-dataset support (`agentic_rag_tool_evolution/scripts/dataset_profiles.py`)
+
+All dataset variation is centralized in `dataset_profiles.py`: paths, adapter module/class, judge system prompt, split counts, and a **normalized row schema** (`case_id/question/answer/question_type/evidence_sources/evidence_excerpts/leakage_terms`) that the four chain scripts consume via `get_profile(--dataset)`. Key per-dataset facts:
+
+- **financebench**: splits come from `agentic_rag_self_learning_v2/data/splits/` (committed); index under `agentic_rag_self_learning/data/generated/full141/`; runs in `runs/` (historic layout).
+- **hotpotqa**: 100 questions, question-level random 40/20/40 split (multi-hop questions share articles — NOT doc-disjoint, recorded in the manifest); index under `data/index/hotpotqa/` (gitignored); runs in `runs/hotpotqa/`.
+- **syllabusqa**: 4358 questions → seeded stratified sample of 200 → doc-disjoint (by `syllabus_name`) 80/40/80 split — whole-syllabus granularity means actual counts land at 79/42/79, so profile counts are **read from SPLIT_MANIFEST.json at runtime**, never hardcode them; the harness gets the adapter-formatted question (`Based on the syllabus "X", ...`), and runs need `SYLLABUSQA_DOC_DIR` (injected automatically from the profile).
+- Splits for the two new datasets are built by `scripts/prepare_splits.py` (seed 20260823-independent, seed 20260909, deterministic, refuses to overwrite a mismatched manifest) and committed under `data/splits/<dataset>/`.
+- Data root defaults to `<workspace>/Data`; override with env `DEEPREAD_DATA_ROOT`.
 
 ### Tests
 
