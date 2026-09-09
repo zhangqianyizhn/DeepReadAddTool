@@ -42,7 +42,12 @@ This wraps `agentic_rag_tool_evolution/scripts/rebuild_baseline141.py`: validate
 cd ruc-ov-eval-zqy-DeepRead
 uv run python ov_test/run.py --config ov_test/config_deepread/financebench.yaml --step all
 # --step all|gen|eval|del ; --skip-ingest reuses an existing index
+# 其他数据集：config_deepread/{hotpotqa,syllabusqa}.yaml（config_deepread_global/ 下有同名变体）
 ```
+
+Supported datasets: FinanceBench (markdown/pdf docs), HotpotQA (`hotpot_qa_100.json` + `hotpot_articles.json`, articles converted to markdown by the adapter), SyllabusQA (dir of train/val/test CSVs + `syllabi/*.docx`, converted via python-docx). Judge routing in `judge_util.py` only special-cases Locomo; all three use the generic 0–4 prompt. HotpotQA/SyllabusQA configs use `${LLM_*}`/`${EMBEDDING_*}` placeholders — direct runs need `ov_test/.env` (see `ov_test/.env.example`).
+
+Data lives outside the repo: on this machine `DeepReadAddTool/Data` is a **symlink to `~/Desktop/ruc-ov/Data`** (gitignored); on a server, place the dataset dir at the same workspace-relative location. `Data/HotpotQA/DeepRead/store_index` ships a pre-built index (skip_ingestion reuses it; flip `skip_ingestion: false` to rebuild).
 
 Experiment scripts never call the model directly — they generate a temp `config.yaml` and launch `ov_test/run.py` as a subprocess with env injection (`LLM_MODEL=$STUDENT_MODEL` etc.).
 
