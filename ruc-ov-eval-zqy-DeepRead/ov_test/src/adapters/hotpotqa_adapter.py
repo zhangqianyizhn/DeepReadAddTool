@@ -127,6 +127,11 @@ class HotpotQAAdapter(BaseAdapter):
                 raise e
 
         self.logger.info(f"[HotpotQAAdapter] Processed {len(title_to_path)} articles")
+        if required_titles and not title_to_path:
+            raise RuntimeError(
+                f"QA 数据引用了 {len(required_titles)} 篇文章，但 {self.articles_file_path} "
+                "中没有匹配到任何标题。请检查 articles 文件与 QA 文件是否配套。"
+            )
 
         # 2. 遍历 QA，按 sample_id 聚合引用文章路径
         with open(self.raw_file_path, 'r', encoding='utf-8') as f:

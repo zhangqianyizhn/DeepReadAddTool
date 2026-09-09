@@ -169,6 +169,13 @@ class SyllabusQAAdapter(BaseAdapter):
                 raise e
         
         self.logger.info(f"[SyllabusQAAdapter] Processed {len(res)} syllabus documents")
+        if required_syllabi and not res:
+            available = sorted(f for f in os.listdir(self.syllabus_dir) if f.endswith('.docx'))[:5]
+            raise RuntimeError(
+                f"CSV 需要 {len(required_syllabi)} 个大纲，但在 {self.syllabus_dir} 中没有匹配到任何 .docx。"
+                f"请检查 docx 是否已铺平到该目录（官方仓库的 syllabi_redacted/word/ 嵌套结构需移出）。"
+                f"CSV 名称样例：{sorted(required_syllabi)[:3]}；目录内 docx 样例：{available}"
+            )
         return res
 
     def _get_required_syllabi(self) -> set:

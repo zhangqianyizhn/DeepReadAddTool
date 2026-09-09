@@ -162,4 +162,10 @@ cd agentic_rag_tool_evolution
 - **"环境变量 XXX 未设置"**：`.env` 没填全，参照 `.env.example`。
 - **划分不一致报错**：`data/splits/<dataset>/` 是冻结产物；不要手改，确认后整个删除再重跑
   `prepare_splits.py --dataset <name> --force`。
+- **SyllabusQA 官方嵌套结构**：如果 `Data/SyllabusQA/syllabi/` 里是官方仓库的
+  `syllabi_redacted/word/*.docx` 嵌套布局，需要把 docx 铺平到 `syllabi/` 下
+  （adapter 现在会在 0 匹配时直接报错，不会再静默空跑）。注意：错误的入库完成后
+  `_pipeline_records.json` 会标记已入库，修正数据后必须删除
+  `ExperimentArtifacts/SyllabusQA200/` 和 `agentic_rag_tool_evolution/data/index/syllabusqa/`
+  再重跑，否则会复用空索引上生成的垃圾答案。
 - **服务器无 GPU**：不需要。PDF 解析走 pymupdf，Embedding 走火山方舟 API。
