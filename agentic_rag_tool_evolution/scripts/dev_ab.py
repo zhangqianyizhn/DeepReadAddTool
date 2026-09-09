@@ -96,6 +96,18 @@ def load_candidate_module(path: Path) -> Any:
     return module
 
 
+def _results_of(output: Any) -> list[Any]:
+    """候选工具的排名结果列表。契约要求 `results` 键，但生成模型常用近义键名，
+    逐一兼容（运行时 Student 直接读整个 JSON，键名不影响实际效果，只有门禁关心）。"""
+    if not isinstance(output, dict):
+        return []
+    for key in ("results", "ranked_documents", "ranked", "top_documents", "documents"):
+        value = output.get(key)
+        if isinstance(value, list):
+            return value
+    return []
+
+
 def run_generated_tests(module: Any, candidate: dict[str, Any]) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     for test in candidate.get("tests") or []:
@@ -122,7 +134,8 @@ def run_generated_tests(module: Any, candidate: dict[str, Any]) -> list[dict[str
             json.dumps(output)  # 必须 JSON 可序列化
         except Exception as exc:  # 工具自身抛错视为测试失败
             error = f"{type(exc).__name__}: {exc}"
-        actual = str((((output or {}).get("results") or [{}])[0]).get("doc_id") or "") if isinstance(output, dict) else ""
+        actual_rows = _results_of(output)
+        actual = str((actual_rows[0] or {}).get("doc_id") or "") if actual_rows and isinstance(actual_rows[0], dict) else ""
         if expected_top:
             # 排名型断言：严格比对 top1 文档
             passed = bool(actual and actual.upper() == expected_top.upper())

@@ -53,7 +53,7 @@ The tool must solve a recurring failure mechanism, not encode gold answers or sp
 Runtime contract:
 - Define exactly one public function: run(question: str, documents: list[dict[str, str]], top_k: int = 5) -> dict.
 - Each document contains only generic corpus metadata: doc_id and source_name.
-- Return JSON-serializable data. Include ranked results where relevant.
+- Return JSON-serializable data. The ranked items MUST live under a top-level `results` list (not `ranked_documents` or other aliases) — downstream validation reads exactly that key.
 - Allowed imports: re, math, json, collections, typing, dataclasses.
 - Forbidden: file/network/process access, environment variables, dynamic execution, third-party packages.
 - Do not copy benchmark answers, question IDs, or a hard-coded company list into the code.
