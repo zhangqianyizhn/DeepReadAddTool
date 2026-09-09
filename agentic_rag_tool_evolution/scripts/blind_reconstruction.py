@@ -274,6 +274,8 @@ def model_json_call(client: OpenAI, model: str, messages: list[dict[str, str]], 
         {"response_format": {"type": "json_object"}, "temperature": 0, "max_tokens": max_tokens},
         {"temperature": 0, "max_tokens": max_tokens},
         {"max_tokens": max_tokens},
+        {"max_tokens": max_tokens},
+        {"max_tokens": max_tokens},
     ]
     last_error: Exception | None = None
     for number, extra in enumerate(attempts, start=1):
@@ -287,10 +289,24 @@ def model_json_call(client: OpenAI, model: str, messages: list[dict[str, str]], 
             if any(marker in error_text for marker in ("403", "PermissionDenied", "AccountOverdue")):
                 raise RuntimeError(f"模型无权限或套餐不可用：{exc}") from exc
             if number < len(attempts):
-                wait = number * 10
+                # 网关 5xx/504 恢复较慢，使用更长退避（30/60/90/120 秒）
+                wait = number * 30
                 say(f"[重试] 第 {number} 次调用失败：{type(exc).__name__}；{wait} 秒后重试。")
                 time.sleep(wait)
     raise RuntimeError(f"模型连续返回失败：{last_error}")
+
+
+def find_resumable_run(runs_dir: Path) -> Path | None:
+    """找最近一次 Analyzer 已完成但 Repair Agent 未完成的 blind 运行目录。"""
+    candidates = sorted(
+        (path for path in runs_dir.glob("blind_*") if (path / "analysis.json").exists()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for path in candidates:
+        if not (path / "BLIND_RECONSTRUCTION_REPORT.md").exists():
+            return path
+    return None
 
 
 def validate_candidate(code: str) -> list[str]:
@@ -421,24 +437,43 @@ def main() -> int:
     if not base_url:
         raise RuntimeError("缺少 ARK_BASE_URL/TEACHER_BASE_URL。")
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = profile.runs_dir / f"blind_{timestamp}"
-    run_dir.mkdir(parents=True, exist_ok=False)
-    (run_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-    (run_dir / "blind_packet.json").write_text(json.dumps(packet, ensure_ascii=False, indent=2), encoding="utf-8")
-
     client = OpenAI(api_key=api_key, base_url=base_url, timeout=600, max_retries=1)
-    say(f"[Analyzer] {model} 正在从原始训练轨迹归纳可工具化的失败机制……")
-    analysis = model_json_call(
-        client,
-        model,
-        [
-            {"role": "system", "content": ANALYZER_SYSTEM},
-            {"role": "user", "content": json.dumps(packet, ensure_ascii=False)},
-        ],
-        max_tokens=5000,
-    )
-    (run_dir / "analysis.json").write_text(json.dumps(analysis, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # 断点续跑：Analyzer 已成功但 Repair Agent 未完成的运行目录直接复用，
+    # 不会因网关抖动重跑已付费的 Analyzer。
+    resumed = find_resumable_run(profile.runs_dir)
+    if resumed is not None:
+        run_dir = resumed
+        analysis = read_json(run_dir / "analysis.json")
+        packet = read_json(run_dir / "blind_packet.json")
+        say(f"[断点续跑] 复用 Analyzer 诊断：{run_dir}")
+    else:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_dir = profile.runs_dir / f"blind_{timestamp}"
+        run_dir.mkdir(parents=True, exist_ok=False)
+        (run_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+        (run_dir / "blind_packet.json").write_text(json.dumps(packet, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        say(f"[Analyzer] {model} 正在从原始训练轨迹归纳可工具化的失败机制……")
+        analysis = model_json_call(
+            client,
+            model,
+            [
+                {"role": "system", "content": ANALYZER_SYSTEM},
+                {"role": "user", "content": json.dumps(packet, ensure_ascii=False)},
+            ],
+            max_tokens=5000,
+        )
+        (run_dir / "analysis.json").write_text(json.dumps(analysis, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if (run_dir / "candidate.json").exists():
+        candidate = read_json(run_dir / "candidate.json")
+        say("[断点续跑] 复用已生成的候选工具，仅重建报告。")
+        safety = candidate.get("static_safety_problems") or []
+        report = render_report(run_dir, manifest, analysis, candidate, safety)
+        (run_dir / "BLIND_RECONSTRUCTION_REPORT.md").write_text(report, encoding="utf-8")
+        say(f"[完成] 盲重建报告：{run_dir / 'BLIND_RECONSTRUCTION_REPORT.md'}")
+        return 0
 
     if not analysis.get("selected_capability"):
         raise RuntimeError(f"Analyzer 没有选择可工具化能力；诊断已保存到 {run_dir / 'analysis.json'}")
