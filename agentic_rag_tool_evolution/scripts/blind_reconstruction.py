@@ -437,7 +437,9 @@ def main() -> int:
     if not base_url:
         raise RuntimeError("缺少 ARK_BASE_URL/TEACHER_BASE_URL。")
 
-    client = OpenAI(api_key=api_key, base_url=base_url, timeout=600, max_retries=1)
+    # plan 通道间歇性排队，单次调用可能挂起很久；给足 25 分钟超时，
+    # 配合外层重试覆盖拥塞窗口。
+    client = OpenAI(api_key=api_key, base_url=base_url, timeout=1500, max_retries=1)
 
     # 断点续跑：Analyzer 已成功但 Repair Agent 未完成的运行目录直接复用，
     # 不会因网关抖动重跑已付费的 Analyzer。

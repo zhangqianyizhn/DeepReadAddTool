@@ -243,10 +243,11 @@ def model_json_call(
     temperature: float = 0.0,
     max_tokens: int = 2048,
 ) -> dict[str, Any]:
-    # Seed Pro can spend several minutes on hidden reasoning.  A longer per-request
-    # timeout plus explicit outer retries is safer than letting one transient timeout
-    # discard an otherwise completed experiment.
-    client = OpenAI(api_key=api_key, base_url=base_url, timeout=600, max_retries=1)
+    # Seed Pro can spend several minutes on hidden reasoning, and the Volcengine
+    # plan channel queues requests for many minutes under congestion.  A long
+    # per-request timeout plus explicit outer retries is safer than letting one
+    # transient timeout discard an otherwise completed experiment.
+    client = OpenAI(api_key=api_key, base_url=base_url, timeout=1500, max_retries=1)
     attempts = [
         {"temperature": temperature, "response_format": {"type": "json_object"}, "max_tokens": max_tokens},
         {"max_tokens": max_tokens},
