@@ -204,6 +204,9 @@ def main() -> int:
         raise FileNotFoundError("缺少运行所需文件：\n" + "\n".join(missing))
 
     VALIDATORS[profile.name](profile)
+    # financebench 适配器直接引用源文件，不会自建 processed_docs；
+    # 但后续 dev_ab 的输入校验要求该目录存在，这里统一补齐。
+    profile.processed_dir.mkdir(parents=True, exist_ok=True)
     have_index = index_is_complete(profile)
     say(
         f"[数据就绪] {profile.display_name} {profile.total_count} 题 / {profile.doc_count} 文档；"
