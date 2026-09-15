@@ -248,16 +248,29 @@ def model_json_call(
     # per-request timeout plus explicit outer retries is safer than letting one
     # transient timeout discard an otherwise completed experiment.
     client = OpenAI(api_key=api_key, base_url=base_url, timeout=1500, max_retries=1)
+    # plan 通道限生成速率（实测约 4 tokens/s）：长生成必须走流式，
+    # 非流式要等整段生成完才返回，必然超时。前两次尝试流式，最后一次回退非流式。
     attempts = [
-        {"temperature": temperature, "response_format": {"type": "json_object"}, "max_tokens": max_tokens},
-        {"max_tokens": max_tokens},
-        {"max_tokens": max_tokens},
+        {"stream": True, "temperature": temperature, "response_format": {"type": "json_object"}, "max_tokens": max_tokens},
+        {"stream": True, "max_tokens": max_tokens},
+        {"stream": False, "max_tokens": max_tokens},
     ]
     last_error: Exception | None = None
     for attempt_number, extra in enumerate(attempts, start=1):
+        use_stream = extra.pop("stream")
         try:
-            response = client.chat.completions.create(model=model, messages=messages, **extra)
-            content = response.choices[0].message.content or ""
+            if use_stream:
+                chunks: list[str] = []
+                with client.chat.completions.create(
+                    model=model, messages=messages, stream=True, **extra
+                ) as response:
+                    for chunk in response:
+                        if chunk.choices and chunk.choices[0].delta.content:
+                            chunks.append(chunk.choices[0].delta.content)
+                content = "".join(chunks)
+            else:
+                response = client.chat.completions.create(model=model, messages=messages, **extra)
+                content = response.choices[0].message.content or ""
             match = re.search(r"\{.*\}", content, flags=re.DOTALL)
             if not match:
                 raise ValueError("模型没有返回JSON对象。")
