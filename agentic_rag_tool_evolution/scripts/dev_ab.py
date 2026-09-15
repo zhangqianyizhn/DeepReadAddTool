@@ -64,8 +64,8 @@ def validate_candidate(path: Path) -> None:
     tree = ast.parse(path.read_text(encoding="utf-8"))
     allowed_imports = {"re", "math", "json", "collections", "typing", "dataclasses"}
     forbidden_calls = {"open", "exec", "eval", "compile", "__import__", "input", "breakpoint"}
-    public: list[str] = []
     problems: list[str] = []
+    # 安全条款（import 白名单 / 禁止调用 / 禁止 dunder）在整棵 AST 上检查；
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -79,8 +79,12 @@ def validate_candidate(path: Path) -> None:
             problems.append(f"forbidden call: {node.func.id}")
         elif isinstance(node, ast.Attribute) and node.attr.startswith("__"):
             problems.append(f"forbidden dunder attribute: {node.attr}")
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
-            public.append(node.name)
+    # 公开函数检查只看模块级定义：嵌套闭包无法从模块外部触达，不扩大工具的外部面。
+    public = [
+        node.name
+        for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_")
+    ]
     if public != ["run"]:
         problems.append(f"public functions must equal ['run']; got {public}")
     if problems:

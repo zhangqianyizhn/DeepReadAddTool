@@ -1,0 +1,286 @@
+{
+  "repair_analysis": {
+    "what_worked": "For straightforward company-plus-year questions, the inventory tool selected the correct 10-K on the first call, eliminated repeated full-corpus searches, and reduced average input tokens from about 205k to 105k and latency from about 44s to 38s. The candidate achieved 1 win, 19 ties, and 0 losses.",
+    "failure_mechanisms": "An additional metadata-level bug remained: the month-year date regex had only one capture group, but the extraction branch assumed two groups, raising 'no such group' at runtime and preventing month-year dates from being parsed. The earlier fiscal-year century bug, date-suffix company pollution, and possessive/multiword/initialism/ticker-prefix matching failures also remained in the rejected candidate.",
+    "scope_boundary": "The tool ranks document metadata only. It cannot verify content, table rows, or semantic intent that selects among several same-company filings. It should not be used to prove absence; the coverage output exists so the agent can enumerate strong candidates before concluding 'not found'."
+  },
+  "changes": [
+    "Replace positional regex group indexing with named capture groups for all date patterns so month-year dates do not raise 'no such group'.",
+    "Fix fiscal-year and quarter parsing so the full four-digit year is captured instead of only the century prefix; removes spurious year 20 entries from query_parsed and fiscal_year lists.",
+    "Mask full dates and the 'dated' marker before company-token extraction so date suffixes no longer pollute company names.",
+    "Parse explicit dates from questions and document metadata, and add a date-match bonus so dated 8-K filings rank correctly.",
+    "Generate generic company aliases from token initials and connector initials, and match proper-noun question tokens as prefixes of normalized company names; supports possessive, multiword, initialism, and ticker-prefix forms without a hard-coded alias list.",
+    "Recognize EARNINGS as a filing type in metadata and questions.",
+    "Expose quarter, filing-type, date, and strong-candidate coverage in the output, and sort by score then match count so better-qualified filings win ties."
+  ],
+  "tool_spec": {
+    "name": "document_inventory_search",
+    "purpose": "Rank the available corpus documents by how well they match the company, fiscal period, filing type, and explicit date mentioned in the question, so the agent can scope subsequent searches to the correct filing instead of running full-corpus searches.",
+    "inputs": {
+      "question": "string; natural-language question containing company name, fiscal period, filing type, and possibly an explicit date",
+      "documents": "list of dicts with keys doc_id and source_name",
+      "top_k": "int; number of ranked candidates to return (default 5)"
+    },
+    "outputs": {
+      "query_parsed": "parsed years, quarters, filing_type, and dates from the question",
+      "results": "ranked documents with doc_id, source_name, parsed company/year/quarter/filing_type, document_dates, score, match_reasons, and match flags",
+      "coverage": "counts and doc_ids for company-matched, year-matched, filing-matched, date-matched, and strong candidates"
+    },
+    "algorithm": "Parse each document into company tokens, fiscal years, quarters, filing type, and explicit dates using regex. Parse the question for the same fields plus normalized text, token set, and proper-noun tokens. Score documents by weighted matches: company 3.0, year 1.5, quarter 1.0, filing type 1.0, explicit date 2.0; unspecified non-date fields receive neutral 0.5. Sort by score, then match count, then doc_id.",
+    "complexity": "O(N * T) where N is the number of documents and T is the length of the metadata strings; no external calls.",
+    "failure_modes": [
+      "Company names that are absent from both metadata and derivable aliases will not match.",
+      "Ambiguous fiscal periods and same-company filing-type choices depend on metadata conventions and question intent.",
+      "The tool ranks metadata only; it does not verify content or table rows.",
+      "Explicit dates are matched when present, but a question with only a month and year may only match at month-year granularity."
+    ]
+  },
+  "code": "import re\nfrom typing import Any, Dict, List, Optional, Set, Tuple\n\n_MONTHS = {\n    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,\n    'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,\n}\n\n_MONTH_PATTERN = r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?'\n_MONTH_GROUP = r'(?P<month>' + _MONTH_PATTERN + r')'\n\n_DATE_PATTERNS = [\n    re.compile(r'(?<![0-9])(?P<year>(?:19|20)[0-9]{2})[-_/](?P<month>0?[1-9]|1[0-2])[-_/](?P<day>0?[1-9]|[12][0-9]|3[01])(?![0-9])', re.I),\n    re.compile(_MONTH_GROUP + r'[ ]+(?P<day>[0-9]{1,2})(?:st|nd|rd|th)?,?[ ]+(?P<year>(?:19|20)[0-9]{2})', re.I),\n    re.compile(r'(?P<day>[0-9]{1,2})(?:st|nd|rd|th)?[ ]+' + _MONTH_GROUP + r'[ ]+(?P<year>(?:19|20)[0-9]{2})', re.I),\n    re.compile(_MONTH_GROUP + r'[ ]+(?P<year>(?:19|20)[0-9]{2})', re.I),\n]\n\n_STOP_COMPANY_TOKENS = {\n    '10', '8', 'K', 'Q', '10K', '10Q', '8K', '10-K', '10-Q', '8-K',\n    'FY', 'Q1', 'Q2', 'Q3', 'Q4', 'ANNUAL', 'REPORT', 'EARNINGS', 'RELEASE',\n    'SOURCE', 'DOCUMENT', 'FILE', 'FILING', 'PDF', 'HTML', 'TXT', 'INC',\n    'CORP', 'CORPORATION', 'CO', 'COMPANY', 'LTD', 'LLC', 'PLC', 'GROUP',\n    'HOLDINGS', 'THE', 'AND', 'OF', 'FOR', 'COM', 'QUARTER', 'QUARTERLY',\n    'RESULTS', 'PRESS', 'STATEMENT', 'FORM', 'ITEM', 'PAGE', 'CURRENT',\n    'EXHIBIT', 'EXHIBITS', 'SEC', 'COMMISSION', 'UNITED', 'STATES',\n    'WASHINGTON', 'DELAWARE', 'JERSEY', 'INCORPORATED', 'DATED', 'FILED',\n}\n\ndef _month_number(name):\n    return _MONTHS.get(name.lower()[:3], 0)\n\ndef _fmt_date(t):\n    if t[2]:\n        return '%04d-%02d-%02d' % (t[0], t[1], t[2])\n    return '%04d-%02d' % (t[0], t[1])\n\ndef _extract_date_tuples(text):\n    dates = []\n    for pat in _DATE_PATTERNS:\n        for m in pat.finditer(text):\n            gd = m.groupdict()\n            year = int(gd['year'])\n            month_text = gd['month']\n            if month_text.isdigit():\n                month = int(month_text)\n            else:\n                month = _month_number(month_text)\n            day_text = gd.get('day')\n            day = int(day_text) if day_text else 0\n            if month and year:\n                tup = (year, month, day)\n                if tup not in dates:\n                    dates.append(tup)\n    return sorted(dates)\n\ndef _mask_dates(text):\n    masked = text\n    for pat in _DATE_PATTERNS:\n        masked = pat.sub(' ', masked)\n    masked = re.sub(r'dated', ' ', masked, flags=re.I)\n    return masked\n\ndef _looks_generic_doc_id(doc_id):\n    s = doc_id.strip().lower()\n    if not s:\n        return True\n    if s.isdigit():\n        return True\n    if re.fullmatch(r'(?:doc|document|file)[_-]?[0-9]*', s):\n        return True\n    if re.fullmatch(r'[a-z]{1,4}[_-]?[0-9]{1,4}', s):\n        return True\n    return False\n\ndef _extract_company_tokens(text):\n    masked = _mask_dates(text)\n    segments = re.split(r'[^A-Za-z0-9]+', masked)\n    tokens = []\n    for seg in segments:\n        if not seg:\n            continue\n        upper = seg.upper()\n        if re.fullmatch(r'(19|20)[0-9]{2}', upper):\n            continue\n        if re.fullmatch(r'(19|20)[0-9]{2}[Qq][1-4]', upper):\n            continue\n        if re.fullmatch(r'FY(19|20)[0-9]{2}', upper):\n            continue\n        if re.fullmatch(r'[Qq][1-4]', upper):\n            continue\n        if re.fullmatch(r'(?:10|8)-?[KQ]', upper):\n            continue\n        if seg.isdigit() and len(seg) <= 2:\n            continue\n        if upper in _STOP_COMPANY_TOKENS:\n            continue\n        tokens.append(seg)\n    return tokens\n\ndef _extract_periods(text):\n    years = set()\n    quarters = set()\n    for m in re.finditer(r'(?<![0-9])(?:19|20)[0-9]{2}(?![0-9])', text):\n        years.add(int(m.group(0)))\n    for m in re.finditer(r'(?<![0-9])(?:19|20)([0-9]{2})[Qq]([1-4])(?![0-9])', text):\n        years.add(int(m.group(0)[:4]))\n        quarters.add(int(m.group(2)))\n    for m in re.finditer(r'(?<![A-Za-z0-9])[Qq]([1-4])(?![0-9])', text):\n        quarters.add(int(m.group(1)))\n    return years, quarters\n\ndef _extract_filing_type(text):\n    up = text.upper()\n    if re.search(r'(?<![A-Za-z0-9])10-?K(?![A-Za-z0-9])', up):\n        return '10-K'\n    if re.search(r'(?<![A-Za-z0-9])10-?Q(?![A-Za-z0-9])', up):\n        return '10-Q'\n    if re.search(r'(?<![A-Za-z0-9])8-?K(?![A-Za-z0-9])', up):\n        return '8-K'\n    if re.search(r'(?<![A-Za-z0-9])EARNINGS(?![A-Za-z0-9])', up):\n        return 'earnings'\n    if re.search(r'(?<![A-Za-z0-9])ANNUAL[ ]+REPORT(?![A-Za-z0-9])', up):\n        return '10-K'\n    if re.search(r'(?<![A-Za-z0-9])QUARTERLY[ ]+REPORT(?![A-Za-z0-9])', up):\n        return '10-Q'\n    return None\n\ndef _company_aliases(tokens_norm):\n    aliases = set()\n    if not tokens_norm:\n        return aliases\n    aliases.add(''.join(tokens_norm))\n    aliases.add(' '.join(tokens_norm))\n    initials = ''.join(t[0] for t in tokens_norm if t)\n    if len(initials) >= 2:\n        aliases.add(initials)\n        aliases.add('n'.join(list(initials)))\n        aliases.add('and'.join(list(initials)))\n        if len(tokens_norm) >= 2:\n            aliases.add(tokens_norm[0] + 'n' + tokens_norm[-1])\n            aliases.add(tokens_norm[0][0] + 'n' + tokens_norm[-1][0])\n    return aliases\n\ndef _proper_tokens(question):\n    out = set()\n    for t in re.findall(r'[A-Za-z0-9]+', question):\n        if not t or t.islower() or t.isdigit():\n            continue\n        if re.fullmatch(r'(?:FY|FISCAL|Q)[0-9]+', t, re.I):\n            continue\n        out.add(t.lower())\n    return out\n\ndef _parse_question(question):\n    years = set()\n    quarters = set()\n    for m in re.finditer(r'(?<![0-9])(?:19|20)[0-9]{2}(?![0-9])', question):\n        years.add(int(m.group(0)))\n    for m in re.finditer(r'(?:FY|FISCAL(?:[ ]+YEAR)?[ ]+)((?:19|20)[0-9]{2})', question, re.I):\n        years.add(int(m.group(1)))\n    for m in re.finditer(r'(?<![0-9])(?:19|20)([0-9]{2})[Qq]([1-4])(?![0-9])', question):\n        years.add(int(m.group(0)[:4]))\n        quarters.add(int(m.group(2)))\n    for m in re.finditer(r'(?<![A-Za-z0-9])[Qq]([1-4])(?![0-9])', question):\n        quarters.add(int(m.group(1)))\n    word_quarters = {'first': 1, '1st': 1, 'second': 2, '2nd': 2, 'third': 3, '3rd': 3, 'fourth': 4, '4th': 4}\n    for word, qnum in word_quarters.items():\n        if re.search(word + r'[ ]+quarter', question, re.I):\n            quarters.add(qnum)\n    dates = _extract_date_tuples(question)\n    filing_type = _extract_filing_type(question)\n    normalized_q = re.sub(r'[^a-z0-9]+', '', question.lower())\n    q_tokens = set(re.findall(r'[a-z0-9]+', question.lower()))\n    proper_tokens = _proper_tokens(question)\n    return {'years': years, 'quarters': quarters, 'filing_type': filing_type,\n            'dates': dates, 'normalized_q': normalized_q, 'q_tokens': q_tokens,\n            'proper_tokens': proper_tokens}\n\ndef _parse_doc(doc):\n    doc_id = doc.get('doc_id', '')\n    source_name = doc.get('source_name', '')\n    combined = doc_id + ' ' + source_name\n    filing_type = _extract_filing_type(combined)\n    years, quarters = _extract_periods(combined)\n    dates = _extract_date_tuples(combined)\n    doc_tokens = _extract_company_tokens(doc_id)\n    src_tokens = _extract_company_tokens(source_name)\n    if doc_tokens and not _looks_generic_doc_id(doc_id):\n        company_tokens = doc_tokens\n    elif src_tokens:\n        company_tokens = src_tokens\n    else:\n        company_tokens = doc_tokens or src_tokens\n    seen = set()\n    uniq = []\n    for token in company_tokens:\n        key = token.lower()\n        if key not in seen:\n            seen.add(key)\n            uniq.append(token)\n    company_tokens = uniq\n    company_raw = ' '.join(company_tokens) if company_tokens else doc_id\n    company_norm = re.sub(r'[^a-z0-9]+', '', company_raw.lower())\n    company_tokens_norm = [re.sub(r'[^a-z0-9]+', '', token.lower()) for token in company_tokens]\n    aliases = _company_aliases(company_tokens_norm)\n    return {'doc_id': doc_id, 'source_name': source_name, 'company': company_raw,\n            'company_norm': company_norm, 'company_tokens_norm': company_tokens_norm,\n            'aliases': aliases, 'filing_type': filing_type, 'years': years,\n            'quarters': quarters, 'dates': dates,\n            'document_dates': [_fmt_date(d) for d in dates]}\n\ndef _date_tuple_match(a, b):\n    if a == b:\n        return True\n    if a[2] == 0 and a[0] == b[0] and a[1] == b[1]:\n        return True\n    if b[2] == 0 and a[0] == b[0] and a[1] == b[1]:\n        return True\n    return False\n\ndef _match_company(meta, parsed_q):\n    company_norm = meta['company_norm']\n    aliases = meta['aliases']\n    normalized_q = parsed_q['normalized_q']\n    q_tokens = parsed_q['q_tokens']\n    proper = parsed_q['proper_tokens']\n    if not company_norm:\n        return 0.0, False\n    if len(company_norm) >= 3 and company_norm in normalized_q:\n        return 1.0, True\n    if company_norm in q_tokens:\n        return 1.0, True\n    for alias in aliases:\n        if len(alias) >= 2 and (alias in normalized_q or alias in proper):\n            return 1.0, True\n    for tok in proper:\n        if len(tok) >= 3:\n            if company_norm.startswith(tok) or tok.startswith(company_norm):\n                return 1.0, True\n    return 0.0, False\n\ndef run(question, documents, top_k=5):\n    parsed_q = _parse_question(question)\n    scored = []\n    for doc in documents:\n        meta = _parse_doc(doc)\n        company_score, company_match = _match_company(meta, parsed_q)\n\n        if parsed_q['years']:\n            inter_years = meta['years'] & parsed_q['years']\n            if inter_years:\n                year_score = 1.0\n                year_match = True\n            else:\n                year_score = 0.0\n                year_match = False\n        else:\n            year_score = 0.5\n            year_match = None\n\n        if parsed_q['quarters']:\n            inter_q = meta['quarters'] & parsed_q['quarters']\n            if inter_q:\n                quarter_score = 1.0\n                quarter_match = True\n            else:\n                quarter_score = 0.0\n                quarter_match = False\n        else:\n            quarter_score = 0.5\n            quarter_match = None\n\n        if parsed_q['filing_type']:\n            if meta['filing_type'] == parsed_q['filing_type']:\n                filing_score = 1.0\n                filing_match = True\n            else:\n                filing_score = 0.0\n                filing_match = False\n        else:\n            filing_score = 0.5\n            filing_match = None\n\n        date_score = 0.0\n        date_match = False\n        if parsed_q['dates'] and meta['dates']:\n            for qd in parsed_q['dates']:\n                for dd in meta['dates']:\n                    if _date_tuple_match(qd, dd):\n                        date_score = 1.0\n                        date_match = True\n                        break\n                if date_match:\n                    break\n\n        score = 3.0 * company_score + 1.5 * year_score + 1.0 * quarter_score + 1.0 * filing_score + 2.0 * date_score\n\n        reasons = []\n        if company_match:\n            reasons.append('company=' + meta['company'])\n        if year_match is True:\n            reasons.append('year=' + str(sorted(inter_years)[0]))\n        if quarter_match is True:\n            reasons.append('quarter=' + str(sorted(inter_q)[0]))\n        if filing_match is True:\n            reasons.append('filing_type=' + str(meta['filing_type']))\n        if date_match:\n            reasons.append('date=' + meta['document_dates'][0])\n        if not reasons:\n            reasons.append('no strong match')\n\n        match_count = sum([\n            1 if company_match else 0,\n            1 if year_match is True else 0,\n            1 if quarter_match is True else 0,\n            1 if filing_match is True else 0,\n            1 if date_match else 0,\n        ])\n\n        scored.append({\n            'doc_id': doc.get('doc_id', ''),\n            'source_name': doc.get('source_name', ''),\n            'company': meta['company'],\n            'fiscal_year': sorted(meta['years']),\n            'fiscal_quarter': sorted(meta['quarters']),\n            'filing_type': meta['filing_type'],\n            'document_dates': meta['document_dates'],\n            'score': round(score, 4),\n            'match_reasons': reasons,\n            'company_match': company_match,\n            'year_match': year_match,\n            'quarter_match': quarter_match,\n            'filing_type_match': filing_match,\n            'date_match': date_match,\n            'match_count': match_count,\n        })\n\n    scored.sort(key=lambda item: (-item['score'], -item['match_count'], item['doc_id']))\n    results = scored[:max(0, top_k)]\n\n    company_matched = [r for r in scored if r['company_match']]\n    year_matched = [r for r in scored if r['year_match'] is True]\n    quarter_matched = [r for r in scored if r['quarter_match'] is True]\n    filing_matched = [r for r in scored if r['filing_type_match'] is True]\n    date_matched = [r for r in scored if r['date_match']]\n    strong_candidates = [r for r in scored if r['company_match'] and (r['year_match'] is True or r['filing_type_match'] is True or r['quarter_match'] is True or r['date_match'])]\n\n    if results:\n        top = results[0]\n        message = 'Top candidate: ' + top['doc_id'] + ' (score ' + str(top['score']) + '). Scope subsequent searches to this doc_id and check other strong candidates for guidance/quarterly questions.'\n    else:\n        message = 'No documents provided.'\n\n    return {\n        'query_parsed': {\n            'years': sorted(parsed_q['years']),\n            'quarters': sorted(parsed_q['quarters']),\n            'filing_type': parsed_q['filing_type'],\n            'dates': [_fmt_date(d) for d in parsed_q['dates']],\n        },\n        'document_count': len(documents),\n        'results': results,\n        'coverage': {\n            'company_matched_count': len(company_matched),\n            'year_matched_count': len(year_matched),\n            'quarter_matched_count': len(quarter_matched),\n            'filing_type_matched_count': len(filing_matched),\n            'date_matched_count': len(date_matched),\n            'strong_candidate_count': len(strong_candidates),\n            'company_matched_doc_ids': [r['doc_id'] for r in company_matched],\n            'strong_candidate_doc_ids': [r['doc_id'] for r in strong_candidates],\n        },\n        'message': message,\n    }\n",
+  "usage_policy": {
+    "when_to_call": "Call at the start of any filing-grounded question, before issuing a full-corpus search. Also call again after a failed full-corpus search to enumerate candidate documents. Use top_k >= 5, and top_k = 10 when the company or filing type is ambiguous.",
+    "how_to_use_output": "Take the top-ranked result's doc_id as the scope for bm25_search/regex_search/read_section. If multiple strong candidates exist, check each one rather than stopping at the top result; in particular, check earnings releases for guidance/expectations questions and annual reports for balance-sheet/income-statement questions. Use coverage.strong_candidate_doc_ids to enumerate candidates before concluding 'not found'.",
+    "fallback": "If the tool returns no strong company match, do not immediately conclude absence. Run one broad get_doc_structure/vector_search over the corpus and inspect source headers. If a candidate doc_id is known but not in results, pass it explicitly to read_section.",
+    "stopping_rule": "Stop document selection when a candidate has company_match=true and at least one of year_match, quarter_match, filing_type_match, or date_match=true, and a subsequent content search locates the relevant statement or table. If no candidate satisfies that after checking all strong candidates and a final broad inventory pass, conclude the corpus does not contain a matching document."
+  },
+  "tests": [
+    {
+      "name": "fiscal_year_parsing_no_century_leak",
+      "question": "What is the FY2017 operating cash flow ratio for Acme?",
+      "documents": [
+        {
+          "doc_id": "d1",
+          "source_name": "ACME_2017_10K"
+        },
+        {
+          "doc_id": "d2",
+          "source_name": "ACME_2015_10K"
+        },
+        {
+          "doc_id": "d3",
+          "source_name": "GLOBEX_2017_10K"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "d1"
+    },
+    {
+      "name": "quarter_and_fiscal_year_parsing",
+      "question": "What were Acme's Q2 FY2023 revenues?",
+      "documents": [
+        {
+          "doc_id": "q1",
+          "source_name": "ACME_2023Q2_10Q"
+        },
+        {
+          "doc_id": "q2",
+          "source_name": "ACME_2023_10K"
+        },
+        {
+          "doc_id": "q3",
+          "source_name": "ACME_2022Q2_10Q"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "q1"
+    },
+    {
+      "name": "ampersand_initialism_company_match",
+      "question": "What was J&J's FY2023 total revenue?",
+      "documents": [
+        {
+          "doc_id": "j1",
+          "source_name": "JOHNSON_JOHNSON_2023_10K"
+        },
+        {
+          "doc_id": "j2",
+          "source_name": "JOHNSON_JOHNSON_2022_10K"
+        },
+        {
+          "doc_id": "j3",
+          "source_name": "OTHER_2023_10K"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "j1"
+    },
+    {
+      "name": "ticker_prefix_company_match",
+      "question": "What is JPM's FY2022 gross margin consistency?",
+      "documents": [
+        {
+          "doc_id": "p1",
+          "source_name": "JPMORGAN_2022_10K"
+        },
+        {
+          "doc_id": "p2",
+          "source_name": "JPMORGAN_2021_10K"
+        },
+        {
+          "doc_id": "p3",
+          "source_name": "OTHER_2022_10K"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "p1"
+    },
+    {
+      "name": "dated_8k_selection",
+      "question": "What was the key agenda of ACME's 8-K filing dated 1st July 2022?",
+      "documents": [
+        {
+          "doc_id": "a1",
+          "source_name": "ACME_2022_8K_dated-2022-07-01"
+        },
+        {
+          "doc_id": "a2",
+          "source_name": "ACME_2022_10K"
+        },
+        {
+          "doc_id": "a3",
+          "source_name": "ACME_2021_8K_dated-2021-07-01"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "a1"
+    },
+    {
+      "name": "possessive_multiword_company_with_date_suffix",
+      "question": "What did Foot Locker's 2022 8-K announce?",
+      "documents": [
+        {
+          "doc_id": "f1",
+          "source_name": "FOOTLOCKER_2022_8K_dated_2022-08-19"
+        },
+        {
+          "doc_id": "f2",
+          "source_name": "FOOTLOCKER_2021_10K"
+        },
+        {
+          "doc_id": "f3",
+          "source_name": "OTHER_2022_8K_dated_2022-08-19"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "f1"
+    },
+    {
+      "name": "multiword_company_prefix_match",
+      "question": "Does Best Buy have improving margins in FY2023?",
+      "documents": [
+        {
+          "doc_id": "b1",
+          "source_name": "BESTBUY_2023_10K"
+        },
+        {
+          "doc_id": "b2",
+          "source_name": "BESTBUY_2022_10K"
+        },
+        {
+          "doc_id": "b3",
+          "source_name": "OTHER_2023_10K"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "b1"
+    },
+    {
+      "name": "common_word_not_treated_as_company_prefix",
+      "question": "What was the cost of revenue for Globex in FY2022?",
+      "documents": [
+        {
+          "doc_id": "c1",
+          "source_name": "COSTCO_2022_10K"
+        },
+        {
+          "doc_id": "g1",
+          "source_name": "GLOBEX_2022_10K"
+        }
+      ],
+      "top_k": 2,
+      "expected_top_doc_id": "g1"
+    },
+    {
+      "name": "month_year_date_parsing_no_group_error",
+      "question": "What were ACME's July 2022 revenues?",
+      "documents": [
+        {
+          "doc_id": "m1",
+          "source_name": "ACME_2022-07-01_10Q"
+        },
+        {
+          "doc_id": "m2",
+          "source_name": "ACME_2022_10K"
+        },
+        {
+          "doc_id": "m3",
+          "source_name": "ACME_2021-07-01_10Q"
+        }
+      ],
+      "top_k": 3,
+      "expected_top_doc_id": "m1"
+    }
+  ],
+  "prediction": {
+    "expected_quality_effect": "Fixes the fiscal-year century bug, date-suffix company pollution, possessive/multiword/initialism/ticker-prefix matching failures, and the month-year regex group crash that caused false no-match results and wrong-company loops. Expected modest accuracy improvement and better evidence-source recall on questions with acronym, possessive, dated-8-K, or month-year phrasing.",
+    "expected_cost_effect": "One O(N) metadata pass remains cheap. Fewer wasted full-corpus searches should keep input tokens and latency at or below the already-reduced candidate levels.",
+    "falsification_test": "On held-out cases with clear company names, including possessive forms, initialism forms, ticker prefixes, dated 8-K filings, and month-year dates, if query_parsed still contains a spurious century-prefix year, company_matched_count is 0 for an obvious company mention, a month-year date raises a regex group error, or the wrong company/date filing is ranked first, the repair is falsified."
+  },
+  "novelty_claim": "No literature novelty claimed; this is a conservative repair of an existing deterministic metadata-ranking tool using generic normalization, date masking, named-group regexes, and prefix/alias rules.",
+  "generated_test_results": [
+    {
+      "name": "fiscal_year_parsing_no_century_leak",
+      "passed": true,
+      "expected_top": "d1",
+      "actual_top": "d1"
+    },
+    {
+      "name": "quarter_and_fiscal_year_parsing",
+      "passed": true,
+      "expected_top": "q1",
+      "actual_top": "q1"
+    },
+    {
+      "name": "ampersand_initialism_company_match",
+      "passed": true,
+      "expected_top": "j1",
+      "actual_top": "j1"
+    },
+    {
+      "name": "ticker_prefix_company_match",
+      "passed": true,
+      "expected_top": "p1",
+      "actual_top": "p1"
+    },
+    {
+      "name": "dated_8k_selection",
+      "passed": true,
+      "expected_top": "a1",
+      "actual_top": "a1"
+    },
+    {
+      "name": "possessive_multiword_company_with_date_suffix",
+      "passed": true,
+      "expected_top": "f1",
+      "actual_top": "f1"
+    },
+    {
+      "name": "multiword_company_prefix_match",
+      "passed": true,
+      "expected_top": "b1",
+      "actual_top": "b1"
+    },
+    {
+      "name": "common_word_not_treated_as_company_prefix",
+      "passed": true,
+      "expected_top": "g1",
+      "actual_top": "g1"
+    },
+    {
+      "name": "month_year_date_parsing_no_group_error",
+      "passed": true,
+      "expected_top": "m1",
+      "actual_top": "m1"
+    }
+  ],
+  "static_safety_problems": []
+}

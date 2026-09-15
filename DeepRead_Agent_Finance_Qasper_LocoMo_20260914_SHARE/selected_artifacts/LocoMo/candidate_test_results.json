@@ -1,0 +1,90 @@
+[
+  {
+    "name": "exact_fact_in_utterance_not_summary",
+    "passed": true,
+    "expected_doc": "doc_exact",
+    "actual_doc": "doc_exact",
+    "expected_node": null,
+    "actual_node": "s1p2"
+  },
+  {
+    "name": "speaker_disambiguation",
+    "passed": true,
+    "expected_doc": "doc_speaker",
+    "actual_doc": "doc_speaker",
+    "expected_node": null,
+    "actual_node": "d2p2"
+  },
+  {
+    "name": "date_filter_selects_correct_session",
+    "passed": true,
+    "expected_doc": "doc_date",
+    "actual_doc": "doc_date",
+    "expected_node": null,
+    "actual_node": "date_p1"
+  },
+  {
+    "name": "list_aggregation_across_utterances",
+    "passed": true,
+    "expected_doc": "doc_list",
+    "actual_doc": "doc_list",
+    "expected_node": null,
+    "actual_node": "l1"
+  },
+  {
+    "name": "quoted_phrase_title_search",
+    "passed": true,
+    "expected_doc": "doc_quote",
+    "actual_doc": "doc_quote",
+    "expected_node": null,
+    "actual_node": "q1"
+  },
+  {
+    "name": "exact_fact_in_utterance_not_summary",
+    "passed": true,
+    "expected_doc": "doc_exact",
+    "actual_doc": "doc_exact",
+    "expected_node": "ut2",
+    "actual_node": "ut2"
+  },
+  {
+    "name": "speaker_disambiguation",
+    "passed": true,
+    "expected_doc": "doc_speaker",
+    "actual_doc": "doc_speaker",
+    "expected_node": "bob1",
+    "actual_node": "bob1"
+  },
+  {
+    "name": "shared_activity_same_session_context",
+    "passed": true,
+    "expected_doc": "doc_shared",
+    "actual_doc": "doc_shared",
+    "expected_node": "bob1",
+    "actual_node": "bob1"
+  },
+  {
+    "name": "list_aggregation_across_sessions",
+    "passed": true,
+    "expected_doc": "doc_list",
+    "actual_doc": "doc_list",
+    "expected_node": null,
+    "actual_node": "e1"
+  },
+  {
+    "name": "date_anchor_with_relative_phrase",
+    "passed": true,
+    "expected_doc": "doc_date",
+    "actual_doc": "doc_date",
+    "expected_node": "e_race",
+    "actual_node": "e_race"
+  },
+  {
+    "name": "life_stage_qualifier_ranking",
+    "passed": true,
+    "expected_doc": "doc_life",
+    "actual_doc": "doc_life",
+    "expected_node": "b1",
+    "actual_node": "b1"
+  }
+]

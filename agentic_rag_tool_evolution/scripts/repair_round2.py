@@ -33,6 +33,8 @@ Do not add a second incompatible tool in this round.
 
 The executable contract remains exactly:
     run(question: str, documents: list[dict[str, str]], top_k: int = 5) -> dict
+It must be the only public module-level function; every helper (including nested closures) must be
+private with a leading underscore.
 Documents contain only doc_id and source_name. Return JSON-serializable data with ranked results.
 Allowed imports: re, math, json, collections, typing, dataclasses.
 Forbidden: file/network/process/environment access, dynamic execution, third-party packages.
@@ -53,7 +55,8 @@ CORRECTION_SYSTEM = """You are continuing an autonomous RAG tool-repair attempt.
 Your previous candidate was rejected by an automated, generic validation gate. Repair the candidate from the
 machine feedback without hard-coding the failing test, benchmark companies, question IDs, or expected document
 IDs. Preserve improvements that already passed. Return a complete replacement JSON object with the same keys
-and the same run(question, documents, top_k) contract. Include at least 6 generic tests using
+and the same run(question, documents, top_k) contract: it must remain the only public module-level
+function, with every helper (including nested closures) private with a leading underscore. Include at least 6 generic tests using
 expected_top_doc_id. The corrected code must remain safe and generalizable.
 """
 

@@ -1,0 +1,735 @@
+import os
+import json
+import time
+import numpy as np
+import re
+import hashlib
+import threading
+import importlib.util
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass, field
+from tqdm import tqdm
+
+from src.adapters.base import StandardDoc
+from src.core.monitor import BenchmarkMonitor
+from src.core.logger import get_logger
+from src.core.doubao_embedding_util import VolcengineEmbedder, embedding_token_tracker
+from src.core.token_tracer_util import token_tracker
+
+from DeepRead.tool import load_corpus
+from DeepRead.tool.utils import _normalize_neighbor_window
+from DeepRead.index import ensure_source_header, parse_markdown_to_corpus
+from DeepRead.agent import (
+    run_agent,
+    JsonlLogger,
+)
+
+
+@dataclass
+class DeepReadResource:
+    uri: str = ""
+    content: str = ""
+    score: float = 0.0
+
+
+@dataclass
+class DeepReadResult:
+    resources: List[DeepReadResource] = field(default_factory=list)
+    retrieve_input_tokens: int = 0
+    retrieve_output_tokens: int = 0
+    retrieved_texts: List[str] = field(default_factory=list)
+
+
+class DeepReadWrapper:
+    """
+    DeepRead 向量存储包装器，接口与 VikingStoreWrapper 对齐。
+
+    每个 sample_id 对应 doc_output_dir/{sample_id}/ 下的独立目录。
+    ingest 阶段：PDF -> PaddleOCR -> Markdown -> corpus JSON + embedding .npy
+    retrieve 阶段：按 target_uri（即 sample_id）加载对应目录的 corpus，
+    调用 run_agent 返回最终答案字符串。
+    """
+
+    def __init__(
+        self,
+        store_path: str,
+        doc_output_dir: str,
+        output_dir: str,
+        model: str,
+        base_url: str,
+        api_key: str,
+        temperature: float = 0.0,
+        enable_vector: bool = True,
+        enable_hybrid: bool = False,
+        enable_semantic: bool = False,
+        neighbor_window: str = "1,-1",
+        max_rounds: int = 50,
+        use_pymupdf: bool = False,
+        source_header_enabled: bool = True,
+        enable_session_pagination: bool = True,
+        preload_directory_structure: bool = False,
+        enable_document_title_search: bool = False,
+        enable_document_inventory_search: bool = False,
+        document_inventory_tool_path: str = "",
+        enable_generated_corpus_search: bool = False,
+        generated_corpus_tool_path: str = "",
+        generated_corpus_inventory_path: str = "",
+        enable_generated_corpus_gate: bool = False,
+        generated_corpus_gate_path: str = "",
+        enable_structure_title_search: bool = False,
+        max_identical_tool_calls: int = 0,
+        max_search_tool_calls: int = 0,
+        max_structure_search_calls: int = 0,
+        agent_topk_max: int = 10,
+        pagination_candidate_limit: int = 50,
+        agent_instructions: Optional[List[str] | str] = None,
+        embedding_api_key: Optional[str] = None,
+        embedding_base_url: Optional[str] = None,
+        embedding_model: str = "doubao-embedding-vision-250615",
+    ):
+        self.store_path = store_path
+        self.doc_output_dir = doc_output_dir
+        self.output_dir = output_dir
+        self.logger = get_logger()
+
+        os.makedirs(self.store_path, exist_ok=True)
+
+        self.model = model
+        self.base_url = base_url
+        self.api_key = api_key
+        self.temperature = temperature
+        self.enable_vector = enable_vector
+        self.enable_hybrid = enable_hybrid
+        self.enable_semantic = enable_semantic
+        self.max_rounds = max_rounds
+        self.use_pymupdf = use_pymupdf
+        self.source_header_enabled = source_header_enabled
+        self.enable_session_pagination = enable_session_pagination
+        self.preload_directory_structure = preload_directory_structure
+        self.enable_document_title_search = enable_document_title_search
+        self.enable_document_inventory_search = enable_document_inventory_search
+        self.document_inventory_tool_path = str(document_inventory_tool_path or "")
+        self.document_inventory_tool = None
+        if self.enable_document_inventory_search:
+            if not self.document_inventory_tool_path:
+                raise ValueError(
+                    "enable_document_inventory_search requires document_inventory_tool_path"
+                )
+            candidate_path = os.path.abspath(self.document_inventory_tool_path)
+            if not os.path.isfile(candidate_path):
+                raise FileNotFoundError(
+                    f"Generated document inventory tool not found: {candidate_path}"
+                )
+            module_name = "deepread_generated_inventory_" + hashlib.sha1(
+                candidate_path.encode("utf-8")
+            ).hexdigest()[:12]
+            spec = importlib.util.spec_from_file_location(module_name, candidate_path)
+            if spec is None or spec.loader is None:
+                raise RuntimeError(f"Cannot load generated tool: {candidate_path}")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            generated_run = getattr(module, "run", None)
+            if not callable(generated_run):
+                raise RuntimeError("Generated tool must export callable run")
+            self.document_inventory_tool = generated_run
+        self.enable_generated_corpus_search = enable_generated_corpus_search
+        self.generated_corpus_tool_path = str(generated_corpus_tool_path or "")
+        self.generated_corpus_inventory_path = str(generated_corpus_inventory_path or "")
+        self.generated_corpus_inventory = {}
+        if self.generated_corpus_inventory_path:
+            inventory_path = os.path.abspath(self.generated_corpus_inventory_path)
+            if not os.path.isfile(inventory_path):
+                raise FileNotFoundError(
+                    f"Generated corpus inventory not found: {inventory_path}"
+                )
+            with open(inventory_path, "r", encoding="utf-8") as handle:
+                loaded_inventory = json.load(handle)
+            if not isinstance(loaded_inventory, dict):
+                raise RuntimeError("Generated corpus inventory must be a JSON object")
+            self.generated_corpus_inventory = loaded_inventory
+        self.generated_corpus_tool = None
+        if self.enable_generated_corpus_search:
+            if not self.generated_corpus_tool_path:
+                raise ValueError(
+                    "enable_generated_corpus_search requires generated_corpus_tool_path"
+                )
+            candidate_path = os.path.abspath(self.generated_corpus_tool_path)
+            if not os.path.isfile(candidate_path):
+                raise FileNotFoundError(
+                    f"Generated corpus tool not found: {candidate_path}"
+                )
+            module_name = "deepread_generated_corpus_" + hashlib.sha1(
+                candidate_path.encode("utf-8")
+            ).hexdigest()[:12]
+            spec = importlib.util.spec_from_file_location(module_name, candidate_path)
+            if spec is None or spec.loader is None:
+                raise RuntimeError(f"Cannot load generated tool: {candidate_path}")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            generated_run = getattr(module, "run", None)
+            if not callable(generated_run):
+                raise RuntimeError("Generated corpus tool must export callable run")
+            self.generated_corpus_tool = generated_run
+        self.enable_generated_corpus_gate = bool(enable_generated_corpus_gate)
+        self.generated_corpus_gate_path = str(generated_corpus_gate_path or "")
+        self.generated_corpus_gate = None
+        if self.enable_generated_corpus_gate:
+            if not self.enable_generated_corpus_search:
+                raise ValueError(
+                    "enable_generated_corpus_gate requires enable_generated_corpus_search"
+                )
+            if not self.generated_corpus_gate_path:
+                raise ValueError(
+                    "enable_generated_corpus_gate requires generated_corpus_gate_path"
+                )
+            gate_path = os.path.abspath(self.generated_corpus_gate_path)
+            if not os.path.isfile(gate_path):
+                raise FileNotFoundError(f"Generated corpus gate not found: {gate_path}")
+            module_name = "deepread_generated_gate_" + hashlib.sha1(
+                gate_path.encode("utf-8")
+            ).hexdigest()[:12]
+            gate_spec = importlib.util.spec_from_file_location(module_name, gate_path)
+            if gate_spec is None or gate_spec.loader is None:
+                raise RuntimeError(f"Cannot load generated gate: {gate_path}")
+            gate_module = importlib.util.module_from_spec(gate_spec)
+            gate_spec.loader.exec_module(gate_module)
+            generated_route = getattr(gate_module, "route", None)
+            if not callable(generated_route):
+                raise RuntimeError("Generated gate must export callable route")
+            self.generated_corpus_gate = generated_route
+        self.enable_structure_title_search = enable_structure_title_search
+        self.max_identical_tool_calls = max(0, int(max_identical_tool_calls))
+        self.max_search_tool_calls = max(0, int(max_search_tool_calls))
+        self.max_structure_search_calls = max(0, int(max_structure_search_calls))
+        self.agent_topk_max = max(1, int(agent_topk_max))
+        self.pagination_candidate_limit = max(
+            self.agent_topk_max, int(pagination_candidate_limit)
+        )
+        self.agent_instructions = agent_instructions
+        self.embedding_api_key = embedding_api_key or api_key
+        self.embedding_base_url = (
+            embedding_base_url or base_url
+        ).rstrip("/")
+        self.embedding_model = embedding_model
+
+        # Neighbor window
+        try:
+            parts = [p.strip() for p in str(neighbor_window).split(",")]
+            if len(parts) == 2:
+                self.neighbor_window = _normalize_neighbor_window((int(parts[0]), int(parts[1])))
+            else:
+                self.neighbor_window = None
+        except Exception:
+            self.neighbor_window = None
+
+        log_path = os.path.join(self.output_dir, "deepread_run.log")
+        self.jsonl_logger = JsonlLogger(log_path)
+
+        # DocIndex 缓存： ingest完成后首次retrieve时构建，之后所有线程复用
+        # _cache_lock 仅保护首次构建（double-checked locking), 构建完成后走无锁快路径
+        self._doc_index_cacahe = None
+        self._cache_lock = threading.Lock()
+
+        try:
+            import tiktoken
+            self.enc = tiktoken.get_encoding("cl100k_base")
+        except Exception as e:
+            self.logger.warning(f"tiktoken init failed: {e}")
+            self.enc = None
+
+    @classmethod
+    def from_config(cls, store_path: str, doc_output_dir: str, output_dir: str, llm_cfg: dict, store_cfg: dict) -> "DeepReadWrapper":
+        """从 config.yaml 的三个子块构造实例，供 run.py 调用。"""
+        neighbor_window = store_cfg.get("neighbor_window", "1,-1")
+        return cls(
+            store_path=store_path,
+            doc_output_dir=doc_output_dir,
+            output_dir = output_dir,
+            model=llm_cfg.get("model", ""),
+            base_url=llm_cfg.get("base_url", ""),
+            api_key=llm_cfg.get("api_key", ""),
+            temperature=llm_cfg.get("temperature", 0.0),
+            enable_vector=store_cfg.get("enable_vector", True),
+            enable_hybrid=store_cfg.get("enable_hybrid", False),
+            enable_semantic=store_cfg.get("enable_semantic", False),
+            neighbor_window=str(neighbor_window),
+            max_rounds=store_cfg.get("max_rounds", 12),
+            use_pymupdf=store_cfg.get("use_pymupdf", False),
+            source_header_enabled=store_cfg.get("source_header_enabled", True),
+            enable_session_pagination=store_cfg.get(
+                "enable_session_pagination", True
+            ),
+            preload_directory_structure=store_cfg.get(
+                "preload_directory_structure", False
+            ),
+            enable_document_title_search=store_cfg.get(
+                "enable_document_title_search", False
+            ),
+            enable_document_inventory_search=store_cfg.get(
+                "enable_document_inventory_search", False
+            ),
+            document_inventory_tool_path=store_cfg.get(
+                "document_inventory_tool_path", ""
+            ),
+            enable_generated_corpus_search=store_cfg.get(
+                "enable_generated_corpus_search", False
+            ),
+            generated_corpus_tool_path=store_cfg.get(
+                "generated_corpus_tool_path", ""
+            ),
+            generated_corpus_inventory_path=store_cfg.get(
+                "generated_corpus_inventory_path", ""
+            ),
+            enable_generated_corpus_gate=store_cfg.get(
+                "enable_generated_corpus_gate", False
+            ),
+            generated_corpus_gate_path=store_cfg.get(
+                "generated_corpus_gate_path", ""
+            ),
+            enable_structure_title_search=store_cfg.get(
+                "enable_structure_title_search", False
+            ),
+            max_identical_tool_calls=store_cfg.get("max_identical_tool_calls", 0),
+            max_search_tool_calls=store_cfg.get("max_search_tool_calls", 0),
+            max_structure_search_calls=store_cfg.get(
+                "max_structure_search_calls", 0
+            ),
+            agent_topk_max=store_cfg.get("agent_topk_max", 10),
+            pagination_candidate_limit=store_cfg.get(
+                "pagination_candidate_limit", 50
+            ),
+            agent_instructions=store_cfg.get("agent_instructions", ""),
+            embedding_api_key=store_cfg.get("embedding_api_key"),
+            embedding_base_url=store_cfg.get("embedding_base_url"),
+            embedding_model=store_cfg.get(
+                "embedding_model", "doubao-embedding-vision-250615"
+            ),
+        )
+    
+    def _pdf_to_markdown_pymupdf(self, pdf_path: str, md_path: str, sample_id: str):
+        """
+        用 pymupdf 从数字原生 PDF 提取文本，写成 Markdown 文件。
+        每页以 `## Page N` 作为标题，保留段落换行。
+        仅适用于数字原生 PDF（非扫描版）。
+        """
+        import fitz
+        # pymupdf
+
+        doc = fitz.open(pdf_path)
+        page_count = len(doc)
+        with open(md_path, "w", encoding="utf-8") as f:
+            for page_num, page in enumerate(doc, start=1):
+                text = page.get_text("text").strip()
+                if not text:
+                    continue
+                f.write(f"## Page {page_num}\n\n")
+                f.write(text)
+                f.write("\n\n")
+        doc.close()
+        self.logger.info(f"[{sample_id}] pymupdf extracted {page_count} pages -> {md_path}")
+
+    def _sample_dir(self, sample_id: str) -> str:
+        """返回 sample 的独立工作目录路径。"""
+        return os.path.join(self.doc_output_dir, sample_id)
+    
+    def _corpus_path(self, sample_id: str) -> str:
+        """返回 sample 的 corpus JSON 路径。"""
+        return os.path.join(self._sample_dir(sample_id), f"{sample_id}_corpus.json")
+
+    def count_tokens(self, text: str) -> int:
+        if not text or not self.enc:
+            return 0
+        return len(self.enc.encode(str(text)))
+    
+    def build_uri_map(self, doc_info: list[StandardDoc]) -> Dict[str, list]:
+        """"""
+        return {doc.sample_id: [doc.sample_id] for doc in doc_info}
+
+    def ingest(self, samples: List[StandardDoc], max_workers: int = 4, monitor: Optional[BenchmarkMonitor] = None) -> dict:
+        """
+        将文档转换为 DeepRead 的 corpus JSON 格式并写入 store_path，
+        然后构建 DocIndex。
+        """
+
+        # TODO 完善并发处理逻辑（monitor在并发处理时起到展示作用）
+        start_time = time.time()
+        embedding_token_tracker.reset()
+
+        if self.use_pymupdf:
+            ocr_pipeline = None
+        else:
+            from paddleocr import PaddleOCRVL
+            ocr_pipeline = PaddleOCRVL(
+                vl_rec_backend="vllm-server",
+                vl_rec_server_url="http://127.0.0.1:8956/v1",
+            )
+
+        embedder = VolcengineEmbedder(
+            model_name=self.embedding_model,
+            api_key=self.embedding_api_key,
+            api_base=self.embedding_base_url,
+            input_type="multimodal",
+            dimension=2048,
+        )
+
+        for sample in tqdm(samples, desc="Ingesting Docs to DeepRead"):
+            if monitor:
+                monitor.worker_start()
+
+            try:
+                self._ingest_one(sample, ocr_pipeline, embedder)
+                if monitor:
+                    monitor.worker_end(success=True)
+            except Exception as e:
+                self.logger.error(f"Failed to ingest sample {sample.sample_id}: {e}")
+                if monitor:
+                    monitor.worker_end(success=False)
+                raise e
+            
+        self.invalidate_doc_index_cache()
+
+        token_usage = embedding_token_tracker.get()
+        return {
+            "time": time.time() - start_time,
+            "input_tokens": token_usage["input_tokens"],
+            "output_tokens": token_usage["output_tokens"],
+        }
+    
+    def _ingest_one(self, sample: StandardDoc, ocr_pipeline, embedder: VolcengineEmbedder):
+        doc_paths = sample.doc_paths
+
+        for path in doc_paths:
+            if not os.path.exists(path):
+                self.logger.warning(f"Document path does not exist: {path}")
+                return
+            name = os.path.splitext(os.path.basename(path))[0]
+            name = re.sub(r'[\\/*?:"<>|]', '_', name)[:120]
+            name = name if name else hashlib.sha1(path.encode('utf-8')).hexdigest()[:16]
+
+            merged_md_path = os.path.join(self.store_path, f"{name}.md")
+            corpus_path = os.path.join(self.store_path, f"{name}_corpus.json")
+            emb_path = os.path.join(self.store_path, f"{name}_emb.npy")
+            idmap_path = os.path.join(self.store_path, f"{name}_idmap.json")
+
+            # --- 断点续传：如果所有输出文件都已存在，直接跳过 ---
+            if os.path.exists(merged_md_path) and os.path.exists(corpus_path) and os.path.exists(emb_path) and os.path.exists(idmap_path):
+                self.logger.info(f"[{name}] Already embedded (md/corpus/emb/idmap exist), skipping.")
+                return
+
+            #  ---Step 1: PDF -> Markdown (or Markdown directly) ---
+            ext = os.path.splitext(path)[1].lower()
+            if ext in [".md", ".markdown"]:
+                import shutil
+                shutil.copy2(path, merged_md_path)
+                self.logger.info(f"[{path}] Copied existing Markdown {merged_md_path}")
+            elif self.use_pymupdf:
+                self._pdf_to_markdown_pymupdf(path, merged_md_path, name)
+            else:
+                # TODO 没有经过验证，暂时忽略
+                merged_json_path = os.path.join(self.store_path, f"{name}.json")
+                temp_json_path = os.path.join(self.store_path, f"{name}_temp_page.json")
+                temp_md_path = os.path.join(self.store_path, f"{name}_temp_page.md")
+                
+                output = ocr_pipeline.predict(path)
+                all_json_data = []
+
+                with open(merged_md_path, "w", encoding="utf-8"):
+                    pass
+
+                for i, res in enumerate(output):
+                    try:
+                        res.save_to_json(save_path=temp_json_path)
+                        with open(temp_json_path, "r", encoding="utf-8") as f:
+                            all_json_data.append(json.load(f))
+                    except Exception as e:
+                        self.logger.warning(f"[{name}] JSON page {i+1} error: {e}")
+
+                    try:
+                        res.save_to_markdown(save_path=temp_md_path)
+                        with open(temp_md_path, "r", encoding="utf-8") as f:
+                            page_content = f.read()
+                        with open(merged_md_path, "a", encoding="utf-8") as f:
+                            f.write(page_content)
+                            if i < len(output) - 1:
+                                f.write("\n\n")
+                    except Exception as e:
+                        self.logger.warning(f"[{name}] Markdown page {i+1} error: {e}")
+
+                try:
+                    with open(merged_json_path, "w", encoding="utf-8") as f:
+                        json.dump(all_json_data, f, indent=2, ensure_ascii=False)
+                except Exception as e:
+                    self.logger.warning(f"[{name}] Save merged JSON error: {e}")
+
+                for p in (temp_json_path, temp_md_path):
+                    if os.path.exists(p):
+                        try:
+                            os.remove(p)
+                        except Exception:
+                            pass
+
+            # 文档名作为普通正文结构的一部分参与目录展示、BM25 与向量检索。
+            if self.source_header_enabled:
+                ensure_source_header(merged_md_path, name)
+
+            # --- Step 2: Markdown -> corpus ---
+            corpus = parse_markdown_to_corpus(merged_md_path)
+            corpus["source_name"] = name
+
+            # --- Step 3: Embedding ---
+            texts: List[str] = []
+            id_map: List[Dict[str, Any]] = []
+
+            for n in corpus.get("nodes", []):
+                nid = n.get("id")
+                for pi, p in enumerate(n.get("paragraphs", [])):
+                    if isinstance(p, str):
+                        t = p.strip()
+                    elif isinstance(p, dict):
+                        t = str(p.get("content", "")).strip()
+                    else:
+                        t = str(p).strip()
+
+                    if not t:
+                        continue
+                    texts.append(t)
+                    id_map.append({"node_id": nid, "paragraph_index": pi})
+
+            if texts:
+                emb_list: List[List[float]] = [
+                    embedder.embed(text=t) 
+                    for t in tqdm(texts, desc=f"[{name}] Embedding", unit="chunk", leave=False)]
+                arr = np.asarray(emb_list, dtype=np.float16)
+
+                np.save(emb_path, arr)
+                with open(idmap_path, "w", encoding="utf-8") as f:
+                    json.dump(id_map, f, ensure_ascii=False)
+
+                corpus["vector_store"] = {
+                    "matrix_path": emb_path,
+                    "id_map_path": idmap_path,
+                    "model_name": self.embedding_model,
+                    "normalized": True,
+                    "dtype": "float16",
+                    "embed_base_url": self.embedding_base_url,
+                }
+
+            # --- Step 4: save corpus JSON ---
+            with open(corpus_path, "w", encoding="utf-8") as f:
+                json.dump(corpus, f, indent=2, ensure_ascii=False)
+            self.logger.info(f"[{name}] Corpus saved to {corpus_path}")
+
+    def _get_doc_index(self):
+        """
+        懒加载并缓存DocIndex
+
+        首次调用时从store_path扫描 *_corpus.json 并构建索引
+        之后所有线程直接复用同一实例（只读，线程安全）
+        double-checked locking 确保构建过程只执行一次
+        """
+        if self._doc_index_cacahe is not None:
+            return self._doc_index_cacahe
+        with self._cache_lock:
+            if self._doc_index_cacahe is None:
+                corpus_paths = sorted([
+                    os.path.join(self.store_path, f)
+                    for f in os.listdir(self.store_path)
+                    if f.endswith('_corpus.json')
+                ])
+                self._doc_index_cacahe = load_corpus(corpus_paths, neighbor_window=self.neighbor_window)
+                self.logger.info(f"DocIndex built and cached from {len(corpus_paths)} corpus file(s) in '{self.store_path}'")
+                # 输出 doc_id -> 文档名映射，方便人工查阅
+                if getattr(self._doc_index_cacahe, 'doc_id_map', None):
+                    map_path = os.path.join(self.store_path, "deepread_doc_map.json")
+                    with open(map_path, "w", encoding="utf-8") as f:
+                        json.dump(self._doc_index_cacahe.doc_id_map, f, indent=2, ensure_ascii=False)
+                    self.logger.info(f"Doc id map saved to {map_path}")
+        return self._doc_index_cacahe
+    
+    def invalidate_doc_index_cache(self):
+        "ingest执行后调用"
+        with self._cache_lock:
+            self._doc_index_cacahe = None
+
+    def retrieve(self, query: str, topk: int = 5, target_uri: str = None) -> DeepReadResult:
+        """
+        使用 run_agent 对指定 sample 执行多轮检索并返回最终答案。
+
+        target_uri: sample_id，用于定位该 sample 的 corpus 目录。
+        返回值中 resources[0].content 即为 agent 的最终答案字符串。
+        """
+        
+        try:
+            doc_index = self._get_doc_index()
+        except Exception as e:
+            self.logger.error(f"Failed to load corpus for '{self.store_path}': {e}")
+            return DeepReadResult()
+
+        # reset 追踪器，确保只统计本次 run_agent 的 token 消耗
+        # 必须用 utils（非 DeepRead.utils），与 DeepRead.py 内部的 _token_tracker 是同一实例
+        token_tracker.reset()
+
+        collected_texts: List[str] = []
+
+        try:
+            answer = run_agent(
+                model=self.model,
+                base_url=self.base_url,
+                doc_index=doc_index,
+                user_question=query,
+                logger=self.jsonl_logger,
+                max_rounds=self.max_rounds,
+                temperature=self.temperature,
+                api_key=self.api_key,
+                enable_vector=self.enable_vector,
+                enable_hybrid=self.enable_hybrid,
+                enable_semantic=self.enable_semantic,
+                disable_bm25=False,
+                disable_regex=False,
+                disable_read=False,
+                embed_api_key=self.embedding_api_key,
+                embed_base_url=(
+                    f"{self.embedding_base_url}/embeddings/multimodal"
+                ),
+                embedding_model=self.embedding_model,
+                neighbor_window=self.neighbor_window,
+                bm25_topk=topk,
+                regex_topk=topk,
+                vector_topk=topk,
+                hybrid_topk=topk,
+                semantic_topk1=30,
+                semantic_topk2=1,
+                collected_texts=collected_texts,
+                enable_session_pagination=self.enable_session_pagination,
+                preload_directory_structure=self.preload_directory_structure,
+                enable_document_title_search=self.enable_document_title_search,
+                enable_document_inventory_search=self.enable_document_inventory_search,
+                document_inventory_tool=self.document_inventory_tool,
+                enable_generated_corpus_search=self.enable_generated_corpus_search,
+                generated_corpus_tool=self.generated_corpus_tool,
+                generated_corpus_inventory=self.generated_corpus_inventory,
+                generated_corpus_gate=self.generated_corpus_gate,
+                enable_structure_title_search=self.enable_structure_title_search,
+                max_identical_tool_calls=self.max_identical_tool_calls,
+                max_search_tool_calls=self.max_search_tool_calls,
+                max_structure_search_calls=self.max_structure_search_calls,
+                agent_topk_max=self.agent_topk_max,
+                pagination_candidate_limit=self.pagination_candidate_limit,
+                additional_instructions=self.agent_instructions,
+            )
+        except Exception as e:
+            self.logger.error(f"run_agent failed for '{self.store_path}': {e}")
+            answer = f"[Error] {str(e)}"
+
+        usage = token_tracker.get()
+        return DeepReadResult(
+            resources=[DeepReadResource(
+                uri=f"deepread://{self.store_path}",
+                content=answer,
+                score=1.0,
+            )],
+            retrieve_input_tokens=usage["input_tokens"],
+            retrieve_output_tokens=usage["output_tokens"],
+            retrieved_texts=collected_texts,
+        )
+
+    def process_retrieval_results(self, search_res: DeepReadResult):
+        """
+        从检索结果中提取 retrieved_texts / context_blocks / retrieved_uris。
+        """
+        retrieved_uris = [r.uri for r in search_res.resources]
+        context_blocks = [r.content for r in search_res.resources]
+        retrieved_texts = search_res.retrieved_texts if search_res.retrieved_texts else context_blocks
+
+        return retrieved_texts, context_blocks, retrieved_uris
+
+    def read_resource(self, uri: str) -> str:
+        """读取 sample 对应的 Markdown 文件内容。uri 格式为 deepread://{sample_id}。"""
+        sample_id = uri.replace("deepread://", "")
+        md_path = os.path.join(self._sample_dir(sample_id), f"{sample_id}.md")
+        if os.path.exists(md_path):
+            with open(md_path, "r", encoding="utf-8") as f:
+                return f.read()
+        return ""
+
+    _DOC_FILE_SUFFIXES = [".md", "_corpus.json", "_emb.npy", "_idmap.json", ".json"]
+    _DOC_TEMP_SUFFIXES = ["_temp_page.json", "_temp_page.md"]
+
+    def _iter_document_ids(self) -> list[str]:
+        """从 store_path 中的文件名推断出所有 document id（文件主干）。"""
+        if not os.path.exists(self.store_path):
+            return []
+        doc_ids = set()
+        for filename in os.listdir(self.store_path):
+            filepath = os.path.join(self.store_path, filename)
+            if os.path.isdir(filepath):
+                continue
+            for suffix in self._DOC_FILE_SUFFIXES:
+                if filename.endswith(suffix):
+                    doc_ids.add(filename[: -len(suffix)])
+                    break
+        return sorted(doc_ids)
+
+    def delete_document(self, doc_id: str) -> bool:
+        """删除单个文档在 store_path 下的所有派生文件。
+
+        包括：.md、_corpus.json、_emb.npy、_idmap.json、.json 以及
+        可能残留的 _temp_page.* 文件。
+        """
+        if not self.store_path or not os.path.exists(self.store_path):
+            return False
+
+        removed_any = False
+        for suffix in self._DOC_FILE_SUFFIXES + self._DOC_TEMP_SUFFIXES:
+            path = os.path.join(self.store_path, f"{doc_id}{suffix}")
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                    self.logger.info(f"[{doc_id}] Removed {path}")
+                    removed_any = True
+                except Exception as e:
+                    self.logger.warning(f"[{doc_id}] Failed to remove {path}: {e}")
+
+        return removed_any
+
+    def clear(self):
+        """逐个文档删除，但保留 store_path 目录本身。
+
+        删除时间会累计到 ``metrics_summary["deletion"]["time"]``，除以文档数即可
+        得到平均每篇文档的删除开销。
+        """
+        if not os.path.exists(self.store_path):
+            return
+
+        doc_ids = self._iter_document_ids()
+        self.logger.info(
+            f"clear(): found {len(doc_ids)} documents to delete: {doc_ids}"
+        )
+
+        for doc_id in doc_ids:
+            self.logger.info(f"clear(): deleting document {doc_id}")
+            try:
+                self.delete_document(doc_id)
+            except Exception as e:
+                self.logger.warning(f"clear(): failed to delete document {doc_id}: {e}")
+
+        self.logger.info(
+            f"clear(): finished deleting {len(doc_ids)} documents, "
+            f"store path kept: {self.store_path}"
+        )
+
+        # 清除 DocIndex 缓存，避免后续 retrieve 读到已删除的文档
+        self._doc_index_cacahe = None
+
+def main():
+    # 简单测试
+    from paddleocr import PaddleOCRVL
+    ocr_pipeline = PaddleOCRVL(
+        vl_rec_backend="vllm-server",
+        vl_rec_server_url="http://10.77.110.187:8956/v1",
+    )
+    output = ocr_pipeline.predict("/Users/zhangqianyi/Desktop/ruc-ov/Data/FinanceBench/pdfs/3M_2015_10K.pdf")
+    a = 1
+
+if __name__ == "__main__":
+    main()

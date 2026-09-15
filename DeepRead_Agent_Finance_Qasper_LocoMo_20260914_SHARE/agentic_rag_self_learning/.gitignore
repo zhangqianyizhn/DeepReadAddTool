@@ -1,0 +1,11 @@
+.env
+.venv/
+data/generated/
+runs/pilot_*/
+
+__pycache__/
+*.pyc
+runs/*
+!runs/README.md
+data/generated/
+config/generated/

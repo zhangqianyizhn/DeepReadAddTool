@@ -51,7 +51,8 @@ Turn the analyzer's selected missing capability into one small executable Python
 The tool must solve a recurring failure mechanism, not encode gold answers or specific benchmark question IDs.
 
 Runtime contract:
-- Define exactly one public function: run(question: str, documents: list[dict[str, str]], top_k: int = 5) -> dict.
+- Define exactly one public module-level function: run(question: str, documents: list[dict[str, str]], top_k: int = 5) -> dict.
+- Any helper function MUST be private (name starts with a single underscore, e.g. _add) — including nested closures.
 - Each document contains only generic corpus metadata: doc_id and source_name.
 - Return JSON-serializable data. The ranked items MUST live under a top-level `results` list (not `ranked_documents` or other aliases) — downstream validation reads exactly that key.
 - Allowed imports: re, math, json, collections, typing, dataclasses.
@@ -330,7 +331,7 @@ def validate_candidate(code: str) -> list[str]:
 
     allowed_imports = {"re", "math", "json", "collections", "typing", "dataclasses"}
     forbidden_calls = {"open", "exec", "eval", "compile", "__import__", "input", "breakpoint"}
-    public_functions: list[str] = []
+    # 安全条款（import 白名单 / 禁止调用 / 禁止 dunder）在整棵 AST 上检查；
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             names = [alias.name.split(".")[0] for alias in node.names] if isinstance(node, ast.Import) else [(node.module or "").split(".")[0]]
@@ -341,8 +342,12 @@ def validate_candidate(code: str) -> list[str]:
             problems.append(f"禁止的调用：{node.func.id}")
         elif isinstance(node, ast.Attribute) and node.attr.startswith("__"):
             problems.append(f"禁止访问双下划线属性：{node.attr}")
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
-            public_functions.append(node.name)
+    # 公开函数检查只看模块级定义：嵌套闭包无法从模块外部触达，不扩大工具的外部面。
+    public_functions = [
+        node.name
+        for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_")
+    ]
     if public_functions != ["run"]:
         problems.append(f"公开函数必须且只能是 run，实际为：{public_functions}")
     return sorted(set(problems))
@@ -482,11 +487,16 @@ def main() -> int:
 
     if (run_dir / "candidate.json").exists():
         candidate = read_json(run_dir / "candidate.json")
-        say("[断点续跑] 复用已生成的候选工具，仅重建报告。")
-        safety = candidate.get("static_safety_problems") or []
+        say("[断点续跑] 复用已生成的候选工具，按当前门禁复核并重建报告。")
+        # 用当前门禁重新复核（门禁规则可能已更新，例如公开函数检查收窄到模块级）。
+        safety = validate_candidate((run_dir / "candidate_tool.py").read_text(encoding="utf-8"))
+        candidate["static_safety_problems"] = safety
+        (run_dir / "candidate.json").write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
         report = render_report(run_dir, manifest, analysis, candidate, safety)
         (run_dir / "BLIND_RECONSTRUCTION_REPORT.md").write_text(report, encoding="utf-8")
         say(f"[完成] 盲重建报告：{run_dir / 'BLIND_RECONSTRUCTION_REPORT.md'}")
+        if safety:
+            say("[注意] 候选仍未通过静态安全检查，禁止接入；先查看报告。")
         return 0
 
     if not analysis.get("selected_capability"):

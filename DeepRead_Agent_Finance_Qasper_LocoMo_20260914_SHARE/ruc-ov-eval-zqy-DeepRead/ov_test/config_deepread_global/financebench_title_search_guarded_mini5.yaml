@@ -1,0 +1,52 @@
+project_name: "RAG_Benchmark"
+dataset_name: "FinanceBenchSmoke5"
+
+adapter:
+  module: "src.adapters.finance_bench_adapter"
+  class_name: "FinanceBenchAdapter"
+
+store:
+  type: "DeepRead"
+  enable_vector: true
+  enable_hybrid: false
+  enable_semantic: false
+  neighbor_window: "1,-1"
+  max_rounds: 15
+  use_pymupdf: true
+  source_header_enabled: true
+  enable_session_pagination: false
+  preload_directory_structure: false
+  enable_document_title_search: true
+  enable_structure_title_search: true
+  max_identical_tool_calls: 1
+  max_search_tool_calls: 10
+  max_structure_search_calls: 2
+  agent_topk_max: 1
+  pagination_candidate_limit: 1
+  agent_instructions:
+    - "Do not repeat a retrieval request merely by changing top_k."
+    - "After two unsuccessful heading searches, switch to doc-scoped content search."
+    - "Once the requested entity, period, metric, and value are supported by evidence, stop searching and answer."
+    - "Before answering, verify that the verbal conclusion is consistent with the cited numbers and with the question's requested comparison or condition."
+  embedding_api_key: "${EMBEDDING_API_KEY}"
+  embedding_base_url: "${EMBEDDING_BASE_URL}"
+  embedding_model: "${EMBEDDING_MODEL_NAME}"
+
+execution:
+  max_workers: 1
+  ingest_workers: 1
+  retrieval_topk: 1
+  max_queries: 5
+  skip_ingestion: true
+
+paths:
+  raw_data: "ExperimentInputs/{dataset_name}/data/financebench_open_source.jsonl"
+  doc_output_dir: "ExperimentArtifacts/{dataset_name}/title_ab_v1/processed_docs"
+  vector_store: "ExperimentArtifacts/{dataset_name}/title_ab_v1/store_index"
+  output_dir: "ExperimentArtifacts/{dataset_name}/Output/deepread_title_search_guarded_mini5"
+
+llm:
+  model: "${LLM_MODEL}"
+  temperature: 0
+  base_url: "${LLM_BASE_URL}"
+  api_key: "${LLM_API_KEY}"
