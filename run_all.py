@@ -39,9 +39,9 @@ RAW_DATA_HINTS = {
     "financebench": ["FinanceBench/data/financebench_open_source.jsonl"],
     "hotpotqa": ["HotpotQA/hotpot_qa_100.json", "HotpotQA/hotpot_articles.json"],
     "syllabusqa": ["SyllabusQA/train.csv", "SyllabusQA/syllabi"],
-    "locomo": ["Locomo/Locomo.json"],
-    "qasper": ["Qasper/qasper-dev-v0.3.json"],
-    "clapnq": ["clapnq-main/annotated_data", "clapnq-main/original_documents"],
+    "locomo": ["Locomo"],
+    "qasper": ["Qasper"],
+    "clapnq": ["clapnq-main/annotated_data/dev", "clapnq-main/original_documents/dev"],
 }
 
 

@@ -2,20 +2,20 @@
   "dataset": "qasper",
   "seed": 20260909,
   "ratio": "40/20/40",
-  "source": "qasper-dev-v0.3.json（本工作区仅有 dev；train-v0.3 不在数据中）",
+  "source": "qasper-train-v0.3.json",
   "question_counts": {
-    "train": 121,
+    "train": 120,
     "dev": 60,
-    "test": 119
+    "test": 120
   },
-  "doc_count": 281,
+  "doc_count": 888,
   "doc_disjoint": true,
   "doc_disjoint_note": "按论文整体分配，同一论文不跨 split；入库覆盖全部论文。",
   "excluded_question_type": "全标注 unanswerable 的题目",
   "files": {
-    "harness_all.json": "d2ff7f54ec8dbacd1764e262f3a37c962c240e536d7ad7b79ddd0ee5e86242da",
-    "harness_dev.json": "d96f1801fa27c64d33497563fde7dcdcd07165463ef6ad1b7619c254a66823cb",
-    "harness_test.json": "5ee7bfd49a25c6b45a089bd8f5076fbe4bb1d457fd701fe329175bef998af4bf",
-    "harness_train.json": "b641a314d7bd60b677404908d3400e8178a2219c0b030a926c6ca118ad0f48e9"
+    "harness_all.json": "260102d2146696dfb3dff5b8fa532895881507385adf4736d0e87739f239ca7f",
+    "harness_dev.json": "4eaf02cee43fc0ed37ca7680363f27c17de7bb6249f81225cfab7061868c5712",
+    "harness_test.json": "c596e60cb837ee5b5303854f9b1603fe9215f5899d56ba18f750852908097925",
+    "harness_train.json": "ce7b9f27a3ad35414e3dcdc7379a447091168d9f86826cc243e694056a000f24"
   }
 }

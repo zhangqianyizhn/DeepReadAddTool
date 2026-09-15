@@ -107,11 +107,18 @@ def validate_qasper(profile: "profiles.DatasetProfile") -> None:
 
 
 def validate_clapnq(profile: "profiles.DatasetProfile") -> None:
-    raise FileNotFoundError(
-        "ClapNQ 数据未就绪：Data/clapnq-main/ 下缺少标注（annotated_data/*/answerable.jsonl）"
-        "和原文（original_documents/*/answerable_orig.jsonl）。"
-        "请从 https://huggingface.co/datasets/PrimeQA/clapnq 及原始仓库下载后放入对应目录。"
-    )
+    required = [
+        profile.raw_data / "annotated_data" / "dev" / "clapnq_dev_answerable.jsonl",
+        profile.raw_data / "original_documents" / "dev" / "clapnq_dev_answerable_orig.jsonl",
+    ]
+    missing = [str(path) for path in required if not path.exists()]
+    if missing:
+        raise FileNotFoundError(
+            "ClapNQ 数据未就绪：\n" + "\n".join(missing)
+            + "\n请从 https://huggingface.co/datasets/PrimeQA/clapnq 及原始仓库下载后放入对应目录。"
+        )
+    if not (profile.splits_dir / "SPLIT_MANIFEST.json").exists():
+        raise FileNotFoundError("缺少划分：请先运行 prepare_splits.py --dataset clapnq")
 
 
 VALIDATORS = {

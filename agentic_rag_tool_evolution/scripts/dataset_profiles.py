@@ -32,6 +32,21 @@ OLD_EXPERIMENT = WORKSPACE / "agentic_rag_self_learning"
 # 数据根目录可用环境变量覆盖（服务器上数据位置可能不同）。
 DATA_ROOT = Path(os.environ.get("DEEPREAD_DATA_ROOT", str(WORKSPACE / "Data"))).expanduser().resolve()
 
+
+def _first_existing(*candidates: Path) -> Path:
+    """数据文件在不同机器上命名可能不同（如 Locomo.json vs locomo10.json），取第一个存在的。"""
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+def _syllabus_doc_dir() -> str:
+    """官方仓库的 docx 在嵌套的 syllabi_redacted/word/ 下，平铺布局也兼容。"""
+    base = DATA_ROOT / "SyllabusQA" / "syllabi"
+    nested = base / "syllabi_redacted" / "word"
+    return str(nested if nested.is_dir() else base)
+
 EXPECTED_COUNTS = {"financebench": 61, "hotpotqa": 40, "syllabusqa": 80}
 
 
@@ -275,7 +290,7 @@ SYLLABUSQA = DatasetProfile(
     processed_dir=ROOT / "data" / "index" / "syllabusqa" / "processed_docs",
     baseline_dataset_name="SyllabusQA200MatchedBaseline",
     dev_dataset_name="SyllabusQADev40",
-    env_overrides={"SYLLABUSQA_DOC_DIR": str(DATA_ROOT / "SyllabusQA" / "syllabi")},
+    env_overrides={"SYLLABUSQA_DOC_DIR": _syllabus_doc_dir()},
     _splits_dir=ROOT / "data" / "splits" / "syllabusqa",
     _runs_dir=ROOT / "runs" / "syllabusqa",
 )
@@ -357,7 +372,7 @@ LOCOMO = DatasetProfile(
         "hallucinated answers score 0."
     ),
     harness_ext=".json",
-    raw_data=DATA_ROOT / "Locomo" / "Locomo.json",
+    raw_data=_first_existing(DATA_ROOT / "Locomo" / "Locomo.json", DATA_ROOT / "Locomo" / "locomo10.json"),
     index_dir=ROOT / "data" / "index" / "locomo" / "store_index",
     processed_dir=ROOT / "data" / "index" / "locomo" / "processed_docs",
     baseline_dataset_name="Locomo300MatchedBaseline",
@@ -443,7 +458,7 @@ QASPER = DatasetProfile(
     adapter_class="QasperAdapter",
     judge_system="You are a strict Qasper answer evaluator.",
     harness_ext=".json",
-    raw_data=DATA_ROOT / "Qasper" / "qasper-dev-v0.3.json",
+    raw_data=_first_existing(DATA_ROOT / "Qasper" / "qasper-train-v0.3.json", DATA_ROOT / "Qasper" / "qasper-dev-v0.3.json"),
     index_dir=ROOT / "data" / "index" / "qasper" / "store_index",
     processed_dir=ROOT / "data" / "index" / "qasper" / "processed_docs",
     baseline_dataset_name="Qasper300MatchedBaseline",
@@ -454,7 +469,36 @@ QASPER = DatasetProfile(
 )
 
 
-# ---------------------------------------------------------------- clapnq（数据待下载，见 run_baseline 校验报错）
+# ---------------------------------------------------------------- clapnq
+
+def _clapnq_rows(split: str) -> list[dict[str, Any]]:
+    path = CLAPNQ.splits_dir / f"harness_{split}.jsonl"
+    normalized = []
+    for item in load_jsonl(path):
+        golds: list[str] = []
+        for output in item.get("output") or []:
+            answer = str((output or {}).get("answer") or "").strip()
+            if answer and answer not in golds:
+                golds.append(answer)
+        passages = item.get("passages") or []
+        normalized.append(
+            {
+                "case_id": str(item.get("id")),
+                "question": str(item.get("input", "")),
+                "answer": "；".join(golds) or "Not mentioned",
+                "question_type": "answerable",
+                "evidence_sources": [str(p.get("title", "")) for p in passages],
+                "evidence_excerpts": [str(p.get("text", ""))[:600] for p in passages[:1]],
+                "leakage_terms": [],
+                "raw": item,
+            }
+        )
+    return normalized
+
+
+def _clapnq_write_subset(rows: list[dict[str, Any]], path: Path) -> None:
+    save_jsonl(path, [row["raw"] for row in rows])
+
 
 CLAPNQ = DatasetProfile(
     name="clapnq",
@@ -463,12 +507,12 @@ CLAPNQ = DatasetProfile(
     train_count=120,
     dev_count=60,
     test_count=120,
-    doc_count=None,
+    doc_count=300,  # adapter 从 original_documents/dev 按行产出文档
     artifact_group="ClapNQ300",
     adapter_module="src.adapters.clapnq_adapter",
     adapter_class="ClapNQAdapter",
     judge_system="You are a strict CLAPNQ answer evaluator.",
-    harness_ext=".json",
+    harness_ext=".jsonl",
     raw_data=DATA_ROOT / "clapnq-main",
     index_dir=ROOT / "data" / "index" / "clapnq" / "store_index",
     processed_dir=ROOT / "data" / "index" / "clapnq" / "processed_docs",
@@ -501,21 +545,13 @@ DEFAULT_WORKERS = {
 }
 
 # FinanceBench 的归一化行直接从 v2 splits 派生；其余两个由 prepare_splits 预生成 harness 文件。
-def _clapnq_not_ready(*_args: Any) -> Any:
-    raise FileNotFoundError(
-        "ClapNQ 数据未就绪：Data/clapnq-main/ 下缺少标注（annotated_data/*/answerable.jsonl）"
-        "和原文（original_documents/*/answerable_orig.jsonl）。"
-        "请从 https://huggingface.co/datasets/PrimeQA/clapnq 及原始仓库下载后放入对应目录。"
-    )
-
-
 _LOADERS: dict[str, Callable[[str], list[dict[str, Any]]]] = {
     "financebench": _fb_rows,
     "hotpotqa": _hotpot_rows,
     "syllabusqa": _syllabus_rows,
     "locomo": _locomo_rows,
     "qasper": _qasper_rows,
-    "clapnq": _clapnq_not_ready,
+    "clapnq": _clapnq_rows,
 }
 _WRITERS: dict[str, Callable[[list[dict[str, Any]], Path], None]] = {
     "financebench": _fb_write_subset,
@@ -523,7 +559,7 @@ _WRITERS: dict[str, Callable[[list[dict[str, Any]], Path], None]] = {
     "syllabusqa": _syllabus_write_subset,
     "locomo": _locomo_write_subset,
     "qasper": _qasper_write_subset,
-    "clapnq": _clapnq_not_ready,
+    "clapnq": _clapnq_write_subset,
 }
 
 

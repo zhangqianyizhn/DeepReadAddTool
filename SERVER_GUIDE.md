@@ -49,16 +49,20 @@ Data/
 │   ├─ train.csv / val.csv / test.csv
 │   └─ syllabi/*.docx
 ├─ Locomo/
-│   └─ Locomo.json
+│   └─ locomo10.json 或 Locomo.json       # 两种命名都识别
 ├─ Qasper/
-│   └─ qasper-dev-v0.3.json        # 本工作区用 dev 集（281 篇论文）；train-v0.3 如有也可
-└─ clapnq-main/                     # ⚠️ 需自行下载，当前未附带
-    ├─ annotated_data/{train,dev}/*answerable.jsonl
-    └─ original_documents/{train,dev}/*answerable_orig.jsonl
+│   └─ qasper-train-v0.3.json（优先）或 qasper-dev-v0.3.json
+└─ clapnq-main/
+    ├─ annotated_data/dev/clapnq_dev_answerable.jsonl
+    └─ original_documents/dev/clapnq_dev_answerable_orig.jsonl
 ```
 
-ClapNQ 下载：<https://huggingface.co/datasets/PrimeQA/clapnq>（标注）+ 原始仓库的
-original_documents。未下载前 `clapnq` 相关的所有阶段都会明确报错，不影响其他数据集。
+说明：
+- **SyllabusQA** 的 docx 兼容两种布局：平铺在 `syllabi/` 下，或官方嵌套的
+  `syllabi/syllabi_redacted/word/`（自动识别，无需移动文件）。
+- **Qasper** 优先使用 train 集（888 篇论文）；只有 dev 集时自动回退（281 篇）。当前已提交的
+  划分基于 train 集（300 题，120/60/120）。
+- **ClapNQ** 实验集 = dev answerable 300 题（adapter 只读取该子集），划分 120/60/120 已提交。
 
 **数据在别处时**（服务器上很常见），两种方式任选：
 

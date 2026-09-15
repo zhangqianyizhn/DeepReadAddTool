@@ -1,0 +1,19 @@
+{
+  "dataset": "clapnq",
+  "seed": 20260909,
+  "ratio": "40/20/40",
+  "question_counts": {
+    "train": 120,
+    "dev": 60,
+    "test": 120
+  },
+  "doc_count": 300,
+  "doc_disjoint": false,
+  "doc_disjoint_note": "题目级随机划分；不同题目可能共享来源 Wikipedia 文章（与 HotpotQA 同类）。",
+  "source": "annotated_data/dev/clapnq_dev_answerable.jsonl（adapter 只读取 dev answerable）",
+  "files": {
+    "harness_dev.jsonl": "e6dd0fb8e488cada8aaebb5556ec0caaee500a1a270df785291a1bbf8ce14ad5",
+    "harness_test.jsonl": "6df0cf08fbce0238bc733b134c1a70fbf7c332e4b6d27d135fe4ea6dfe080436",
+    "harness_train.jsonl": "19472b0b95272b060faab47914ad82d4df787ad4df392a6fda03687e8c7d8dba"
+  }
+}

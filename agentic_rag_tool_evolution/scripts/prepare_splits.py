@@ -310,7 +310,7 @@ def prepare_qasper(profile: profiles.DatasetProfile) -> dict[str, Any]:
         "dataset": "qasper",
         "seed": SEED,
         "ratio": "40/20/40",
-        "source": "qasper-dev-v0.3.json（本工作区仅有 dev；train-v0.3 不在数据中）",
+        "source": profile.raw_data.name,
         "question_counts": {key: len(value) for key, value in assignment.items()},
         "doc_count": len(data),
         "doc_disjoint": True,
@@ -322,11 +322,40 @@ def prepare_qasper(profile: profiles.DatasetProfile) -> dict[str, Any]:
 # ---------------------------------------------------------------- clapnq
 
 def prepare_clapnq(profile: profiles.DatasetProfile) -> dict[str, Any]:
-    raise FileNotFoundError(
-        "ClapNQ 数据未就绪：Data/clapnq-main/ 下缺少标注（annotated_data/*/answerable.jsonl）"
-        "和原文（original_documents/*/answerable_orig.jsonl）。"
-        "请从 https://huggingface.co/datasets/PrimeQA/clapnq 及原始仓库下载后放入对应目录，再重跑本脚本。"
+    annotations = (
+        profile.raw_data / "annotated_data" / "dev" / "clapnq_dev_answerable.jsonl"
     )
+    orig_docs = profile.raw_data / "original_documents" / "dev" / "clapnq_dev_answerable_orig.jsonl"
+    for path in (annotations, orig_docs):
+        if not path.exists():
+            raise FileNotFoundError(f"缺少 ClapNQ 数据文件：{path}")
+
+    rows = profiles.load_jsonl(annotations)
+    if len(rows) != profile.total_count:
+        raise RuntimeError(f"ClapNQ dev answerable 应为 {profile.total_count} 题，实际 {len(rows)} 题。")
+
+    # 题目级随机划分（与 HotpotQA 相同：不同题目可能共享来源文章，无法 doc-disjoint）
+    rng = random.Random(SEED)
+    shuffled = rows[:]
+    rng.shuffle(shuffled)
+    splits = {
+        "train": shuffled[: profile.train_count],
+        "dev": shuffled[profile.train_count : profile.train_count + profile.dev_count],
+        "test": shuffled[profile.train_count + profile.dev_count :],
+    }
+    for split, split_rows in splits.items():
+        profiles.save_jsonl(profile.splits_dir / f"harness_{split}.jsonl", split_rows)
+
+    return {
+        "dataset": "clapnq",
+        "seed": SEED,
+        "ratio": "40/20/40",
+        "question_counts": {key: len(value) for key, value in splits.items()},
+        "doc_count": profile.doc_count,
+        "doc_disjoint": False,
+        "doc_disjoint_note": "题目级随机划分；不同题目可能共享来源 Wikipedia 文章（与 HotpotQA 同类）。",
+        "source": "annotated_data/dev/clapnq_dev_answerable.jsonl（adapter 只读取 dev answerable）",
+    }
 
 
 # ---------------------------------------------------------------- driver
