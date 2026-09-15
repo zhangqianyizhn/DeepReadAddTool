@@ -77,8 +77,9 @@ class DatasetProfile:
 
     def harness_full_file(self) -> Path:
         """baseline 入库/答题用的完整实验集文件（覆盖所有 split 涉及的文档）。"""
-        if self.name == "syllabusqa":
-            return self.splits_dir / "harness_all.csv"
+        merged = self.splits_dir / f"harness_all{self.harness_ext}"
+        if merged.exists():
+            return merged
         return self.raw_data
 
     @property
@@ -280,26 +281,249 @@ SYLLABUSQA = DatasetProfile(
 )
 
 
+# ---------------------------------------------------------------- locomo
+
+def _locomo_dia_map(conversation: dict[str, Any]) -> dict[str, str]:
+    dia_map: dict[str, str] = {}
+    for sess_idx in range(1, 100):
+        session = conversation.get(f"session_{sess_idx}")
+        if not isinstance(session, list):
+            continue
+        for turn in session:
+            dia_id = turn.get("dia_id", "")
+            if dia_id:
+                speaker = turn.get("speaker", "")
+                dia_map[dia_id] = f"{speaker}: {turn.get('text', '')}" if speaker else str(turn.get("text", ""))
+    return dia_map
+
+
+def _locomo_rows(split: str) -> list[dict[str, Any]]:
+    data = load_json(LOCOMO.splits_dir / f"harness_{split}.json")
+    normalized = []
+    for item in data:
+        sample_id = item.get("sample_id", "unknown")
+        dia_map = _locomo_dia_map(item.get("conversation", {}))
+        for idx, qa in enumerate(item.get("qa", [])):
+            excerpts: list[str] = []
+            for ev in qa.get("evidence", []) or []:
+                for part in re.split(r"\s*;\s*", str(ev)):
+                    part = part.strip()
+                    if part:
+                        excerpts.append(dia_map.get(part, part))
+            answer = qa.get("answer")
+            normalized.append(
+                {
+                    "case_id": f"{sample_id}#{idx}",
+                    "question": str(qa.get("question", "")),
+                    "answer": str(answer) if answer not in (None, "") else "Not mentioned",
+                    "question_type": f"category_{qa.get('category')}",
+                    "evidence_sources": [sample_id],
+                    "evidence_excerpts": excerpts[:2],
+                    "leakage_terms": [],
+                    "raw": {"sample_id": sample_id, "qa": qa},
+                }
+            )
+    return normalized
+
+
+def _locomo_write_subset(rows: list[dict[str, Any]], path: Path) -> None:
+    wanted = {row["case_id"] for row in rows}
+    subset: list[dict[str, Any]] = []
+    for item in load_json(LOCOMO.splits_dir / "harness_dev.json"):
+        filtered = [
+            qa
+            for idx, qa in enumerate(item.get("qa", []))
+            if f"{item.get('sample_id', 'unknown')}#{idx}" in wanted
+        ]
+        if filtered:
+            subset.append({**item, "qa": filtered})
+    save_json(path, subset)
+
+
+LOCOMO = DatasetProfile(
+    name="locomo",
+    display_name="Locomo",
+    total_count=300,
+    train_count=120,
+    dev_count=60,
+    test_count=120,
+    doc_count=10,
+    artifact_group="Locomo300",
+    adapter_module="src.adapters.locomo_adapter",
+    adapter_class="LocomoAdapter",
+    judge_system=(
+        "You are a lenient Locomo answer evaluator. If the generated answer mentions the gold answer's "
+        "core subject or the same time period, score 4; partially correct answers score 1-3; wrong or "
+        "hallucinated answers score 0."
+    ),
+    harness_ext=".json",
+    raw_data=DATA_ROOT / "Locomo" / "Locomo.json",
+    index_dir=ROOT / "data" / "index" / "locomo" / "store_index",
+    processed_dir=ROOT / "data" / "index" / "locomo" / "processed_docs",
+    baseline_dataset_name="Locomo300MatchedBaseline",
+    dev_dataset_name="LocomoDev60",
+    env_overrides={},
+    _splits_dir=ROOT / "data" / "splits" / "locomo",
+    _runs_dir=ROOT / "runs" / "locomo",
+)
+
+
+# ---------------------------------------------------------------- qasper
+
+def _qasper_golds(qa: dict[str, Any]) -> list[str]:
+    golds: list[str] = []
+    for wrapper in qa.get("answers", []):
+        answer = wrapper.get("answer", {})
+        if answer.get("unanswerable", False):
+            value = "Not mentioned"
+        else:
+            spans = [s.strip() for s in answer.get("extractive_spans", []) if str(s).strip()]
+            free = str(answer.get("free_form_answer") or "").strip()
+            yes_no = answer.get("yes_no")
+            if spans:
+                value = "; ".join(spans)
+            elif free:
+                value = free
+            elif yes_no is not None:
+                value = "Yes" if yes_no else "No"
+            else:
+                continue
+        if value not in golds:
+            golds.append(value)
+    return golds or ["Not mentioned"]
+
+
+def _qasper_rows(split: str) -> list[dict[str, Any]]:
+    data = load_json(QASPER.splits_dir / f"harness_{split}.json")
+    normalized = []
+    for paper_id, paper in data.items():
+        title = paper.get("title", "")
+        for qa in paper.get("qas", []):
+            excerpts: list[str] = []
+            for wrapper in qa.get("answers", []):
+                for ev in wrapper.get("answer", {}).get("evidence", []) or []:
+                    if str(ev).strip():
+                        excerpts.append(str(ev).strip())
+            normalized.append(
+                {
+                    "case_id": qa.get("question_id"),
+                    # 与 adapter 生成给 Student 的问题文本保持一致
+                    "question": f'Based on the paper "{title}", {qa.get("question", "")}',
+                    "answer": "；".join(_qasper_golds(qa)),
+                    "question_type": "qasper",
+                    "evidence_sources": [title] if title else [str(paper_id)],
+                    "evidence_excerpts": excerpts[:2],
+                    "leakage_terms": [],
+                    "raw": {"paper_id": paper_id, "qa": qa},
+                }
+            )
+    return normalized
+
+
+def _qasper_write_subset(rows: list[dict[str, Any]], path: Path) -> None:
+    wanted = {row["case_id"] for row in rows}
+    data = load_json(QASPER.splits_dir / "harness_dev.json")
+    subset = {
+        paper_id: {**paper, "qas": [qa for qa in paper.get("qas", []) if qa.get("question_id") in wanted]}
+        for paper_id, paper in data.items()
+    }
+    save_json(path, {paper_id: paper for paper_id, paper in subset.items() if paper["qas"]})
+
+
+QASPER = DatasetProfile(
+    name="qasper",
+    display_name="Qasper",
+    total_count=300,
+    train_count=120,
+    dev_count=60,
+    test_count=120,
+    doc_count=281,
+    artifact_group="Qasper300",
+    adapter_module="src.adapters.qasper_adapter",
+    adapter_class="QasperAdapter",
+    judge_system="You are a strict Qasper answer evaluator.",
+    harness_ext=".json",
+    raw_data=DATA_ROOT / "Qasper" / "qasper-dev-v0.3.json",
+    index_dir=ROOT / "data" / "index" / "qasper" / "store_index",
+    processed_dir=ROOT / "data" / "index" / "qasper" / "processed_docs",
+    baseline_dataset_name="Qasper300MatchedBaseline",
+    dev_dataset_name="QasperDev60",
+    env_overrides={},
+    _splits_dir=ROOT / "data" / "splits" / "qasper",
+    _runs_dir=ROOT / "runs" / "qasper",
+)
+
+
+# ---------------------------------------------------------------- clapnq（数据待下载，见 run_baseline 校验报错）
+
+CLAPNQ = DatasetProfile(
+    name="clapnq",
+    display_name="ClapNQ",
+    total_count=300,
+    train_count=120,
+    dev_count=60,
+    test_count=120,
+    doc_count=None,
+    artifact_group="ClapNQ300",
+    adapter_module="src.adapters.clapnq_adapter",
+    adapter_class="ClapNQAdapter",
+    judge_system="You are a strict CLAPNQ answer evaluator.",
+    harness_ext=".json",
+    raw_data=DATA_ROOT / "clapnq-main",
+    index_dir=ROOT / "data" / "index" / "clapnq" / "store_index",
+    processed_dir=ROOT / "data" / "index" / "clapnq" / "processed_docs",
+    baseline_dataset_name="ClapNQ300MatchedBaseline",
+    dev_dataset_name="ClapNQDev60",
+    env_overrides={},
+    _splits_dir=ROOT / "data" / "splits" / "clapnq",
+    _runs_dir=ROOT / "runs" / "clapnq",
+)
+
+
 PROFILES: dict[str, DatasetProfile] = {
     "financebench": FINANCEBENCH,
     "hotpotqa": HOTPOTQA,
     "syllabusqa": SYLLABUSQA,
+    "locomo": LOCOMO,
+    "qasper": QASPER,
+    "clapnq": CLAPNQ,
 }
 
 # 默认答题/入库线程数：financebench 保持 1 以与历史 reference artifacts 完全对齐；
 # 新数据集无历史对齐包袱，默认 4（火山方舟 429 由底层指数退避重试兜底）。
-DEFAULT_WORKERS = {"financebench": 1, "hotpotqa": 4, "syllabusqa": 4}
+DEFAULT_WORKERS = {
+    "financebench": 1,
+    "hotpotqa": 4,
+    "syllabusqa": 4,
+    "locomo": 4,
+    "qasper": 4,
+    "clapnq": 4,
+}
 
 # FinanceBench 的归一化行直接从 v2 splits 派生；其余两个由 prepare_splits 预生成 harness 文件。
+def _clapnq_not_ready(*_args: Any) -> Any:
+    raise FileNotFoundError(
+        "ClapNQ 数据未就绪：Data/clapnq-main/ 下缺少标注（annotated_data/*/answerable.jsonl）"
+        "和原文（original_documents/*/answerable_orig.jsonl）。"
+        "请从 https://huggingface.co/datasets/PrimeQA/clapnq 及原始仓库下载后放入对应目录。"
+    )
+
+
 _LOADERS: dict[str, Callable[[str], list[dict[str, Any]]]] = {
     "financebench": _fb_rows,
     "hotpotqa": _hotpot_rows,
     "syllabusqa": _syllabus_rows,
+    "locomo": _locomo_rows,
+    "qasper": _qasper_rows,
+    "clapnq": _clapnq_not_ready,
 }
 _WRITERS: dict[str, Callable[[list[dict[str, Any]], Path], None]] = {
     "financebench": _fb_write_subset,
     "hotpotqa": _hotpot_write_subset,
     "syllabusqa": _syllabus_write_subset,
+    "locomo": _locomo_write_subset,
+    "qasper": _qasper_write_subset,
+    "clapnq": _clapnq_not_ready,
 }
 
 

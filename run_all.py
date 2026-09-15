@@ -32,13 +32,16 @@ SCRIPTS = WORKSPACE / "agentic_rag_tool_evolution" / "scripts"
 ENV_FILE = WORKSPACE / "agentic_rag_self_learning" / ".env"
 DATA_ROOT = Path(os.environ.get("DEEPREAD_DATA_ROOT", str(WORKSPACE / "Data"))).expanduser().resolve()
 
-ALL_DATASETS = ["financebench", "hotpotqa", "syllabusqa"]
+ALL_DATASETS = ["financebench", "hotpotqa", "syllabusqa", "locomo", "qasper", "clapnq"]
 
 # 每个数据集需要的原始数据路径（相对 DATA_ROOT）
 RAW_DATA_HINTS = {
     "financebench": ["FinanceBench/data/financebench_open_source.jsonl"],
     "hotpotqa": ["HotpotQA/hotpot_qa_100.json", "HotpotQA/hotpot_articles.json"],
     "syllabusqa": ["SyllabusQA/train.csv", "SyllabusQA/syllabi"],
+    "locomo": ["Locomo/Locomo.json"],
+    "qasper": ["Qasper/qasper-dev-v0.3.json"],
+    "clapnq": ["clapnq-main/annotated_data", "clapnq-main/original_documents"],
 }
 
 

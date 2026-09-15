@@ -45,10 +45,20 @@ Data/
 ├─ HotpotQA/
 │   ├─ hotpot_qa_100.json
 │   └─ hotpot_articles.json
-└─ SyllabusQA/
-    ├─ train.csv / val.csv / test.csv
-    └─ syllabi/*.docx
+├─ SyllabusQA/
+│   ├─ train.csv / val.csv / test.csv
+│   └─ syllabi/*.docx
+├─ Locomo/
+│   └─ Locomo.json
+├─ Qasper/
+│   └─ qasper-dev-v0.3.json        # 本工作区用 dev 集（281 篇论文）；train-v0.3 如有也可
+└─ clapnq-main/                     # ⚠️ 需自行下载，当前未附带
+    ├─ annotated_data/{train,dev}/*answerable.jsonl
+    └─ original_documents/{train,dev}/*answerable_orig.jsonl
 ```
+
+ClapNQ 下载：<https://huggingface.co/datasets/PrimeQA/clapnq>（标注）+ 原始仓库的
+original_documents。未下载前 `clapnq` 相关的所有阶段都会明确报错，不影响其他数据集。
 
 **数据在别处时**（服务器上很常见），两种方式任选：
 

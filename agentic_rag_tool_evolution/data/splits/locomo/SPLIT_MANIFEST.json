@@ -1,0 +1,20 @@
+{
+  "dataset": "locomo",
+  "seed": 20260909,
+  "ratio": "40/20/40",
+  "question_counts": {
+    "train": 120,
+    "dev": 60,
+    "test": 120
+  },
+  "doc_count": 10,
+  "doc_disjoint": true,
+  "doc_disjoint_note": "按 sample_id（会话）整体分配，同一会话不跨 split。",
+  "excluded_question_type": "category 5（adversarial，adapter 同样跳过）",
+  "files": {
+    "harness_all.json": "c5c42afdd84ae3a07b33fa57700d3e1f39f64107db015073ec8fccca4b35fdef",
+    "harness_dev.json": "df6e5edb456f4477c494c144240bb46cecf23c780cb4721bdeaf841c85f64d9a",
+    "harness_test.json": "be4a8dfab9953f89fda8a93febc0a0f83569a2458c9b5c19a7aed20c71432644",
+    "harness_train.json": "9da2b08e46bc25120691a9811f67574ae32ae07f06f27adf4ee94bc6fdfec0a4"
+  }
+}

@@ -164,9 +164,180 @@ def prepare_syllabusqa(profile: profiles.DatasetProfile) -> dict[str, Any]:
     return manifest
 
 
+# ---------------------------------------------------------------- 共用
+
+def _greedy_assign(
+    groups: list[tuple[str, list[Any]]], targets: dict[str, int]
+) -> dict[str, list[tuple[str, Any]]]:
+    """把 (文档名, 题目列表) 整体分配到目标题数的 split（doc-disjoint），保留文档名。"""
+    assignment: dict[str, list[tuple[str, Any]]] = {key: [] for key in targets}
+    for name, rows in groups:
+        split = max(
+            targets,
+            key=lambda key: (targets[key] - len(assignment[key])) / targets[key],
+        )
+        assignment[split].extend((name, qa) for qa in rows)
+    return assignment
+
+
+def _write_json_splits(
+    profile: profiles.DatasetProfile,
+    assignment: dict[str, list[tuple[str, Any]]],
+    docs_by_name: dict[str, Any],
+    qa_key: str,
+) -> None:
+    """每个 split 写 harness 文件：文档完整内容 + 仅本 split 的 QA。
+    qa_key="qa" 输出会话列表（locomo）；qa_key="qas" 输出论文 dict（qasper）。"""
+    for split, pairs in assignment.items():
+        by_doc: dict[str, list[Any]] = defaultdict(list)
+        for name, qa in pairs:
+            by_doc[name].append(qa)
+        if qa_key == "qas":
+            out: Any = {
+                name: {**docs_by_name[name], "qas": qas}
+                for name, qas in sorted(by_doc.items())
+            }
+        else:
+            out = [
+                {**docs_by_name[name], "qa": qas}
+                for name, qas in sorted(by_doc.items())
+            ]
+        profiles.save_json(profile.splits_dir / f"harness_{split}.json", out)
+
+
+# ---------------------------------------------------------------- locomo
+
+def prepare_locomo(profile: profiles.DatasetProfile) -> dict[str, Any]:
+    data = profiles.load_json(profile.raw_data)
+    if not isinstance(data, list):
+        data = [data]
+    rng = random.Random(SEED)
+
+    # 每个会话分层抽样（adapter 跳过 category 5，保持一致）
+    per_conv = profile.total_count // len(data)
+    sampled_conv: dict[str, list[dict[str, Any]]] = {}
+    for item in data:
+        sample_id = item.get("sample_id", "unknown")
+        pool = [qa for qa in item.get("qa", []) if str(qa.get("category")) != "5"]
+        rng.shuffle(pool)
+        sampled_conv[sample_id] = pool[:per_conv]
+    if sum(len(v) for v in sampled_conv.values()) < profile.total_count:
+        raise RuntimeError(f"Locomo 可抽题目不足 {profile.total_count}。")
+
+    # 会话整体 doc-disjoint 分配
+    groups = sorted(sampled_conv.items())
+    rng.shuffle(groups)
+    targets = {"train": profile.train_count, "dev": profile.dev_count, "test": profile.test_count}
+    assignment = _greedy_assign(groups, targets)
+
+    docs_by_name = {item.get("sample_id", "unknown"): item for item in data}
+    _write_json_splits(profile, assignment, docs_by_name, qa_key="qa")
+
+    # baseline 文件：全部会话入库，QA 仅保留抽样题
+    sampled_by_conv: dict[str, list[Any]] = defaultdict(list)
+    for pairs in assignment.values():
+        for name, qa in pairs:
+            sampled_by_conv[name].append(qa)
+    all_out = [
+        {**item, "qa": sampled_by_conv.get(item.get("sample_id", "unknown"), [])}
+        for item in data
+    ]
+    profiles.save_json(profile.splits_dir / "harness_all.json", all_out)
+
+    return {
+        "dataset": "locomo",
+        "seed": SEED,
+        "ratio": "40/20/40",
+        "question_counts": {key: len(value) for key, value in assignment.items()},
+        "doc_count": len(data),
+        "doc_disjoint": True,
+        "doc_disjoint_note": "按 sample_id（会话）整体分配，同一会话不跨 split。",
+        "excluded_question_type": "category 5（adversarial，adapter 同样跳过）",
+    }
+
+
+# ---------------------------------------------------------------- qasper
+
+def prepare_qasper(profile: profiles.DatasetProfile) -> dict[str, Any]:
+    data = profiles.load_json(profile.raw_data)
+    rng = random.Random(SEED)
+
+    # 论文内打乱后可答题目轮转抽样
+    by_paper: dict[str, list[dict[str, Any]]] = {}
+    for paper_id, paper in data.items():
+        pool = [
+            qa
+            for qa in paper.get("qas", [])
+            if not all(a.get("answer", {}).get("unanswerable", False) for a in qa.get("answers", []))
+        ]
+        rng.shuffle(pool)
+        by_paper[paper_id] = pool
+    papers = sorted(by_paper)
+    rng.shuffle(papers)
+
+    sampled: list[tuple[str, dict[str, Any]]] = []
+    cursor = 0
+    while len(sampled) < profile.total_count:
+        paper_id = papers[cursor % len(papers)]
+        cursor += 1
+        if by_paper[paper_id]:
+            sampled.append((paper_id, by_paper[paper_id].pop()))
+        if not any(by_paper.values()):
+            raise RuntimeError(f"Qasper 可抽题目不足 {profile.total_count}。")
+
+    # 论文整体 doc-disjoint 分配
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for paper_id, qa in sampled:
+        grouped[paper_id].append(qa)
+    groups = sorted(grouped.items())
+    rng.shuffle(groups)
+    targets = {"train": profile.train_count, "dev": profile.dev_count, "test": profile.test_count}
+    assignment = _greedy_assign(groups, targets)
+    _write_json_splits(profile, assignment, data, qa_key="qas")
+
+    # baseline 文件：全部论文入库，QA 仅保留抽样题
+    sampled_by_paper: dict[str, list[Any]] = defaultdict(list)
+    for pairs in assignment.values():
+        for name, qa in pairs:
+            sampled_by_paper[name].append(qa)
+    all_out = {
+        paper_id: {**paper, "qas": sampled_by_paper.get(paper_id, [])}
+        for paper_id, paper in data.items()
+    }
+    profiles.save_json(profile.splits_dir / "harness_all.json", all_out)
+
+    return {
+        "dataset": "qasper",
+        "seed": SEED,
+        "ratio": "40/20/40",
+        "source": "qasper-dev-v0.3.json（本工作区仅有 dev；train-v0.3 不在数据中）",
+        "question_counts": {key: len(value) for key, value in assignment.items()},
+        "doc_count": len(data),
+        "doc_disjoint": True,
+        "doc_disjoint_note": "按论文整体分配，同一论文不跨 split；入库覆盖全部论文。",
+        "excluded_question_type": "全标注 unanswerable 的题目",
+    }
+
+
+# ---------------------------------------------------------------- clapnq
+
+def prepare_clapnq(profile: profiles.DatasetProfile) -> dict[str, Any]:
+    raise FileNotFoundError(
+        "ClapNQ 数据未就绪：Data/clapnq-main/ 下缺少标注（annotated_data/*/answerable.jsonl）"
+        "和原文（original_documents/*/answerable_orig.jsonl）。"
+        "请从 https://huggingface.co/datasets/PrimeQA/clapnq 及原始仓库下载后放入对应目录，再重跑本脚本。"
+    )
+
+
 # ---------------------------------------------------------------- driver
 
-PREPARERS = {"hotpotqa": prepare_hotpotqa, "syllabusqa": prepare_syllabusqa}
+PREPARERS = {
+    "hotpotqa": prepare_hotpotqa,
+    "syllabusqa": prepare_syllabusqa,
+    "locomo": prepare_locomo,
+    "qasper": prepare_qasper,
+    "clapnq": prepare_clapnq,
+}
 
 
 def main() -> int:

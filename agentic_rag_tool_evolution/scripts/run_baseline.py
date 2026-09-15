@@ -89,10 +89,38 @@ def validate_syllabusqa(profile: "profiles.DatasetProfile") -> None:
         raise FileNotFoundError(f"缺少合并实验集：{profile.harness_full_file()}")
 
 
+def _validate_json_splits_ready(profile: "profiles.DatasetProfile") -> None:
+    if not profile.raw_data.exists():
+        raise FileNotFoundError(f"缺少原始数据：{profile.raw_data}")
+    if not (profile.splits_dir / "SPLIT_MANIFEST.json").exists():
+        raise FileNotFoundError(f"缺少划分：请先运行 prepare_splits.py --dataset {profile.name}")
+    if not profile.harness_full_file().exists():
+        raise FileNotFoundError(f"缺少合并实验集：{profile.harness_full_file()}")
+
+
+def validate_locomo(profile: "profiles.DatasetProfile") -> None:
+    _validate_json_splits_ready(profile)
+
+
+def validate_qasper(profile: "profiles.DatasetProfile") -> None:
+    _validate_json_splits_ready(profile)
+
+
+def validate_clapnq(profile: "profiles.DatasetProfile") -> None:
+    raise FileNotFoundError(
+        "ClapNQ 数据未就绪：Data/clapnq-main/ 下缺少标注（annotated_data/*/answerable.jsonl）"
+        "和原文（original_documents/*/answerable_orig.jsonl）。"
+        "请从 https://huggingface.co/datasets/PrimeQA/clapnq 及原始仓库下载后放入对应目录。"
+    )
+
+
 VALIDATORS = {
     "financebench": validate_financebench,
     "hotpotqa": validate_hotpotqa,
     "syllabusqa": validate_syllabusqa,
+    "locomo": validate_locomo,
+    "qasper": validate_qasper,
+    "clapnq": validate_clapnq,
 }
 
 

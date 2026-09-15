@@ -1,0 +1,21 @@
+{
+  "dataset": "qasper",
+  "seed": 20260909,
+  "ratio": "40/20/40",
+  "source": "qasper-dev-v0.3.json（本工作区仅有 dev；train-v0.3 不在数据中）",
+  "question_counts": {
+    "train": 121,
+    "dev": 60,
+    "test": 119
+  },
+  "doc_count": 281,
+  "doc_disjoint": true,
+  "doc_disjoint_note": "按论文整体分配，同一论文不跨 split；入库覆盖全部论文。",
+  "excluded_question_type": "全标注 unanswerable 的题目",
+  "files": {
+    "harness_all.json": "d2ff7f54ec8dbacd1764e262f3a37c962c240e536d7ad7b79ddd0ee5e86242da",
+    "harness_dev.json": "d96f1801fa27c64d33497563fde7dcdcd07165463ef6ad1b7619c254a66823cb",
+    "harness_test.json": "5ee7bfd49a25c6b45a089bd8f5076fbe4bb1d457fd701fe329175bef998af4bf",
+    "harness_train.json": "b641a314d7bd60b677404908d3400e8178a2219c0b030a926c6ca118ad0f48e9"
+  }
+}
