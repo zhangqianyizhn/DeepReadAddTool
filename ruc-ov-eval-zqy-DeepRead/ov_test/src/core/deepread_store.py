@@ -349,11 +349,12 @@ class DeepReadWrapper:
         """
         将文档转换为 DeepRead 的 corpus JSON 格式并写入 store_path，
         然后构建 DocIndex。
-        """
 
-        # TODO 完善并发处理逻辑（monitor在并发处理时起到展示作用）
+        并发说明：先按文档路径去重（同一篇文章会被多个 question sample 重复引用），
+        再用线程池并行处理。每篇文档的产物是独立文件名，embedding token 追踪器是
+        thread-local，因此并发安全。
+        """
         start_time = time.time()
-        embedding_token_tracker.reset()
 
         if self.use_pymupdf:
             ocr_pipeline = None
@@ -364,31 +365,55 @@ class DeepReadWrapper:
                 vl_rec_server_url="http://127.0.0.1:8956/v1",
             )
 
+        # 跨线程汇总型 tracker（ThreadLocal 版在并行时会丢失 worker 线程的计数）
+        from src.core.token_tracer_util import SimpleTokenTracker
+        ingest_tracker = SimpleTokenTracker()
+
         embedder = VolcengineEmbedder(
             model_name=self.embedding_model,
             api_key=self.embedding_api_key,
             api_base=self.embedding_base_url,
             input_type="multimodal",
             dimension=2048,
+            tracker=ingest_tracker,
         )
 
-        for sample in tqdm(samples, desc="Ingesting Docs to DeepRead"):
+        # 按文档路径去重，保持首次出现顺序（同名文件在不同 sample 中只会被处理一次）
+        unique_docs: List[StandardDoc] = []
+        seen_paths = set()
+        for sample in samples:
+            for path in sample.doc_paths:
+                if path not in seen_paths:
+                    seen_paths.add(path)
+                    unique_docs.append(StandardDoc(sample.sample_id, [path]))
+
+        def _ingest_doc(doc: StandardDoc) -> None:
             if monitor:
                 monitor.worker_start()
-
             try:
-                self._ingest_one(sample, ocr_pipeline, embedder)
+                self._ingest_one(doc, ocr_pipeline, embedder)
                 if monitor:
                     monitor.worker_end(success=True)
             except Exception as e:
-                self.logger.error(f"Failed to ingest sample {sample.sample_id}: {e}")
+                self.logger.error(f"Failed to ingest doc {doc.doc_paths}: {e}")
                 if monitor:
                     monitor.worker_end(success=False)
-                raise e
-            
+                raise
+
+        workers = max(1, int(max_workers or 1))
+        if workers == 1 or len(unique_docs) <= 1:
+            for doc in tqdm(unique_docs, desc="Ingesting Docs to DeepRead"):
+                _ingest_doc(doc)
+        else:
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                futures = [pool.submit(_ingest_doc, doc) for doc in unique_docs]
+                for future in tqdm(as_completed(futures), total=len(futures), desc="Ingesting Docs to DeepRead"):
+                    future.result()
+
         self.invalidate_doc_index_cache()
 
-        token_usage = embedding_token_tracker.get()
+        token_usage = ingest_tracker.get()
         return {
             "time": time.time() - start_time,
             "input_tokens": token_usage["input_tokens"],

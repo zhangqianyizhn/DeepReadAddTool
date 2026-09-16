@@ -56,10 +56,18 @@ def prepare_hotpotqa(profile: profiles.DatasetProfile) -> dict[str, Any]:
     }
     assert sum(len(v) for v in splits.values()) == profile.total_count
 
-    # 入库需要覆盖全部问题引用的文章，统计文档数供索引完整性校验
-    all_titles = {
-        title for item in qa_data for title in item.get("context", {}).get("title", [])
-    }
+    # 入库需要覆盖全部问题引用的文章。可入库数 ≠ 引用数：
+    # QA 引用了 991 个标题，但 "Innerspace" 不在 articles 库里（990 可入库），
+    # 且 "Romeo & Juliet" 类标题清洗后文件名相同会互相覆盖（989 个实际文件）。
+    # doc_count 必须与 index_is_complete 统计的 *_corpus.json 文件数口径一致。
+    articles_path = profile.raw_data.parent / "hotpot_articles.json"
+    available_titles = {a.get("title") for a in profiles.load_json(articles_path)}
+    referenced = {title for item in qa_data for title in item.get("context", {}).get("title", [])}
+
+    def _safe_filename(title: str) -> str:
+        return "".join(c if (c.isalnum() or c in (" ", "-", "_")) else "_" for c in title).strip()
+
+    doc_files = {_safe_filename(t) for t in referenced & available_titles}
 
     for split, rows in splits.items():
         profiles.save_json(profile.splits_dir / f"harness_{split}.json", rows)
@@ -68,9 +76,13 @@ def prepare_hotpotqa(profile: profiles.DatasetProfile) -> dict[str, Any]:
         "seed": SEED,
         "ratio": "40/20/40",
         "question_counts": {key: len(value) for key, value in splits.items()},
-        "doc_count": len(all_titles),
+        "doc_count": len(doc_files),
         "doc_disjoint": False,
         "doc_disjoint_note": "HotpotQA 多跳问题共享 Wikipedia 文章，划分为题目级随机，跨 split 存在文章重叠。",
+        "doc_count_note": (
+            f"引用标题 {len(referenced)}；缺失于 articles 库 {len(referenced - available_titles)}；"
+            f"清洗后文件名冲突 1 组（Romeo _ Juliet）；实际语料文件 {len(doc_files)}。"
+        ),
     }
     return manifest
 

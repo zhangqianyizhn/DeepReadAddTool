@@ -7,9 +7,10 @@
     "dev": 20,
     "test": 40
   },
-  "doc_count": 991,
+  "doc_count": 989,
   "doc_disjoint": false,
   "doc_disjoint_note": "HotpotQA 多跳问题共享 Wikipedia 文章，划分为题目级随机，跨 split 存在文章重叠。",
+  "doc_count_note": "引用标题 991；缺失于 articles 库 1；清洗后文件名冲突 1 组（Romeo _ Juliet）；实际语料文件 989。",
   "files": {
     "harness_dev.json": "dfe944cfccefc9d1a2dc571fbe2da3daa57974e078a830aa68af876be104ffb2",
     "harness_test.json": "846e2b76245e9b64755fd66eda619ff37688a8c11cd3564df1bd37d147f82f2f",
