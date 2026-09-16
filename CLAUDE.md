@@ -99,6 +99,19 @@ PYTHONPATH=".:ov_test" uv run python -m unittest \
 
 `DeepRead/agent/llm.py` imports `src.core.token_tracer_util` from ov_test, so tests need BOTH repo root and `ov_test/` on `PYTHONPATH` — plain `unittest discover` fails to import.
 
+### Runtime ablation (`DEEPREAD_RUNTIME`)
+
+The chain can run against two DeepRead runtimes, selected by env var `DEEPREAD_RUNTIME` (default `tuned`):
+
+- **`tuned`**: `ruc-ov-eval-zqy-DeepRead/` — the carefully tuned runtime (all existing results).
+- **`initial`**: `ruc-ov-eval-initial/` — ablation runtime: ruc-ov-eval@`fb8a301` + DeepRead@`7fe3ba2` (built from the local repos at `~/Desktop/ruc-ov/ruc-ov-eval[DeepRead]`) plus a **minimal backport** (committed inside that dir's two git repos): `agent_instructions` passthrough, the generated-tool contract (`enable_document_inventory_search` + `document_inventory_tool_path` + schema/dispatch), config-driven embedding, and `auto_increment_output` support. Trajectory event schema is untouched and compatible with `blind_reconstruction`.
+
+With `DEEPREAD_RUNTIME=initial`, indexes (`data/index_initial/<dataset>/`), runs (`runs_initial/<dataset>/`), and baseline artifacts (`ExperimentArtifacts/<group>_initial/`) are fully separate from the tuned line:
+
+```bash
+DEEPREAD_RUNTIME=initial ./run_all.sh --datasets financebench --workers 4
+```
+
 ## Architecture
 
 ### Benchmark layer (`ruc-ov-eval-zqy-DeepRead/ov_test/`)

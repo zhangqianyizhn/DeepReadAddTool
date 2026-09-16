@@ -17,14 +17,14 @@ import yaml
 HERE = Path(__file__).resolve()
 ROOT = HERE.parents[1]
 WORKSPACE = ROOT.parent
-REPO = WORKSPACE / "ruc-ov-eval-zqy-DeepRead"
-HARNESS = REPO / "ov_test" / "run.py"
 OLD_EXPERIMENT = WORKSPACE / "agentic_rag_self_learning"
-
 sys.path.insert(0, str(OLD_EXPERIMENT / "scripts"))
 sys.path.insert(0, str(HERE.parent))
 import run_pilot as legacy  # noqa: E402
 import dataset_profiles as profiles  # noqa: E402
+
+REPO = profiles.RUNTIME_REPO
+HARNESS = REPO / "ov_test" / "run.py"
 
 
 def say(message: str) -> None:

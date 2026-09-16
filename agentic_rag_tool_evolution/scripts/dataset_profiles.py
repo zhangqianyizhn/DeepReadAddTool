@@ -32,6 +32,13 @@ OLD_EXPERIMENT = WORKSPACE / "agentic_rag_self_learning"
 # 数据根目录可用环境变量覆盖（服务器上数据位置可能不同）。
 DATA_ROOT = Path(os.environ.get("DEEPREAD_DATA_ROOT", str(WORKSPACE / "Data"))).expanduser().resolve()
 
+# 运行时切换：默认 tuned（ruc-ov-eval-zqy-DeepRead，调优版）；
+# DEEPREAD_RUNTIME=initial 使用 ruc-ov-eval-initial/（ruc-ov-eval@fb8a301 + DeepRead@7fe3ba2
+# + 最小回填的消融运行时）。切换后索引、runs、ExperimentArtifacts 全部独立，互不污染。
+RUNTIME_TAG = os.environ.get("DEEPREAD_RUNTIME", "tuned").strip() or "tuned"
+RUNTIME_SUFFIX = "" if RUNTIME_TAG == "tuned" else f"_{RUNTIME_TAG}"
+RUNTIME_REPO = WORKSPACE / ("ruc-ov-eval-zqy-DeepRead" if RUNTIME_TAG == "tuned" else f"ruc-ov-eval-{RUNTIME_TAG}")
+
 
 def _first_existing(*candidates: Path) -> Path:
     """数据文件在不同机器上命名可能不同（如 Locomo.json vs locomo10.json），取第一个存在的。"""
@@ -585,6 +592,12 @@ def get_profile(name: str) -> DatasetProfile:
                 profile.total_count = sum(counts.values())
             if manifest.get("doc_count"):
                 profile.doc_count = manifest["doc_count"]
+    # 非默认运行时：索引、runs、baseline artifact 全部切换到独立目录
+    if RUNTIME_TAG != "tuned":
+        profile.artifact_group = profile.artifact_group + RUNTIME_SUFFIX
+        profile._runs_dir = ROOT / f"runs{RUNTIME_SUFFIX}" / profile.name
+        profile.index_dir = ROOT / "data" / f"index{RUNTIME_SUFFIX}" / profile.name / "store_index"
+        profile.processed_dir = ROOT / "data" / f"index{RUNTIME_SUFFIX}" / profile.name / "processed_docs"
     return profile
 
 
