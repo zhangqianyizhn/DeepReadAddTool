@@ -161,18 +161,9 @@ ExperimentArtifacts/<数据集>/Output/deepread_matched_baseline_*/   # baseline
 **数据不需要另选目录。** 两个运行时共享同一份 `Data/`（原始数据与运行时无关）。
 索引、runs、baseline 产物已由 `DEEPREAD_RUNTIME` 开关自动隔离，互不污染。
 
-需要另外准备的是**消融运行时本身**：`ruc-ov-eval-initial/`（ruc-ov-eval@fb8a301 +
-DeepRead@7fe3ba2 + 最小回填）不在 git 同步范围内（已 gitignore，156MB）。从本机传到服务器：
-
-```bash
-# 在本机（DeepReadAddTool 工作区根）执行
-rsync -a ruc-ov-eval-initial/ user@服务器:~/DeepReadAddTool/ruc-ov-eval-initial/
-# 或打包后拷贝解压
-tar czf /tmp/ruc-ov-eval-initial.tar.gz ruc-ov-eval-initial
-# scp /tmp/ruc-ov-eval-initial.tar.gz user@服务器:~ 然后在服务器工作区根 tar xzf 解压
-```
-
-传输完成后即可使用（目录必须放在服务器工作区根，与 `ruc-ov-eval-zqy-DeepRead/` 同级）：
+**消融运行时 `ruc-ov-eval-initial/` 已纳入 git 管理**（ruc-ov-eval@fb8a301 +
+DeepRead@7fe3ba2 + 最小回填，来源与回填明细见该目录下的 README.md），
+服务器 `git pull` 即可获得，无需任何额外传输或环境配置：
 
 ```bash
 DEEPREAD_RUNTIME=initial ./run_all.sh --datasets financebench --workers 4
