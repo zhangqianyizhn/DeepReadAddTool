@@ -129,6 +129,19 @@ prepare_splits（仅 HotpotQA/SyllabusQA：40%/20%/40% 划分，SyllabusQA 先�
 唯一共享约束是模型 API 的 QPS——429 限流由底层 5 次指数退避重试兜底，若频繁限流就降低
 `--workers` 或减少并行数据集数。
 
+**多轮迭代**（验证每一轮的价值：每轮都有 dev + 冻结 test 评估）：
+
+```bash
+./run_all.sh --datasets syllabusqa --rounds 3
+# R1: 盲重建候选 → dev A/B → 冻结 test（--source-dir . --round-name round1）
+# R2: 修复候选   → dev A/B → 冻结 test（--round-name round2）
+# R3: 再修复     → dev A/B → 冻结 test（--source-dir repair_round3 --round-name round3）
+```
+
+纪律保持不变：任何一轮的 Repair Agent 只读 **dev** 反馈，test 结果永不回流修复；
+每轮候选独立 SHA-256 冻结（各自目录下的 FROZEN_MANIFEST.json）。
+成本提示：每多一轮 ≈ 额外 2×test 题 Student + 2×test 题 Judge + 1-3 次 Teacher 调用。
+
 **断点续跑**：所有阶段都有断点（入库按文档跳过、答案/Judge 评分按文件复用、
 候选与冻结清单按 SHA-256 校验）。中断或失败后，直接重新运行 `./run_all.sh` 即可。
 

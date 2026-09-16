@@ -132,10 +132,16 @@ def question_id(question: str) -> str:
     return hashlib.sha1(question.encode("utf-8")).hexdigest()[:16]
 
 
-def make_feedback_packet(blind_run: Path, profile: "profiles.DatasetProfile") -> dict[str, Any]:
+def make_feedback_packet(
+    blind_run: Path,
+    profile: "profiles.DatasetProfile",
+    candidate_judged_path: Path,
+    candidate_log_dir: Path,
+    round_number: int,
+) -> dict[str, Any]:
     dev_run = blind_run / "dev_ab"
     baseline = core.load_json(dev_run / "baseline_judged.json").get("results", [])
-    candidate = core.load_json(dev_run / "generated_tool_judged.json").get("results", [])
+    candidate = core.load_json(candidate_judged_path).get("results", [])
     judged_ids = {row["case_id"] for row in candidate}
     dev_rows = [row for row in profile.load_split_rows("dev") if row["case_id"] in judged_ids]
     if len(dev_rows) != len(judged_ids):
@@ -143,7 +149,7 @@ def make_feedback_packet(blind_run: Path, profile: "profiles.DatasetProfile") ->
     by_id = {row["case_id"]: row for row in dev_rows}
     baseline_by_id = {row["case_id"]: row for row in baseline}
     candidate_by_id = {row["case_id"]: row for row in candidate}
-    log_path = next((dev_run / "generated_tool").glob("output_*/deepread_run.log"), None)
+    log_path = next(candidate_log_dir.glob("output_*/deepread_run.log"), None)
     if log_path is None:
         raise RuntimeError("缺少候选组dev轨迹。")
     trajectories = load_log_events(log_path)
@@ -172,7 +178,7 @@ def make_feedback_packet(blind_run: Path, profile: "profiles.DatasetProfile") ->
     baseline_metrics = core.metrics(baseline)
     candidate_metrics = core.metrics(candidate)
     return {
-        "experiment": "autonomous_tool_repair_round2",
+        "experiment": f"autonomous_tool_repair_round{round_number}",
         "data_policy": {
             "tool_generation_source": "train only",
             "repair_feedback_source": "dev only",
@@ -212,9 +218,10 @@ def validate_no_case_leakage(code: str, profile: "profiles.DatasetProfile") -> N
 
 
 def generate_repair(
-    blind_run: Path, feedback: dict[str, Any], dry_run: bool, profile: "profiles.DatasetProfile"
+    blind_run: Path, feedback: dict[str, Any], dry_run: bool, profile: "profiles.DatasetProfile",
+    source_dir: Path, round_number: int,
 ) -> Path:
-    repair_dir = blind_run / "repair_round2"
+    repair_dir = blind_run / f"repair_round{round_number}"
     repair_dir.mkdir(parents=True, exist_ok=True)
     packet_path = repair_dir / "repair_feedback_packet.json"
     if not packet_path.exists():
@@ -225,16 +232,17 @@ def generate_repair(
     candidate_path = repair_dir / "candidate.json"
     tool_path = repair_dir / "candidate_tool.py"
     if candidate_path.exists() and tool_path.exists():
-        say(f"[复用] 已生成Round 2候选：{candidate_path}")
+        say(f"[复用] 已生成Round {round_number}候选：{candidate_path}")
         return repair_dir
 
-    original = core.load_json(blind_run / "candidate.json")
+    original = core.load_json(source_dir / "candidate.json")
     payload = {
         "original_analysis": core.load_json(blind_run / "analysis.json"),
         "original_tool_spec": original.get("tool_spec"),
-        "original_code": (blind_run / "candidate_tool.py").read_text(encoding="utf-8"),
+        "original_code": (source_dir / "candidate_tool.py").read_text(encoding="utf-8"),
         "original_usage_policy": original.get("usage_policy"),
         "development_feedback": feedback,
+        "iteration": round_number,
     }
     env = core.legacy.load_experiment_env()
     prior_candidate: dict[str, Any] | None = None
@@ -325,19 +333,20 @@ def tool_call_summary(log_path: Path) -> dict[str, Any]:
     return {"questions": len(query_ids), "rounds": rounds, "tool_calls": dict(counts)}
 
 
-def append_round2_report(
+def append_round_report(
     report_path: Path,
     repaired: dict[str, Any],
     original_report: Path,
     candidate_output: Path,
+    round_number: int,
 ) -> None:
     base_text = report_path.read_text(encoding="utf-8")
     summary = tool_call_summary(candidate_output / "deepread_run.log")
     additions = [
         "",
-        "## Round 2自主修复说明",
+        f"## Round {round_number}自主修复说明",
         "",
-        "本轮Repair Agent只获得原候选、dev成对结果和原始轨迹；未提供人工故障结论，未访问test。",
+        "本轮Repair Agent只获得上一轮候选、dev成对结果和原始轨迹；未提供人工故障结论，未访问test。",
         "",
         "### Agent自主诊断",
         "",
@@ -351,7 +360,7 @@ def append_round2_report(
         json.dumps(repaired.get("changes"), ensure_ascii=False, indent=2),
         "```",
         "",
-        f"- 原Round 1报告：`{original_report}`",
+        f"- 上一轮报告：`{original_report}`",
         f"- 修复组总轮数：{summary['rounds']}",
         f"- 修复组工具调用：`{json.dumps(summary['tool_calls'], ensure_ascii=False)}`",
         "",
@@ -360,7 +369,8 @@ def append_round2_report(
 
 
 def evaluate_repair(
-    blind_run: Path, repair_dir: Path, profile: "profiles.DatasetProfile", workers: int = 1
+    blind_run: Path, repair_dir: Path, profile: "profiles.DatasetProfile",
+    round_number: int, workers: int = 1,
 ) -> Path:
     original_dev = blind_run / "dev_ab"
     baseline_path = original_dev / "baseline_judged.json"
@@ -395,7 +405,7 @@ def evaluate_repair(
         env,
         profile.judge_system,
     )
-    report = dev_run / "ROUND2_DEV_AB_REPORT.md"
+    report = dev_run / f"ROUND{round_number}_DEV_AB_REPORT.md"
     core.write_report(
         report,
         repair_dir,
@@ -404,10 +414,14 @@ def evaluate_repair(
         repaired.get("generated_test_results") or [],
         profile.display_name,
     )
-    append_round2_report(report, repaired, original_dev / "DEV_AB_REPORT.md", output)
+    previous_report = (
+        original_dev / "DEV_AB_REPORT.md" if round_number == 2
+        else blind_run / f"repair_round{round_number - 1}" / "dev_ab" / f"ROUND{round_number - 1}_DEV_AB_REPORT.md"
+    )
+    append_round_report(report, repaired, previous_report, output, round_number)
     comparison = core.paired(baseline, judged)
     say(
-        f"[完成] Round 2 vs原Baseline：{comparison['wins']}胜/"
+        f"[完成] Round {round_number} vs原Baseline：{comparison['wins']}胜/"
         f"{comparison['ties']}平/{comparison['losses']}负，净分={comparison['net_score']:+d}"
     )
     say(f"[报告] {report}")
@@ -417,6 +431,8 @@ def evaluate_repair(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
+    parser.add_argument("--round", type=int, default=2, choices=[2, 3],
+                        help="修复轮次：2=修复盲重建候选；3=以 Round 2 的 dev 反馈继续修复")
     parser.add_argument("--workers", type=int, default=None,
                         help="答题线程数（默认：financebench=1 对齐历史，其余=4）")
     parser.add_argument("--dry-run", action="store_true")
@@ -424,27 +440,39 @@ def main() -> int:
     profile = profiles.get_profile(args.dataset)
     workers = args.workers or profiles.DEFAULT_WORKERS[profile.name]
     blind_run = core.latest_blind_run(profile)
+
+    if args.round == 2:
+        source_dir = blind_run
+        candidate_judged = blind_run / "dev_ab" / "generated_tool_judged.json"
+        candidate_log_dir = blind_run / "dev_ab" / "generated_tool"
+    else:
+        source_dir = blind_run / "repair_round2"
+        candidate_judged = source_dir / "dev_ab" / "repaired_generated_tool_judged.json"
+        candidate_log_dir = source_dir / "dev_ab" / "repaired_generated_tool"
+
     required = [
-        blind_run / "candidate.json",
-        blind_run / "candidate_tool.py",
+        source_dir / "candidate.json",
+        source_dir / "candidate_tool.py",
         blind_run / "analysis.json",
         blind_run / "dev_ab" / "baseline_judged.json",
-        blind_run / "dev_ab" / "generated_tool_judged.json",
+        candidate_judged,
         profile.harness_file("dev"),
     ]
     missing = [str(path) for path in required if not path.exists()]
     if missing:
-        raise FileNotFoundError("Round 2缺少输入：\n" + "\n".join(missing))
-    feedback = make_feedback_packet(blind_run, profile)
+        raise FileNotFoundError(f"Round {args.round} 缺少输入：\n" + "\n".join(missing))
+    feedback = make_feedback_packet(
+        blind_run, profile, candidate_judged, candidate_log_dir, args.round
+    )
     say(
-        f"[反馈就绪] dev={len(feedback['cases'])}题；"
+        f"[反馈就绪] Round {args.round}；dev={len(feedback['cases'])}题；"
         f"test访问={feedback['data_policy']['test_access']}；人工故障标签={feedback['data_policy']['human_failure_labels']}"
     )
-    repair_dir = generate_repair(blind_run, feedback, args.dry_run, profile)
+    repair_dir = generate_repair(blind_run, feedback, args.dry_run, profile, source_dir, args.round)
     if args.dry_run:
         say(f"[DryRun完成] 反馈包已生成：{repair_dir / 'repair_feedback_packet.json'}；未调用API。")
         return 0
-    evaluate_repair(blind_run, repair_dir, profile, workers)
+    evaluate_repair(blind_run, repair_dir, profile, args.round, workers)
     return 0
 
 

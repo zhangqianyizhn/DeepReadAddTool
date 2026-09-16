@@ -82,6 +82,9 @@ def main() -> int:
     parser.add_argument("--workers", type=int, default=None,
                         help="答题线程数（默认按 profile：financebench=1，其余=4）")
     parser.add_argument("--ingest-workers", type=int, default=None, help="入库线程数（默认同 --workers）")
+    parser.add_argument("--rounds", type=int, default=1, choices=[1, 2, 3],
+                        help="迭代轮数：1=现有链（盲重建→dev→修复→test）；"
+                             "2/3=多轮迭代，每一轮都做 dev + 冻结 test 评估（修复反馈仅来自 dev）")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -105,9 +108,25 @@ def main() -> int:
             run_step(dataset, "prepare_splits.py", [])
         run_step(dataset, "run_baseline.py", worker_args + ingest_args)
         run_step(dataset, "blind_reconstruction.py", [])
-        run_step(dataset, "dev_ab.py", worker_args)
-        run_step(dataset, "repair_round2.py", worker_args)
-        run_step(dataset, "frozen_test61.py", worker_args)
+
+        if args.rounds == 1:
+            # 单轮链：盲重建 → dev A/B → 修复 → 冻结 test
+            run_step(dataset, "dev_ab.py", worker_args)
+            run_step(dataset, "repair_round2.py", worker_args)
+            run_step(dataset, "frozen_test61.py", worker_args)
+        else:
+            # 多轮迭代：每一轮都做 dev + 冻结 test 评估，以此判断每一轮的价值。
+            # 纪律保持：修复 Agent 的反馈只来自 dev，test 结果不回流。
+            run_step(dataset, "dev_ab.py", worker_args)                                     # R1 dev
+            run_step(dataset, "frozen_test61.py",
+                     ["--source-dir", ".", "--round-name", "round1", *worker_args])         # R1 test
+            run_step(dataset, "repair_round2.py", worker_args)                              # R2 修复 + dev
+            run_step(dataset, "frozen_test61.py",
+                     ["--round-name", "round2", *worker_args])                              # R2 test
+            if args.rounds == 3:
+                run_step(dataset, "repair_round2.py", ["--round", "3", *worker_args])       # R3 修复 + dev
+                run_step(dataset, "frozen_test61.py",
+                         ["--source-dir", "repair_round3", "--round-name", "round3", *worker_args])  # R3 test
         say(f"\n[数据集完成] {dataset}")
 
     say("\n[全部完成] 各数据集报告见 agentic_rag_tool_evolution/runs/ 与 ExperimentArtifacts/。")

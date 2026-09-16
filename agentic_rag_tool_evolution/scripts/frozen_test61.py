@@ -31,15 +31,19 @@ def sha256_file(path: Path) -> str:
 
 
 def freeze_candidate(
-    repair_dir: Path, run_root: Path, env: dict[str, str], profile: "profiles.DatasetProfile"
+    repair_dir: Path, run_root: Path, env: dict[str, str], profile: "profiles.DatasetProfile",
+    round_name: str | None = None,
 ) -> tuple[Path, dict[str, Any]]:
     source_tool = repair_dir / "candidate_tool.py"
     source_json = repair_dir / "candidate.json"
     frozen_tool = run_root / "frozen_candidate_tool.py"
     frozen_json = run_root / "frozen_candidate.json"
     manifest_path = run_root / "FROZEN_MANIFEST.json"
+    protocol = f"held_out_test{profile.test_count}_ab_v1"
+    if round_name:
+        protocol = f"{protocol}_{round_name}"
     expected = {
-        "protocol": f"held_out_test{profile.test_count}_ab_v1",
+        "protocol": protocol,
         "dataset": profile.name,
         "source_repair_dir": str(repair_dir),
         "source_candidate_tool_sha256": sha256_file(source_tool),
@@ -123,7 +127,8 @@ def write_test_report(
     latency_change = (after["average_latency_sec"] / before["average_latency_sec"] - 1) if before["average_latency_sec"] else 0
     score_change = after["accuracy"] - before["accuracy"]
     lines = [
-        f"# AI自主生成并修复工具：冻结Test {profile.test_count}最终A/B（{profile.display_name}）",
+        f"# AI自主生成并修复工具：冻结Test {profile.test_count}最终A/B（{profile.display_name}）"
+        + (f"【{manifest.get('protocol', '')}】" if manifest.get("protocol") else ""),
         "",
         "## 实验纪律",
         "",
@@ -179,12 +184,17 @@ def main() -> int:
     parser.add_argument("--dataset", default="financebench", choices=sorted(profiles.PROFILES))
     parser.add_argument("--workers", type=int, default=None,
                         help="答题线程数（默认：financebench=1 对齐历史，其余=4）")
+    parser.add_argument("--source-dir", default="repair_round2",
+                        help="候选所在目录（相对 blind_run）：'.'=盲重建原候选（第1轮），"
+                             "repair_round2/repair_round3=对应修复轮")
+    parser.add_argument("--round-name", default=None,
+                        help="轮次标签（写入报告与冻结清单 protocol，如 round1）")
     args = parser.parse_args()
     profile = profiles.get_profile(args.dataset)
     workers = args.workers or profiles.DEFAULT_WORKERS[profile.name]
 
     blind_run = core.latest_blind_run(profile)
-    repair_dir = blind_run / "repair_round2"
+    repair_dir = blind_run if args.source_dir == "." else blind_run / args.source_dir
     test_harness_file = profile.harness_file("test")
     required = [repair_dir / "candidate_tool.py", repair_dir / "candidate.json", test_harness_file]
     missing = [str(item) for item in required if not item.exists()]
@@ -197,7 +207,7 @@ def main() -> int:
     env = core.legacy.load_experiment_env()
     run_root = repair_dir / "frozen_test61"
     run_root.mkdir(parents=True, exist_ok=True)
-    frozen_tool, manifest = freeze_candidate(repair_dir, run_root, env, profile)
+    frozen_tool, manifest = freeze_candidate(repair_dir, run_root, env, profile, args.round_name)
     frozen_candidate = core.load_json(run_root / "frozen_candidate.json")
     core.validate_candidate(frozen_tool)
     tests = core.run_generated_tests(core.load_candidate_module(frozen_tool), frozen_candidate)

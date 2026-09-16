@@ -59,8 +59,11 @@ One command for the full pipeline (all three datasets, or a subset) — see `SER
 ./run_all.sh                                  # prepare_splits → baseline → blind → dev A/B → repair → frozen test
 ./run_all.sh --datasets financebench          # subset
 ./run_all.sh --workers 8                      # question-level thread parallelism (default: financebench=1 to match historic artifacts, others=4)
+./run_all.sh --rounds 3                       # multi-round mode: R1 blind → dev+test, R2 repair → dev+test, R3 repair → dev+test
 ./run_all.sh --dry-run                        # preflight only, no API calls
 ```
+
+Multi-round (`--rounds 2|3`): every round gets a full dev A/B AND a frozen test A/B so each round's value is measurable (`frozen_test61.py --source-dir .|--round-name roundN` for R1/R3; repair via `repair_round2.py --round 2|3`). Discipline preserved: repair Agents only ever see **dev** feedback — per-round test results never flow back into any repair. Each round freezes its own candidate (separate `frozen_test61/FROZEN_MANIFEST.json` per round dir; round 2's protocol string is unchanged for backward compatibility).
 
 Dataset-level parallelism: run multiple terminals each with `--datasets <name>` — indexes, `runs/<dataset>/`, and `ExperimentArtifacts/` are fully isolated per dataset; the only shared constraint is model API QPS (429s are retried with backoff by `DeepRead/agent/llm.py`).
 
