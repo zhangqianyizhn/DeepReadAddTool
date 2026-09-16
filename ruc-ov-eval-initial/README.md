@@ -25,6 +25,12 @@ hipporag/pageindex → 应用回填 → 折叠进主仓（嵌套 .git 历史已�
 3. `DeepRead/prompt/system.py`：`build_system_prompt(additional_instructions=...)`。
 4. `DeepRead/tool/schema.py`：`document_inventory_search` 工具定义（开关控制）。
 5. `DeepRead/agent/runner.py`：`document_inventory_search` 分发（corpus 文档清单调用候选工具）。
+6. `ov_test/src/pipeline.py`：`skip_ingestion` 时不再调用 `adapter.data_prepare`
+   （否则跳过入库的评测阶段会被 Adapter 的文档布局检查阻断，例如 ClapNQ 的 split 文件路径）；
+   DeepRead 入库前不清空 store 目录（断点续传）。
+7. `ov_test/src/core/doubao_embedding_util.py`：整体替换为调优版——plan 通道会把可重放的
+   请求偶尔返回为 400 InvalidParameter，钉版无重试会直接终止入库；调优版带精确重试与
+   跨线程 token 汇总支持。
 
 **刻意未改**：检索工具集合、Agent 循环逻辑、系统 prompt 主体、轨迹事件 schema
 （`llm_response`/`tool_call`/`tool_result` + sha1 query_id，与 blind_reconstruction 解析器兼容）、

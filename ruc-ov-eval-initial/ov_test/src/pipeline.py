@@ -66,12 +66,6 @@ class BenchmarkPipeline:
         doc_dir = self.config['paths'].get('doc_output_dir')
         if not doc_dir:
             doc_dir = os.path.join(self.output_dir, "docs")
-        # 0. 预处理数据集
-        try:
-            doc_info = self.adapter.data_prepare(doc_dir)
-        except Exception as e:
-            self.logger.error(f"Data preparation failed: {e}")
-            raise
         skip_ingestion = self.config['execution'].get('skip_ingestion', False)
 
         # 断点恢复：如果 records 标记已入库完成，跳过入库
@@ -89,14 +83,27 @@ class BenchmarkPipeline:
                 self.metrics_summary["insertion"] = {"time": 0, "input_tokens": 0, "output_tokens": 0}
 
         else:  # 正常执行入库
+            # 文档路径只在真正入库时需要。跳过入库的评测可以使用位于任意
+            # 目录的题目子集，而不应被 Adapter 的 PDF/Markdown 布局检查阻断。
+            try:
+                doc_info = self.adapter.data_prepare(doc_dir)
+            except Exception as e:
+                self.logger.error(f"Data preparation failed: {e}")
+                raise
             import shutil
             from src.core.backup_utils import backup_store
             store_path = self.config['paths'].get('vector_store', '')
-            # 清空 store 目录
-            if os.path.isdir(store_path):
+            # DeepRead 由 _ingest_one 内部做断点续传，pipeline 层面不清空
+            if self.store_type != 'DeepRead' and os.path.isdir(store_path):
                 shutil.rmtree(store_path)
                 os.makedirs(store_path, exist_ok=True)
                 self.logger.info(f"Store directory cleared: {store_path}")
+            else:
+                os.makedirs(store_path, exist_ok=True)
+                if self.store_type == 'DeepRead':
+                    self.logger.info(f"Store directory preserved for DeepRead resume: {store_path}")
+                else:
+                    self.logger.info(f"Store directory ready: {store_path}")
             ingest_workers = self.config['execution'].get('ingest_workers', 10)
             ingest_stats = self.db.ingest(
                 doc_info,
